@@ -1,0 +1,30 @@
+name: signtalk
+description: "A new Flutter project."
+
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/signtalk_bg.png
+    - assets/images/signtalk_logo.png
+    - assets/images/google_icon.png
+    - assets/images/welcome_page_icon.png
+    - assets/images/welcome_page_text.png
