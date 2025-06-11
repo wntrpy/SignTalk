@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
-
 import '../main.dart';
 import 'auth_screens/login_screen.dart';
 

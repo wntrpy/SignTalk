@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   static const double fontSizeLarge = 20.0;
   static const double fontSizeExtraLarge = 24.0;
 
-  //image paths, para everytime na kakailanganin, tatawagin nalang yung static var
+  //image paths
   static const String signtalk_bg = 'assets/images/signtalk_bg.png';
   static const String signtalk_logo = 'assets/images/signtalk_logo.png';
   static const String google_logo = 'assets/images/google_icon.png';
