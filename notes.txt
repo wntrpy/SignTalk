@@ -1,0 +1,19 @@
+aral:
+- firebase
+- refresh indicator tulad ng sa facebook
+    - homepage (message page)
+    
+
+CHEAT SHIT:
+PADDING
+EdgeInsets.all(value)	Padding on all sides
+EdgeInsets.symmetric(horizontal: x, vertical: y)	Padding on left-right and top-bottom
+EdgeInsets.only(left: x, right: y, top: z, bottom: w)	Custom padding per side
+EdgeInsets.zero	No padding (equivalent to 0)
+
+
+MARGIN
+
+EdgeInsets.all(20)	Margin on all sides
+EdgeInsets.symmetric(horizontal: 12, vertical: 8)	Horizontal and vertical margin
+EdgeInsets.only(top: 30, left: 10)	Specific side margin

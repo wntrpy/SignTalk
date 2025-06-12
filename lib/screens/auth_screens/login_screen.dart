@@ -8,28 +8,30 @@ import '../../main.dart';
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
-  //para sa CustomTextFieldAuth
   //TODO: AYUSIN MO LATER
   final customTextFieldAuthController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset:
+          false, // prevents resize pag enabled yung on-screen keeb
       body: Stack(
         fit: StackFit.expand,
         children: [
           Image.asset(MyApp.signtalk_bg, fit: BoxFit.cover),
 
-          Padding(
+          // prevents overflow
+          SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 56.0, vertical: 80),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
-              // crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                //signtalk icon
+                // SignTalk logo
                 CustomSigntalkLogo(width: 120, height: 120),
 
-                //column for input fields
+                SizedBox(height: 20),
+
+                // Input fields
                 Column(
                   children: [
                     CustomTextfieldAuth(
@@ -37,7 +39,6 @@ class LoginScreen extends StatelessWidget {
                       controller: customTextFieldAuthController,
                     ),
                     SizedBox(height: 20),
-
                     CustomTextfieldAuth(
                       labelText: "Password",
                       controller: customTextFieldAuthController,
@@ -45,16 +46,20 @@ class LoginScreen extends StatelessWidget {
                   ],
                 ),
 
-                //forgot password
+                SizedBox(height: 10),
+
+                // Forgot password
                 Align(
                   alignment: Alignment.centerLeft,
                   child: CustomTextButton(
                     buttonText: "Forgot Password?",
-                    onPressed: () {}, //TODO: replace mo later
+                    onPressed: () {},
                   ),
                 ),
 
-                //login button
+                SizedBox(height: 10),
+
+                // Login button
                 Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(
@@ -64,15 +69,16 @@ class LoginScreen extends StatelessWidget {
                       colorCode: MyApp.orange,
                       buttonWidth: 110,
                       buttonHeight: 45,
-                      onPressed: () {}, //TODO: replace mo later
+                      onPressed: () {},
                       textColor: MyApp.white,
                       textSize: MyApp.fontSizeLarge,
                     ),
                   ),
                 ),
 
-                //sign up button and login w google container
                 SizedBox(height: 40),
+
+                // Sign up & Google login
                 Column(
                   children: [
                     CustomButton(
@@ -80,12 +86,11 @@ class LoginScreen extends StatelessWidget {
                       colorCode: MyApp.white,
                       buttonWidth: 120,
                       buttonHeight: 40,
-                      onPressed: () {}, //TODO: replace mo later
+                      onPressed: () {},
                       textColor: MyApp.black,
                       textSize: MyApp.fontSizeMedium,
                     ),
 
-                    //or text
                     Padding(
                       padding: EdgeInsets.only(top: 12, bottom: 12),
                       child: Text(
@@ -103,7 +108,7 @@ class LoginScreen extends StatelessWidget {
                       colorCode: MyApp.white,
                       buttonWidth: 200,
                       buttonHeight: 45,
-                      onPressed: () {}, //TODO: replace mo later
+                      onPressed: () {},
                       textColor: MyApp.black,
                       icon: Image.asset(MyApp.google_logo),
                       textSize: MyApp.fontSizeMedium,
