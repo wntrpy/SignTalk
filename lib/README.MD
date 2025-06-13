@@ -28,12 +28,11 @@ Widgets (reusable UI) so far:
 
 - ## CUSTOM TEXTFIELD (WHITE)
 
-/\***\*\*\*\*\***\*\*\*\*\***\*\*\*\*\***\*\*\***\*\*\*\*\***\*\*\*\*\***\*\*\*\*\***\*\*\*\*\***\*\*\*\*\***\*\*\*\*\***\*\*\*\*\***\*\*\***\*\*\*\*\***\*\*\*\*\***\*\*\*\*\***/
 signtalk/ - MAIN FOLDER
 │
 │ ├── lib/ FRONTEND FOLDER
 │ │ ├── main.dart # first screen (pedeng splash screen to) - starting point
-│ │ ├── core/ # helper classes, and anything na magagamit natin sa buong UI (think of this as global.css)
+│ │ ├── core/ # helper classes, and anything na magagamit natin sa buong UI
 │ │ ├── providers/ # for state management using riverpod
 │ │ ├── notifiers/ # LAHAT NG FUNCTION NA MAGAGAMIT NI PROVIDER(riverpod) NANDITO (PARA MALINIS ANG CODE AND SEPARATION OF CONCERNS)
 │ │ ├── services/ # any code na nag communicate with backend
@@ -59,8 +58,6 @@ signtalk/ - MAIN FOLDER
 │
 ├── .gitignore # ignore anything na important sa code natin (API keys) (hindi pa siguro need for now)
 └── README.md # MAIN DOCUMENTATION (setup, how to use)
-
-/**********************\*\*\*\***********************SCREENS************************************\*\*\*************************************
 
 Splash screen
 login screen

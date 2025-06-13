@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import '../main.dart';
 import 'auth_screens/login_screen.dart';
@@ -17,9 +18,7 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     Future.delayed(const Duration(seconds: 3), () {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => LoginScreen()));
+      context.go('/login_screen');
     });
     super.initState();
   }

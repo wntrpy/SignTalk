@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:signtalk/widgets/auth_widgets/custom_textfield_auth.dart';
 import 'package:signtalk/widgets/custom_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
@@ -86,7 +87,7 @@ class LoginScreen extends StatelessWidget {
                       colorCode: MyApp.white,
                       buttonWidth: 120,
                       buttonHeight: 40,
-                      onPressed: () {},
+                      onPressed: () => context.go('/registration_screen'),
                       textColor: MyApp.black,
                       textSize: MyApp.fontSizeMedium,
                     ),

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:signtalk/main.dart';
 
 class CustomSigntalkLogo extends StatelessWidget {
-  final int width;
-  final int height;
+  final double width;
+  final double height;
   const CustomSigntalkLogo({
     super.key,
     required this.width,
@@ -12,6 +12,6 @@ class CustomSigntalkLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset(MyApp.signtalk_logo, width: 120, height: 120);
+    return Image.asset(MyApp.signtalk_logo, width: width, height: height);
   }
 }

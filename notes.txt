@@ -17,3 +17,133 @@ MARGIN
 EdgeInsets.all(20)	Margin on all sides
 EdgeInsets.symmetric(horizontal: 12, vertical: 8)	Horizontal and vertical margin
 EdgeInsets.only(top: 30, left: 10)	Specific side margin
+
+
+CHAT:
+- nakasort dapat yung users sa HomeScreen (screen na nagpapakita ng list ng users(mga kachat))
+    - kung sino yung latest na may chat, or chinat, dapat ayun yung nasa pinakataas
+- identify read and undread messages (parang sa messenger)
+- identify if the user is online
+- kapag mag reread ng messages, hindi dapat iload lahat ng messages, dapat 15-20 messages lang ang maload
+    - parang sa messenger, maloload lang yung ibang messages kapag nag scroll
+- push notification
+
+BUTTONS:
+ElevatedButton( - BUTTON NA MAY BG
+  onPressed: () {
+    print('ElevatedButton pressed');
+  },
+  child: Text('Elevated'),
+)
+
+
+TextButton( - TEXT ONLY BUTTON
+  onPressed: () {
+    print('TextButton pressed');
+  },
+  child: Text('Text Button'),
+)
+
+
+OutlinedButton( - MAY BORDER PERO WALANG BG
+  onPressed: () {
+    print('OutlinedButton pressed');
+  },
+  child: Text('Outlined'),
+)
+
+- ICON ONLY
+IconButton( 
+  icon: Icon(Icons.thumb_up),
+  onPressed: () {
+    print('Icon button pressed');
+  },
+)
+
+
+FloatingActionButton( - YUNG USUALLY NASA LOWER RIGHT
+  onPressed: () {
+    print('FAB pressed');
+  },
+  child: Icon(Icons.add),
+)
+
+
+
+SIGNTALK TECHNOLOGY STACK
+- Flutter
+  - Frontend development
+
+- Riverpod
+  - State management framework
+  - gagamitin to for:
+    - shared states
+    - clean architecture
+  - NOTIFIERS
+    - nag-hohold ng methods na magagamit sa providers
+  - PROVIDERS
+    - nag-hohold ng actual state na i-read/watch ng UI
+
+saan magagamit si riverpod?
+- LOGIN states
+  - check if
+- user details
+  - magagamit here since need yung user details sa ibang screens
+
+
+
+- GoRouter
+  - better navigation in Flutter
+  - puwede magamit later for deep linking (sa push-notifications sa chats)
+
+- firebase
+  - database
+  - auth 
+
+- Python
+  - backend processes
+  - translation
+
+- FastAPI
+ - API para makonek yung flutter sa python, and para magamit yung functionalities na gagawin natin
+
+
+SIGNTALK features:
+- login
+  - can login through gmail
+- registration
+  - signup 
+- forget password
+  - verification code
+  - new and confirm new password
+- account can be restricted if the user entered the wrong password 5 times
+
+- chat screen 
+  - send and receive chats from users
+  - can send/receive signlanguage, text, audio messages
+- search bar for users
+  - can search any available users within the database
+  - can create a chatroom by chatting a specific user
+- profile screen 
+  - display user profile
+  - can edit user profile 
+    - edit username
+    - age
+    - name?
+- receiver profile screen (the one the user is talking to)
+  - can change nickname
+  - can enable and disable:
+    - 3d avatar sign language
+    - translated voice speech
+    - notification
+    - can block the user
+    - can delete conversation
+
+-settings screen
+  - can switch app language (eng, fil)
+  - toggle dark mode
+  - can send feedback to admins
+  - can adjust avatar translation speed
+  - can view blocked list (users)
+  - ASL and FSL Alphabet Chart for educational purposes
+  - logout button

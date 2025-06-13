@@ -3,7 +3,7 @@ import 'package:signtalk/main.dart';
 
 class CustomTextfieldAuth extends StatelessWidget {
   final String labelText;
-  final TextEditingController controller;
+  final TextEditingController? controller;
 
   const CustomTextfieldAuth({
     super.key,

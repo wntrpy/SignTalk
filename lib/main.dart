@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:signtalk/screens/auth_screens/login_screen.dart';
+import 'package:signtalk/screens/auth_screens/registration_screen.dart';
+import 'package:signtalk/screens/auth_screens/welcome_screen.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
 
   //colors nakabased sa figma
   static const Color darkViolet = Color(0xFF481872); // dark violet
@@ -26,14 +31,36 @@ class MyApp extends StatelessWidget {
   static const String signtalk_bg = 'assets/images/signtalk_bg.png';
   static const String signtalk_logo = 'assets/images/signtalk_logo.png';
   static const String google_logo = 'assets/images/google_icon.png';
+  static const String welcome_screen_icon =
+      'assets/images/welcome_screen_icon.png';
+  static const String welcome_screen_text =
+      'assets/images/welcome_screen_text.png';
+  //routes using go_router
+  final GoRouter _router = GoRouter(
+    initialLocation: '/login_screen',
+    routes: [
+      GoRoute(
+        path: '/login_screen',
+        builder: (context, state) => LoginScreen(),
+      ),
+      GoRoute(
+        path: '/registration_screen',
+        builder: (context, state) => RegistrationScreen(),
+      ),
+      GoRoute(
+        path: '/welcome_screen',
+        builder: (context, state) => WelcomeScreen(),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: _router,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
-
-      home: SplashScreen(),
+      //TODO: bakit walang yung splash scrfeen
     );
   }
 }

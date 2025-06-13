@@ -9,7 +9,8 @@ class CustomButton extends StatelessWidget {
   final void Function() onPressed;
   final Widget? icon; // optional
   final Color? textColor; // optional
-  final double textSize; //optional
+  final double? textSize; //optional
+  final double? borderRadiusValue;
 
   const CustomButton({
     super.key,
@@ -19,6 +20,7 @@ class CustomButton extends StatelessWidget {
     required this.buttonHeight,
     required this.onPressed,
     required this.textSize,
+    this.borderRadiusValue,
     this.icon,
     this.textColor,
   });
@@ -37,7 +39,7 @@ class CustomButton extends StatelessWidget {
           backgroundColor: colorCode,
           elevation: 2,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(borderRadiusValue ?? 30),
             side: BorderSide.none,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16),

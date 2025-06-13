@@ -11,7 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  go_router: ^15.2.0
+  flutter_riverpod: ^2.6.1
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -26,5 +27,5 @@ flutter:
     - assets/images/signtalk_bg.png
     - assets/images/signtalk_logo.png
     - assets/images/google_icon.png
-    - assets/images/welcome_page_icon.png
-    - assets/images/welcome_page_text.png
+    - assets/images/welcome_screen_icon.png
+    - assets/images/welcome_screen_text.png
