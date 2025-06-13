@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/widgets/auth_widgets/custom_textfield_auth.dart';
 import 'package:signtalk/widgets/custom_button.dart';
+import 'package:signtalk/widgets/custom_password_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/custom_text_button.dart';
 import '../../main.dart';
@@ -35,14 +36,17 @@ class LoginScreen extends StatelessWidget {
                 // Input fields
                 Column(
                   children: [
+                    //username or email field
                     CustomTextfieldAuth(
                       labelText: "Username or Email",
                       controller: customTextFieldAuthController,
                     ),
                     SizedBox(height: 20),
-                    CustomTextfieldAuth(
+
+                    //password field
+                    CustomPasswordField(
+                      controller: null,
                       labelText: "Password",
-                      controller: customTextFieldAuthController,
                     ),
                   ],
                 ),

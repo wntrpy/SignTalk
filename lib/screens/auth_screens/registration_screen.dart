@@ -7,6 +7,7 @@ import 'package:signtalk/widgets/custom_back_button.dart';
 import 'package:signtalk/widgets/custom_button.dart';
 import 'package:signtalk/widgets/custom_password_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
+import 'package:signtalk/widgets/custom_textfield_dropdown.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -20,7 +21,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  String? _passwordError;
+  final List<String> userTypes = ['Hearing', 'Non-Hearing']; //laman ng dropdown
+
+  String? _passwordError; //var na naghohold ng lalamanin ng error
+  String? selectedUserType; //var na naghohold ng value ng dropdown
 
   void _handleSubmit() {
     validateAndSubmit(
@@ -38,11 +42,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   //TODO: lagyan mo ng isempty validation kada field
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        context.pop(); // goto previos page ion the stack
-        return false; // block system back button's default exit
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          context.pop(); // go back to previous page in the stack
+        }
       },
+
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Stack(
@@ -86,10 +93,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             controller: null,
                           ),
                           SizedBox(height: 20),
+
                           //age
                           CustomTextfieldAuth(
                             labelText: "Age",
                             controller: null,
+                          ),
+                          SizedBox(height: 20),
+
+                          //user type
+                          CustomTextfieldDropdown(
+                            hint: "User Type",
+                            value: selectedUserType,
+                            items: userTypes,
+                            onChanged: (value) =>
+                                setState(() => selectedUserType = value),
                           ),
                           SizedBox(height: 20),
 

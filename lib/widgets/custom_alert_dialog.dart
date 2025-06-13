@@ -30,8 +30,8 @@ class CustomAlertDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
       child: Container(
-        width: dialogWidth,
-        height: dialogHeight,
+        width: dialogWidth ?? 100,
+        height: dialogHeight ?? 200,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: MyApp.white,

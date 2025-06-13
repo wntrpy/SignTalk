@@ -59,9 +59,11 @@ class ForgetPasswordNewPassword extends StatelessWidget {
                             dialogTitle: 'Password Changed!',
                             dialogTextContent: 'tstsedfsdf',
                             buttonText: 'asdas',
-                            onPressed: () {},
-                            dialogWidth: 1500.0,
-                            dialogHeight: 1500.0,
+                            onPressed: () => context.push(
+                              '/login_screen',
+                            ), //TODO: fix mo later
+                            dialogWidth: 100.0,
+                            dialogHeight: 200.0,
                           );
                         },
                       );

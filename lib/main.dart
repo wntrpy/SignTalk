@@ -7,6 +7,7 @@ import 'package:signtalk/screens/auth_screens/forget_password_verification.dart'
 import 'package:signtalk/screens/auth_screens/login_screen.dart';
 import 'package:signtalk/screens/auth_screens/registration_screen.dart';
 import 'package:signtalk/screens/auth_screens/welcome_screen.dart';
+import 'package:signtalk/screens/chat_screens/home_screen.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
@@ -73,6 +74,9 @@ class MyApp extends StatelessWidget {
         path: '/forget_password_new_password',
         builder: (context, state) => ForgetPasswordNewPassword(),
       ),
+
+      //--------------------------CHATS---------------------------
+      GoRoute(path: '/home_screen', builder: (context, state) => HomeScreen()),
     ],
   );
 

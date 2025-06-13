@@ -1,0 +1,58 @@
+CHAT:
+- nakasort dapat yung users sa HomeScreen (screen na nagpapakita ng list ng users(mga kachat))
+    - kung sino yung latest na may chat, or chinat, dapat ayun yung nasa pinakataas
+- identify read and undread messages (parang sa messenger)
+- identify if the user is online
+- kapag mag reread ng messages, hindi dapat iload lahat ng messages, dapat 15-20 messages lang ang maload
+    - parang sa messenger, maloload lang yung ibang messages kapag nag scroll
+- push notification
+
+
+BACKEND STUFFS:
+Login screen
+- check if nag-eexist yung email and password
+- if hindi nag-eexist, throw yung email sa errorText widget sa loginScreen
+- if goods lahat, then proceed sa home screen with user infos
+
+Registration screen
+- validations
+    - dapat lahat ng fields may input
+        - if walang input lahat, may lalabas na error text widget sa pinakababa 
+    - password validations 
+        - must be > 8
+        - cant be empty
+        - check if same
+            - may code na nag-check nito(password_validator.dart)
+            - meron na din nagdidisplay ng error text
+- if goods lahat and walang error
+    - insert na sa database after button clicked
+        - then proceed sa welcome screen
+        - need na din maget dito yung user infos na nakasetup with riverpod
+
+Forget password screen - enter username
+- enter email sa textfield
+    - check sa db if nag-eexist yung email
+        - if true, then may magsesend na verification code sa email
+        - if false, then may magshoshow na aleart dialog stating na hindi nag-exist yung email
+            - may nakahanda na custom_alert_dialog for this
+
+Forget password screen - enter verification code
+- enter verification code, and check if same sa sinend
+    - if true, then proceed sa creation of new password
+    - if false, then may magshoshow na aleart dialog stating na hindi same yung verification code
+        - may nakahanda na custom_alert_dialog for this
+
+Forget password screen - create new password
+- enter and re-enter new password
+    - check if same yung inenter na password  
+        - if true, then may mag-show na alert_dialog saying na success, then balik sa login screen after btn click
+            - then proceed na sa pag-update ng password based sa EMAIL na ininput
+        - if false, may error text lang ulit na mag-show
+
+
+RIVERPOD SETUP:
+User information (login screen and registration screen)
+
+- home screen
+     - pede magamit yung username dito, sa may appbar
+        -Text("Welcome, ${user?.username ?? 'Guest'}");
