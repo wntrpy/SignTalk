@@ -4,8 +4,8 @@ import 'package:signtalk/main.dart';
 class CustomButton extends StatelessWidget {
   final String buttonText;
   final Color colorCode; // background color
-  final double buttonWidth;
-  final double buttonHeight;
+  final double? buttonWidth;
+  final double? buttonHeight;
   final void Function() onPressed;
   final Widget? icon; // optional
   final Color? textColor; // optional

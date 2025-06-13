@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:signtalk/screens/auth_screens/forget_password_new_password.dart';
+import 'package:signtalk/screens/auth_screens/forget_password_screen.dart';
+import 'package:signtalk/screens/auth_screens/forget_password_verification.dart';
 import 'package:signtalk/screens/auth_screens/login_screen.dart';
 import 'package:signtalk/screens/auth_screens/registration_screen.dart';
 import 'package:signtalk/screens/auth_screens/welcome_screen.dart';
@@ -35,10 +38,17 @@ class MyApp extends StatelessWidget {
       'assets/images/welcome_screen_icon.png';
   static const String welcome_screen_text =
       'assets/images/welcome_screen_text.png';
+  static const String welcome_screen_bg = 'assets/images/welcome_screen_bg.png';
+
   //routes using go_router
   final GoRouter _router = GoRouter(
-    initialLocation: '/login_screen',
+    initialLocation: '/splash_screen',
     routes: [
+      //--------------------------AUTHENTICATIONS---------------------------
+      GoRoute(
+        path: '/splash_screen',
+        builder: (context, state) => SplashScreen(),
+      ),
       GoRoute(
         path: '/login_screen',
         builder: (context, state) => LoginScreen(),
@@ -51,6 +61,18 @@ class MyApp extends StatelessWidget {
         path: '/welcome_screen',
         builder: (context, state) => WelcomeScreen(),
       ),
+      GoRoute(
+        path: '/forget_password_screen',
+        builder: (context, state) => ForgetPasswordScreen(),
+      ),
+      GoRoute(
+        path: '/forget_password_verification',
+        builder: (context, state) => ForgetPasswordVerification(),
+      ),
+      GoRoute(
+        path: '/forget_password_new_password',
+        builder: (context, state) => ForgetPasswordNewPassword(),
+      ),
     ],
   );
 
@@ -60,7 +82,6 @@ class MyApp extends StatelessWidget {
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
-      //TODO: bakit walang yung splash scrfeen
     );
   }
 }

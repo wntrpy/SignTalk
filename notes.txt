@@ -68,6 +68,17 @@ FloatingActionButton( - YUNG USUALLY NASA LOWER RIGHT
   child: Icon(Icons.add),
 )
 
+//pang visualize
+  decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(
+                              0.3,
+                            ), // Light background color
+                            border: Border.all(
+                              color: Colors.red,
+                              width: 2,
+                            ), // Red border
+                          ),
+
 
 
 SIGNTALK TECHNOLOGY STACK

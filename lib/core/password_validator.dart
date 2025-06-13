@@ -26,5 +26,5 @@ void validateAndSubmit({
   }*/
 
   onValidationResult(null);
-  context.go('/welcome_screen');
+  context.push('/welcome_screen');
 }

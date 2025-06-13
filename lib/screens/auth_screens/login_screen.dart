@@ -54,7 +54,7 @@ class LoginScreen extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: CustomTextButton(
                     buttonText: "Forgot Password?",
-                    onPressed: () {},
+                    onPressed: () => context.push('/forget_password_screen'),
                   ),
                 ),
 
@@ -87,7 +87,7 @@ class LoginScreen extends StatelessWidget {
                       colorCode: MyApp.white,
                       buttonWidth: 120,
                       buttonHeight: 40,
-                      onPressed: () => context.go('/registration_screen'),
+                      onPressed: () => context.push('/registration_screen'),
                       textColor: MyApp.black,
                       textSize: MyApp.fontSizeMedium,
                     ),
