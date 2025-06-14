@@ -43,42 +43,33 @@ class MyApp extends StatelessWidget {
 
   static const String karina_pic = 'assets/images/karina.jpg';
 
+  //TODO: ibukod mo ng file to
   //routes using go_router
   final GoRouter _router = GoRouter(
     initialLocation: '/splash_screen',
     routes: [
-      //--------------------------AUTHENTICATIONS---------------------------
+      // ---------------------- AUTHENTICATION ----------------------
+      _goRouteWithSlide('/login_screen', LoginScreen()),
+      _goRouteWithSlide('/registration_screen', RegistrationScreen()),
+      _goRouteWithSlide('/welcome_screen', WelcomeScreen()),
+      _goRouteWithSlide('/forget_password_screen', ForgetPasswordScreen()),
+      _goRouteWithSlide(
+        '/forget_password_verification',
+        ForgetPasswordVerification(),
+      ),
+      _goRouteWithSlide(
+        '/forget_password_new_password',
+        ForgetPasswordNewPassword(),
+      ),
+
+      // ------------------------ CHATS ----------------------------
+      _goRouteWithSlide('/home_screen', HomeScreen()),
+
+      // ------------------------ SPLASH (no transition) ----------
       GoRoute(
         path: '/splash_screen',
         builder: (context, state) => SplashScreen(),
       ),
-      GoRoute(
-        path: '/login_screen',
-        builder: (context, state) => LoginScreen(),
-      ),
-      GoRoute(
-        path: '/registration_screen',
-        builder: (context, state) => RegistrationScreen(),
-      ),
-      GoRoute(
-        path: '/welcome_screen',
-        builder: (context, state) => WelcomeScreen(),
-      ),
-      GoRoute(
-        path: '/forget_password_screen',
-        builder: (context, state) => ForgetPasswordScreen(),
-      ),
-      GoRoute(
-        path: '/forget_password_verification',
-        builder: (context, state) => ForgetPasswordVerification(),
-      ),
-      GoRoute(
-        path: '/forget_password_new_password',
-        builder: (context, state) => ForgetPasswordNewPassword(),
-      ),
-
-      //--------------------------CHATS---------------------------
-      GoRoute(path: '/home_screen', builder: (context, state) => HomeScreen()),
     ],
   );
 
@@ -90,4 +81,22 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(),
     );
   }
+}
+
+GoRoute _goRouteWithSlide(String path, Widget page) {
+  return GoRoute(
+    path: path,
+    pageBuilder: (context, state) => CustomTransitionPage(
+      key: state.pageKey,
+      child: page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween<Offset>(
+          begin: const Offset(1.0, 0.0), // Slide in from right
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.ease));
+
+        return SlideTransition(position: animation.drive(tween), child: child);
+      },
+    ),
+  );
 }

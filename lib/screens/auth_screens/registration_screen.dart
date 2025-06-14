@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/core/password_validator.dart';
 import 'package:signtalk/main.dart';
-import 'package:signtalk/widgets/auth_widgets/custom_textfield_auth.dart';
-import 'package:signtalk/widgets/custom_back_button.dart';
-import 'package:signtalk/widgets/custom_button.dart';
-import 'package:signtalk/widgets/custom_password_button.dart';
+import 'package:signtalk/widgets/textfields/custom_textfield_auth.dart';
+import 'package:signtalk/widgets/buttons/custom_back_button.dart';
+import 'package:signtalk/widgets/buttons/custom_button.dart';
+import 'package:signtalk/widgets/textfields/custom_password_textfield.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
-import 'package:signtalk/widgets/custom_textfield_dropdown.dart';
+import 'package:signtalk/widgets/textfields/custom_textfield_dropdown.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});

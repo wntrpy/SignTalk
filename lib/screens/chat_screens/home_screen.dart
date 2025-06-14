@@ -136,6 +136,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       //listview builder
                       //narerefresh dapat
                       //dapat pagkachat, marebuild tong dynamic content, and masort based sa recent na nagchat, based sa timestamp
+                      //may padding
+                      //sliaable
                       child: Container(),
                     ),
                   ),
