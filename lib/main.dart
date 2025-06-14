@@ -41,6 +41,8 @@ class MyApp extends StatelessWidget {
       'assets/images/welcome_screen_text.png';
   static const String welcome_screen_bg = 'assets/images/welcome_screen_bg.png';
 
+  static const String karina_pic = 'assets/images/karina.jpg';
+
   //routes using go_router
   final GoRouter _router = GoRouter(
     initialLocation: '/splash_screen',

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/main.dart';
 import 'package:signtalk/widgets/auth_widgets/custom_textfield_auth.dart';
-import 'package:signtalk/widgets/custom_button.dart';
+import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/custom_text_button.dart';
 

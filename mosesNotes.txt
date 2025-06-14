@@ -56,3 +56,4 @@ User information (login screen and registration screen)
 - home screen
      - pede magamit yung username dito, sa may appbar
         -Text("Welcome, ${user?.username ?? 'Guest'}");
+

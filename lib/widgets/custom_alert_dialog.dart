@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:signtalk/main.dart';
-import 'package:signtalk/widgets/custom_button.dart';
+import 'package:signtalk/widgets/buttons/custom_button.dart';
 
 class CustomAlertDialog extends StatelessWidget {
   final String dialogTitle;

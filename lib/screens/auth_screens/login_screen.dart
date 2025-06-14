@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/widgets/auth_widgets/custom_textfield_auth.dart';
-import 'package:signtalk/widgets/custom_button.dart';
+import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/custom_password_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/custom_text_button.dart';
@@ -11,6 +11,7 @@ class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
   //TODO: AYUSIN MO LATER
+  //TODO: lagyan mo ng error text widget
   final customTextFieldAuthController = TextEditingController();
   @override
   Widget build(BuildContext context) {
@@ -74,7 +75,8 @@ class LoginScreen extends StatelessWidget {
                       colorCode: MyApp.orange,
                       buttonWidth: 110,
                       buttonHeight: 45,
-                      onPressed: () {},
+                      onPressed: () =>
+                          context.push('/home_screen'), //TODO: FIX LATER
                       textColor: MyApp.white,
                       textSize: MyApp.fontSizeLarge,
                     ),

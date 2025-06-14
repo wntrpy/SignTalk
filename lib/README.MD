@@ -27,24 +27,3 @@ Widgets (reusable UI) so far:
       ),
 
 - ## CUSTOM TEXTFIELD (WHITE)
-
-Splash screen
-login screen
-registration screen / sign up screen
-forget password screen 1 (enter email of the account)
-forget password screen 2 (verification)
-forget password screen 3 (new and confirm password)
-new user welcome screen
-
-home screen(message tab active) (with message(if existing user and has messaged anyone before) or none (new user))
-home screen(contacts tab active) (show list of contacts)
-home screen (search screen?)
-conversation screen
-
-User profile screen
-Settings screen
-feedback screen
-blocked list screen
-ASL and FSL alphabet chart screen
-
-Other end(user profile settings screen) the one the user is talking to
