@@ -2,6 +2,7 @@ aral:
 - firebase
 - refresh indicator tulad ng sa facebook
     - homepage (message page)
+- LAHAT NG NAGNANAVIGATE PAPUNTA KAY LOGIN SCREEN, context.go lang dapat gamit
     
 
 CHEAT SHIT:

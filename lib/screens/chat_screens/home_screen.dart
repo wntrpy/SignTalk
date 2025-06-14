@@ -11,10 +11,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // Example data that will be refreshed
+  List<String> dummyContacts = ['Contact 1', 'Contact 2', 'Contact 3'];
+
   Future<void> _refresh() async {
     await Future.delayed(const Duration(seconds: 2)); // simulate network fetch
     setState(() {
-      //TODO: fix
+      // Update your data here
+      dummyContacts.add('New Contact ${dummyContacts.length + 1}');
     });
   }
 
@@ -24,20 +28,20 @@ class _HomeScreenState extends State<HomeScreen> {
       canPop: false,
       onPopInvoked: (didPop) {
         if (!didPop) {
-          context.pop(); // go back to previous page in the stack
+          context.pop();
         }
       },
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: RefreshIndicator(
-          onRefresh: _refresh, //TODO: fix
+          onRefresh: _refresh,
           child: Stack(
             fit: StackFit.expand,
             children: [
               Image.asset(MyApp.signtalk_bg, fit: BoxFit.cover),
-
               Column(
                 children: [
+                  //--------------------------SIGNTALK LOGO AND USERNAME---------------------------
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20.0,
@@ -45,14 +49,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: Column(
                       children: [
-                        //--------------------------APP BAR PERO CNTAINER---------------------------
                         Container(
                           padding: EdgeInsets.only(bottom: 10),
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Colors.white, // Border color
-                                width: 1.5, // Border width
+                                color: Colors.white,
+                                width: 1.5,
                               ),
                             ),
                           ),
@@ -60,12 +63,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              //--------------------------SIGNTALK LOGO AND USERNAME---------------------------
                               Row(
                                 children: [
                                   CustomSigntalkLogo(width: 80, height: 80),
                                   Text(
-                                    "Hello, Sung!", //username or first name lang dapat here
+                                    "Hello, Sung!",
                                     style: TextStyle(
                                       fontSize: MyApp.fontSizeLarge,
                                       color: MyApp.white,
@@ -78,9 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               //--------------------------CIRCLE PFP---------------------------
                               IconButton(
                                 onPressed: () {
-                                  print(
-                                    'Profile picture clicked!',
-                                  ); //TODO: fix later = redirect to profile screen
+                                  //TODO: FIX LATER = redirect to profile screen
+                                  print('Profile picture clicked!');
                                 },
                                 icon: Container(
                                   padding: EdgeInsets.all(2.0),
@@ -96,49 +97,47 @@ class _HomeScreenState extends State<HomeScreen> {
                                     backgroundColor: MyApp.orange,
                                   ),
                                 ),
-                                splashRadius: 30, // Adjust ripple effect size
+                                splashRadius: 30,
                               ),
                             ],
                           ),
                         ),
                         SizedBox(height: 20),
-
-                        //search bar
                         SearchBar(
                           leading: Icon(Icons.search),
                           hintText: "Search Contact...",
                           padding: WidgetStatePropertyAll(
                             EdgeInsets.symmetric(horizontal: 16.0),
                           ),
-                          onChanged: (value) {}, //TODO: fix later
-                          onSubmitted: (value) {}, //TODO: fix later
+                          onChanged: (value) {},
+                          onSubmitted: (value) {},
                         ),
                       ],
                     ),
                   ),
 
-                  //--------------------------BODY---------------------------
+                  // ------------------------USER CARD WIDGET CONTIANER----------------------------
+                  //listview builder
+                  //narerefresh dapat
+                  //dapat pagkachat, marebuild tong dynamic content, and masort based sa recent na nagchat, based sa timestamp
+                  //may padding
+                  //sliaable
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(
-                            40.0,
-                          ), // Adjust radius as needed
-                          topRight: Radius.circular(
-                            40.0,
-                          ), // Adjust radius as needed
+                          topLeft: Radius.circular(40.0),
+                          topRight: Radius.circular(40.0),
                         ),
                       ),
-
-                      //--------------------------DITO NA YUNG DYNAMIC CONTENT---------------------------
-                      //listview builder
-                      //narerefresh dapat
-                      //dapat pagkachat, marebuild tong dynamic content, and masort based sa recent na nagchat, based sa timestamp
-                      //may padding
-                      //sliaable
-                      child: Container(),
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(16.0),
+                        itemCount: dummyContacts.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(title: Text(dummyContacts[index]));
+                        },
+                      ),
                     ),
                   ),
                 ],
