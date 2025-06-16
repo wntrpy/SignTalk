@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:signtalk/main.dart';
-import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
-import 'package:signtalk/widgets/buttons/custom_icon_button.dart';
 import 'package:signtalk/widgets/custom_app_bar.dart';
 import 'package:signtalk/widgets/textfields/custom_line_textfield.dart';
+import 'package:signtalk/app_constants.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -49,7 +47,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   children: [
                     // signtalk bg
                     Image.asset(
-                      MyApp.signtalk_bg,
+                      AppConstants.signtalk_bg,
                       fit: BoxFit.cover,
                       width: double.infinity,
                     ),
@@ -63,8 +61,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
                         // ------------------------USER PFP MALAKI----------------------------
                         CustomCirclePfpButton(
-                          borderColor: MyApp.white,
-                          userImage: MyApp.default_user_pfp,
+                          borderColor: AppConstants.white,
+                          userImage: AppConstants.default_user_pfp,
                           width: 120,
                           height: 120,
                         ),
@@ -75,8 +73,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           "Byeon Woo Seok",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: MyApp.white,
-                            fontSize: MyApp.fontSizeExtraLarge,
+                            color: AppConstants.white,
+                            fontSize: AppConstants.fontSizeExtraLarge,
                           ),
                         ),
                         SizedBox(height: 15),
@@ -84,12 +82,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         // ------------------------EDIT BUTTON----------------------------
                         CustomButton(
                           buttonText: "Edit Profile",
-                          colorCode: MyApp.white,
+                          colorCode: AppConstants.white,
                           buttonWidth: 150,
                           buttonHeight: 45,
                           onPressed: () {}, //TODO: fix later
-                          textSize: MyApp.fontSizeMedium,
-                          textColor: MyApp.darkViolet,
+                          textSize: AppConstants.fontSizeMedium,
+                          textColor: AppConstants.darkViolet,
                         ),
                       ],
                     ),
@@ -104,7 +102,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               child: Container(
                 padding: EdgeInsets.only(top: 12.0),
                 width: double.infinity,
-                color: MyApp.white,
+                color: AppConstants.white,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [

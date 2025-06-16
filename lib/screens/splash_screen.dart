@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
-import '../main.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen>
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(MyApp.signtalk_bg, fit: BoxFit.cover),
+        Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
         Center(child: CustomSigntalkLogo(width: 200, height: 200)),
       ],

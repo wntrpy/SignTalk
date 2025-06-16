@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
 
 class CustomCirclePfpButton extends StatelessWidget {
   final Color borderColor; // color for border
@@ -36,7 +36,7 @@ class CustomCirclePfpButton extends StatelessWidget {
           backgroundImage: userImage != null
               ? AssetImage(userImage!)
               : const AssetImage('assets/icons/default_user_pfp.png'),
-          backgroundColor: MyApp.orange,
+          backgroundColor: AppConstants.orange,
         ),
       ),
     );

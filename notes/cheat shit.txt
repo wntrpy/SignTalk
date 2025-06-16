@@ -65,3 +65,20 @@ FloatingActionButton( - YUNG USUALLY NASA LOWER RIGHT
                             ), // Red border
                           ),
 
+
+BORDER RADIUS
+ decoration: BoxDecoration(
+                          color: AppConstants.darkViolet,
+                          borderRadius: BorderRadius.circular(
+                            20.0,
+                          ), // Half 
+
+BOX SHADOW
+boxShadow: [
+      BoxShadow(
+        color: Colors.grey.withOpacity(0.5), // Shadow color
+        spreadRadius: 2, // Spread radius
+        blurRadius: 7, // Blur radius
+        offset: Offset(0, 3), // Shadow position (x,y)
+      ),
+    ],

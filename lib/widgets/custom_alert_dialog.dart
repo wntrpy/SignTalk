@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/buttons/custom_button.dart';
 
 class CustomAlertDialog extends StatelessWidget {
@@ -34,19 +34,18 @@ class CustomAlertDialog extends StatelessWidget {
         height: dialogHeight ?? 200,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: MyApp.white,
+          color: AppConstants.white,
           borderRadius: BorderRadius.circular(15),
         ),
         child: Column(
-          mainAxisSize:
-              MainAxisSize.min, // Only affects height if height is not provided
+          mainAxisSize: MainAxisSize.min,
           children: [
             // DIALOG TITLE
             Text(
               dialogTitle,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: MyApp.fontSizeLarge,
+                fontSize: AppConstants.fontSizeLarge,
               ),
               textAlign: TextAlign.center,
             ),
@@ -58,7 +57,7 @@ class CustomAlertDialog extends StatelessWidget {
               dialogTextContent,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: MyApp.fontSizeLarge,
+                fontSize: AppConstants.fontSizeLarge,
               ),
               textAlign: TextAlign.center,
             ),
@@ -68,11 +67,11 @@ class CustomAlertDialog extends StatelessWidget {
             // DIALOG BUTTON
             CustomButton(
               buttonText: buttonText,
-              colorCode: MyApp.orange,
+              colorCode: AppConstants.orange,
               buttonWidth: buttonWidth ?? 150,
               buttonHeight: buttonHeight ?? 50,
               onPressed: onPressed,
-              textSize: MyApp.fontSizeMedium,
+              textSize: AppConstants.fontSizeMedium,
             ),
           ],
         ),

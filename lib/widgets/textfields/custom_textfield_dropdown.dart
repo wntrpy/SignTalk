@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
 
 class CustomTextfieldDropdown extends StatelessWidget {
   final String hint;
@@ -24,7 +24,10 @@ class CustomTextfieldDropdown extends StatelessWidget {
         //text sa taas
         Text(
           hint,
-          style: TextStyle(fontSize: MyApp.fontSizeMedium, color: Colors.white),
+          style: TextStyle(
+            fontSize: AppConstants.fontSizeMedium,
+            color: Colors.white,
+          ),
         ),
         SizedBox(height: 5),
 

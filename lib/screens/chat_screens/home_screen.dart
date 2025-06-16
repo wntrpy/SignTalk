@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/chat/custom_user_card_widget.dart';
@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(MyApp.signtalk_bg, fit: BoxFit.cover),
+              Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
               Column(
                 children: [
                   //--------------------------SIGNTALK LOGO AND USERNAME---------------------------
@@ -72,8 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Text(
                                     "Hello, Sung!",
                                     style: TextStyle(
-                                      fontSize: MyApp.fontSizeLarge,
-                                      color: MyApp.white,
+                                      fontSize: AppConstants.fontSizeLarge,
+                                      color: AppConstants.white,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                               //--------------------------CIRCLE PFP---------------------------
                               CustomCirclePfpButton(
-                                borderColor: MyApp.white,
+                                borderColor: AppConstants.white,
                                 userImage: null,
                                 onPressed: () => context.push(
                                   '/profile_screen',

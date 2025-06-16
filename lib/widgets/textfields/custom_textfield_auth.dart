@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
 
 class CustomTextfieldAuth extends StatelessWidget {
   final String labelText;
@@ -18,7 +18,10 @@ class CustomTextfieldAuth extends StatelessWidget {
       children: [
         Text(
           labelText,
-          style: TextStyle(fontSize: MyApp.fontSizeMedium, color: Colors.white),
+          style: TextStyle(
+            fontSize: AppConstants.fontSizeMedium,
+            color: Colors.white,
+          ),
         ), //label text na nasa taas ng textfield
         SizedBox(height: 5),
 

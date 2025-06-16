@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/buttons/custom_icon_button.dart';
 
 class CustomAppBar extends StatelessWidget {
@@ -33,8 +33,8 @@ class CustomAppBar extends StatelessWidget {
           Text(
             appBarText,
             style: TextStyle(
-              color: MyApp.white,
-              fontSize: MyApp.fontSizeExtraLarge,
+              color: AppConstants.white,
+              fontSize: AppConstants.fontSizeExtraLarge,
               fontWeight: FontWeight.bold,
             ),
           ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
+
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 
 class CustomUserCardWidget extends StatelessWidget {
@@ -18,7 +19,7 @@ class CustomUserCardWidget extends StatelessWidget {
             //mute
             onPressed: (context) {},
             icon: Icons.notifications,
-            backgroundColor: MyApp.darkViolet,
+            backgroundColor: AppConstants.darkViolet,
             borderRadius: BorderRadius.circular(12),
           ),
 
@@ -26,7 +27,7 @@ class CustomUserCardWidget extends StatelessWidget {
           SlidableAction(
             onPressed: (context) {},
             icon: Icons.block,
-            backgroundColor: MyApp.darkViolet,
+            backgroundColor: AppConstants.darkViolet,
             borderRadius: BorderRadius.circular(12),
           ),
 
@@ -34,7 +35,7 @@ class CustomUserCardWidget extends StatelessWidget {
           SlidableAction(
             onPressed: (context) {},
             icon: Icons.delete,
-            backgroundColor: MyApp.darkViolet,
+            backgroundColor: AppConstants.darkViolet,
             borderRadius: BorderRadius.circular(12),
           ),
         ],
@@ -52,7 +53,7 @@ class CustomUserCardWidget extends StatelessWidget {
             children: [
               //--------------------------USER PFP---------------------------
               CustomCirclePfpButton(
-                borderColor: MyApp.darkViolet,
+                borderColor: AppConstants.darkViolet,
                 userImage: null,
               ), //TODO: palitan ng pic galing sa db, if none edi default pic
               //--------------------------FULL NAME AND CHAT---------------------------
@@ -65,9 +66,9 @@ class CustomUserCardWidget extends StatelessWidget {
                     Text(
                       "Asa Enami",
                       style: TextStyle(
-                        color: MyApp.darkViolet,
+                        color: AppConstants.darkViolet,
                         fontWeight: FontWeight.bold,
-                        fontSize: MyApp.fontSizeLarge,
+                        fontSize: AppConstants.fontSizeLarge,
                       ),
                     ),
 
@@ -75,8 +76,8 @@ class CustomUserCardWidget extends StatelessWidget {
                     Text(
                       "Malaking ipikto sa bustun siltics",
                       style: TextStyle(
-                        color: MyApp.darkViolet,
-                        fontSize: MyApp.fontSizeMedium,
+                        color: AppConstants.darkViolet,
+                        fontSize: AppConstants.fontSizeMedium,
                       ),
                     ),
                   ],
@@ -87,8 +88,8 @@ class CustomUserCardWidget extends StatelessWidget {
               Text(
                 "12:11 AM",
                 style: TextStyle(
-                  color: MyApp.darkViolet,
-                  fontSize: MyApp.fontSizeSmall,
+                  color: AppConstants.darkViolet,
+                  fontSize: AppConstants.fontSizeSmall,
                 ),
               ),
             ],

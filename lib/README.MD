@@ -23,7 +23,7 @@ Widgets (reusable UI) so far:
       buttonWidth: 200,
       buttonHeight: 50,
       onPressed: () {},
-      icon: MyApp.imagePath, (OPTIONAL, kapag need lang ng image)
+      icon: AppConstants.imagePath, (OPTIONAL, kapag need lang ng image)
       ),
 
 - ## CUSTOM TEXTFIELD (WHITE)

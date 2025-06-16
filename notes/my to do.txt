@@ -1,3 +1,4 @@
 front end
 - settings screen
 - chat screen
+- user receiver profile screen
