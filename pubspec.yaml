@@ -27,3 +27,4 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/icons/settings_icons/

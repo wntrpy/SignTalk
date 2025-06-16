@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:signtalk/main.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
-import 'package:signtalk/widgets/custom_user_card_widget.dart';
+import 'package:signtalk/widgets/chat/custom_user_card_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

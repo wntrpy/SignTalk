@@ -4,6 +4,7 @@ import 'package:signtalk/main.dart';
 import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/buttons/custom_icon_button.dart';
+import 'package:signtalk/widgets/custom_app_bar.dart';
 import 'package:signtalk/widgets/textfields/custom_line_textfield.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -14,6 +15,16 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
+  void changeEditButtonState() {
+    //pag penendot yng button dapat:
+    //mabago yung color to orange
+    //mabago yung text to save
+    //maenable yung pag-iinput ng text sa textfield
+    //riverpod state, na nagchecheck if false or true ba yung value
+    //if false, yung default button
+    //if true, then change to orange and such
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -48,46 +59,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         // ------------------------parang app bar----------------------------
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 24.0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // ------------------------BACK BUTTON----------------------------
-                              CustomIconButton(
-                                icon: Icons.arrow_back,
-                                color: Colors.white,
-                                size: 30.0,
-                                onPressed: () => context
-                                    .pop(), //TODO: go back to profile screen
-                              ),
-
-                              // ------------------------PROFILE TEXT----------------------------
-                              Text(
-                                "Profile",
-                                style: TextStyle(
-                                  color: MyApp.white,
-                                  fontSize: MyApp.fontSizeExtraLarge,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-
-                              // ------------------------SETTINGS BUTTON----------------------------
-                              CustomIconButton(
-                                icon: Icons.settings,
-                                color: Colors.white,
-                                size: 30.0,
-                                onPressed: () => context.push(
-                                  '/settings_screen',
-                                ), //TODO: goto settings screen
-                              ),
-                            ],
-                          ),
-                        ),
+                        CustomAppBar(appBarText: "Profile"),
 
                         // ------------------------USER PFP MALAKI----------------------------
                         CustomCirclePfpButton(
