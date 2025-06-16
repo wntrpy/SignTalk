@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
+import 'package:signtalk/main.dart';
+import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 
 class CustomUserCardWidget extends StatelessWidget {
   const CustomUserCardWidget({super.key});
@@ -15,7 +18,7 @@ class CustomUserCardWidget extends StatelessWidget {
             //mute
             onPressed: (context) {},
             icon: Icons.notifications,
-            backgroundColor: Colors.red,
+            backgroundColor: MyApp.darkViolet,
             borderRadius: BorderRadius.circular(12),
           ),
 
@@ -23,7 +26,7 @@ class CustomUserCardWidget extends StatelessWidget {
           SlidableAction(
             onPressed: (context) {},
             icon: Icons.block,
-            backgroundColor: Colors.black,
+            backgroundColor: MyApp.darkViolet,
             borderRadius: BorderRadius.circular(12),
           ),
 
@@ -31,14 +34,67 @@ class CustomUserCardWidget extends StatelessWidget {
           SlidableAction(
             onPressed: (context) {},
             icon: Icons.delete,
-            backgroundColor: Colors.black,
+            backgroundColor: MyApp.darkViolet,
             borderRadius: BorderRadius.circular(12),
           ),
         ],
       ),
 
       //TODO: dito content
-      child: Container(),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12), //  ripple effect pagpenendot
+        onTap: () {
+          context.go('/login_screen');
+        },
+        child: Container(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //--------------------------USER PFP---------------------------
+              CustomCirclePfpButton(
+                borderColor: MyApp.darkViolet,
+                userImage: null,
+              ), //TODO: palitan ng pic galing sa db, if none edi default pic
+              //--------------------------FULL NAME AND CHAT---------------------------
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    //--------------------------FULL NAME---------------------------
+                    Text(
+                      "Asa Enami",
+                      style: TextStyle(
+                        color: MyApp.darkViolet,
+                        fontWeight: FontWeight.bold,
+                        fontSize: MyApp.fontSizeLarge,
+                      ),
+                    ),
+
+                    //--------------------------CHAT---------------------------
+                    Text(
+                      "Malaking ipikto sa bustun siltics",
+                      style: TextStyle(
+                        color: MyApp.darkViolet,
+                        fontSize: MyApp.fontSizeMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              //--------------------------TIMESTAMP---------------------------
+              Text(
+                "12:11 AM",
+                style: TextStyle(
+                  color: MyApp.darkViolet,
+                  fontSize: MyApp.fontSizeSmall,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

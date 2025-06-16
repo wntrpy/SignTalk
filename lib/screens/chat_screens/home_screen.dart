@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/main.dart';
+import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
+import 'package:signtalk/widgets/custom_user_card_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
+      //TODO: tanggalin mo to
       canPop: false,
       onPopInvoked: (didPop) {
         if (!didPop) {
@@ -78,26 +81,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
 
                               //--------------------------CIRCLE PFP---------------------------
-                              IconButton(
-                                onPressed: () {
-                                  //TODO: FIX LATER = redirect to profile screen
-                                  print('Profile picture clicked!');
-                                },
-                                icon: Container(
-                                  padding: EdgeInsets.all(2.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(100),
-                                  ),
-                                  child: CircleAvatar(
-                                    backgroundImage: AssetImage(
-                                      MyApp.signtalk_bg,
-                                    ),
-                                    radius: 30,
-                                    backgroundColor: MyApp.orange,
-                                  ),
-                                ),
-                                splashRadius: 30,
+                              CustomCirclePfpButton(
+                                borderColor: MyApp.white,
+                                userImage: null,
+                                onPressed: () => context.push(
+                                  '/profile_screen',
+                                ), // TODO: goto profile screen
                               ),
                             ],
                           ),
@@ -135,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: EdgeInsets.all(16.0),
                         itemCount: dummyContacts.length,
                         itemBuilder: (context, index) {
-                          return ListTile(title: Text(dummyContacts[index]));
+                          return CustomUserCardWidget();
                         },
                       ),
                     ),

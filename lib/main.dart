@@ -8,6 +8,8 @@ import 'package:signtalk/screens/auth_screens/login_screen.dart';
 import 'package:signtalk/screens/auth_screens/registration_screen.dart';
 import 'package:signtalk/screens/auth_screens/welcome_screen.dart';
 import 'package:signtalk/screens/chat_screens/home_screen.dart';
+import 'package:signtalk/screens/chat_screens/user_profile_screen.dart';
+import 'package:signtalk/screens/settings_screens/settings_screen.dart';
 import 'screens/splash_screen.dart';
 
 void main() {
@@ -26,6 +28,7 @@ class MyApp extends StatelessWidget {
   static const Color black = Color.fromARGB(255, 0, 0, 0); // black
 
   //fonts size based sa figma
+  static const double fontSizeExtraSmall = 9.0;
   static const double fontSizeSmall = 12.0;
   static const double fontSizeMedium = 16.0;
   static const double fontSizeLarge = 20.0;
@@ -33,8 +36,8 @@ class MyApp extends StatelessWidget {
 
   //image paths
   static const String signtalk_bg = 'assets/images/signtalk_bg.png';
-  static const String signtalk_logo = 'assets/images/signtalk_logo.png';
-  static const String google_logo = 'assets/images/google_icon.png';
+  static const String signtalk_logo = 'assets/icons/signtalk_logo.png';
+  static const String google_logo = 'assets/icons/google_icon.png';
   static const String welcome_screen_icon =
       'assets/images/welcome_screen_icon.png';
   static const String welcome_screen_text =
@@ -42,6 +45,7 @@ class MyApp extends StatelessWidget {
   static const String welcome_screen_bg = 'assets/images/welcome_screen_bg.png';
 
   static const String karina_pic = 'assets/images/karina.jpg';
+  static const String default_user_pfp = 'assets/icons/default_user_pfp.jpg';
 
   //TODO: ibukod mo ng file to
   //routes using go_router
@@ -64,6 +68,10 @@ class MyApp extends StatelessWidget {
 
       // ------------------------ CHATS ----------------------------
       _goRouteWithSlide('/home_screen', HomeScreen()),
+      _goRouteWithSlide('/profile_screen', UserProfileScreen()),
+
+      // ------------------------ SETTINGS ----------------------------
+      _goRouteWithSlide('/settings_screen', SettingScreen()),
 
       // ------------------------ SPLASH (no transition) ----------
       GoRoute(

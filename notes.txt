@@ -3,6 +3,7 @@ aral:
 - refresh indicator tulad ng sa facebook
     - homepage (message page)
 - LAHAT NG NAGNANAVIGATE PAPUNTA KAY LOGIN SCREEN, context.go lang dapat gamit
+- DAPAT PAG NASA MESSAGE SCREEN TAPOS PININDOT YUNG BACK BUTTON SA CP, DAPAT MAG QUIT YUNG APP, OR MAY LUMABAS NA ALERT DIALOG FOR CONFIRMATION
     
 
 CHEAT SHIT:
