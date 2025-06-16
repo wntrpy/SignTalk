@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/core/password_validator.dart';
-import 'package:signtalk/main.dart';
 import 'package:signtalk/widgets/textfields/custom_textfield_auth.dart';
-import 'package:signtalk/widgets/buttons/custom_back_button.dart';
 import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/textfields/custom_password_textfield.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/textfields/custom_textfield_dropdown.dart';
+import 'package:signtalk/app_constants.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -56,14 +55,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           fit: StackFit.expand,
           children: [
             //signtalk bg
-            Image.asset(MyApp.signtalk_bg, fit: BoxFit.cover),
+            Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
             //TODO: NDE MAPINDOT
             /*  Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 10,
             child: CustomBackButton(
-              colorCode: MyApp.white,
+              colorCode: AppConstants.white,
               onPressed: () => context.go('/login_screen'),
               iconSize: 30,
             ),
@@ -145,7 +144,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             margin: EdgeInsets.only(left: 170),
                             child: CustomButton(
                               buttonText: "Register",
-                              colorCode: MyApp.orange,
+                              colorCode: AppConstants.orange,
                               buttonWidth: 200,
                               buttonHeight: 50,
                               onPressed: _handleSubmit, //TODO: FIX MO LATER

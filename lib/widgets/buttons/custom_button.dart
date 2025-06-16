@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
 
 class CustomButton extends StatelessWidget {
   final String buttonText;
@@ -28,7 +28,7 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // final text color
-    Color effectiveTextColor = textColor ?? MyApp.white;
+    Color effectiveTextColor = textColor ?? AppConstants.white;
 
     return SizedBox(
       width: buttonWidth,

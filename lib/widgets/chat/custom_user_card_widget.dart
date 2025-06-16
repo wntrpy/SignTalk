@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
-
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 
 class CustomUserCardWidget extends StatelessWidget {

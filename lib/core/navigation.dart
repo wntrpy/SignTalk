@@ -8,6 +8,7 @@ import 'package:signtalk/screens/auth_screens/registration_screen.dart';
 import 'package:signtalk/screens/auth_screens/welcome_screen.dart';
 import 'package:signtalk/screens/chat_screens/home_screen.dart';
 import 'package:signtalk/screens/chat_screens/user_profile_screen.dart';
+import 'package:signtalk/screens/settings_screens/settings_alphabet_chart_screen.dart';
 import 'package:signtalk/screens/settings_screens/settings_screen.dart';
 import 'package:signtalk/screens/splash_screen.dart';
 
@@ -35,6 +36,10 @@ final GoRouter router = GoRouter(
 
     // ------------------------ SETTINGS ----------------------------
     goRouteWithSlide('/settings_screen', SettingScreen()),
+    goRouteWithSlide(
+      '/settings_alphabet_chart_screen',
+      SettingsAlphabetChart(),
+    ),
 
     // ------------------------ SPLASH (no transition) ----------
     GoRoute(

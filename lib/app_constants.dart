@@ -18,15 +18,28 @@ class AppConstants {
   static const double fontSizeLarge = 20.0;
   static const double fontSizeExtraLarge = 24.0;
 
-  // Asset paths
+  //IMAGE PATHS
   static const String signtalk_bg = 'assets/images/signtalk_bg.png';
-  static const String signtalk_logo = 'assets/icons/signtalk_logo.png';
-  static const String google_logo = 'assets/icons/google_icon.png';
   static const String welcome_screen_icon =
       'assets/images/welcome_screen_icon.png';
   static const String welcome_screen_text =
       'assets/images/welcome_screen_text.png';
   static const String welcome_screen_bg = 'assets/images/welcome_screen_bg.png';
   static const String karina_pic = 'assets/images/karina.jpg';
-  static const String default_user_pfp = 'assets/icons/default_user_pfp.jpg';
+
+  //ICON PATHS
+  static const String signtalk_logo = 'assets/icons/signtalk_logo.png';
+  static const String google_logo = 'assets/icons/google_icon.png';
+  static const String default_user_pfp = 'assets/icons/default_user_pfp.png';
+
+  static const String settings_switch_language_icon =
+      'assets/icons/settings_icons/settings_switch_language.svg';
+  static const String settings_feedback_icon =
+      'assets/icons/settings_icons/settings_feedback_icon.svg';
+  static const String settings_avatar_speed =
+      'assets/icons/settings_icons/settings_avatar_speed.svg';
+  static const String settings_blocked_list =
+      'assets/icons/settings_icons/settings_blocked_list.svg';
+  static const String settings_alphabet_chart =
+      'assets/icons/settings_icons/settings_alphabet_chart.svg';
 }

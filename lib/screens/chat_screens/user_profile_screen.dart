@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/custom_app_bar.dart';
 import 'package:signtalk/widgets/textfields/custom_line_textfield.dart';
@@ -82,7 +83,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         // ------------------------EDIT BUTTON----------------------------
                         CustomButton(
                           buttonText: "Edit Profile",
-                          colorCode: AppConstants.white,
+                          colorCode: Theme.of(
+                            context,
+                          ).colorScheme.surface, //TODO: bagohin mo
                           buttonWidth: 150,
                           buttonHeight: 45,
                           onPressed: () {}, //TODO: fix later

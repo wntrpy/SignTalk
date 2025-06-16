@@ -5,7 +5,7 @@ import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/textfields/custom_password_textfield.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/buttons/custom_text_button.dart';
-import '../../main.dart';
+import 'package:signtalk/app_constants.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -21,7 +21,7 @@ class LoginScreen extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(MyApp.signtalk_bg, fit: BoxFit.cover),
+          Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
           // prevents overflow
           SingleChildScrollView(
@@ -72,13 +72,13 @@ class LoginScreen extends StatelessWidget {
                     width: 150,
                     child: CustomButton(
                       buttonText: "Login",
-                      colorCode: MyApp.orange,
+                      colorCode: AppConstants.orange,
                       buttonWidth: 110,
                       buttonHeight: 45,
                       onPressed: () =>
                           context.push('/home_screen'), //TODO: FIX LATER
-                      textColor: MyApp.white,
-                      textSize: MyApp.fontSizeLarge,
+                      textColor: AppConstants.white,
+                      textSize: AppConstants.fontSizeLarge,
                     ),
                   ),
                 ),
@@ -90,12 +90,12 @@ class LoginScreen extends StatelessWidget {
                   children: [
                     CustomButton(
                       buttonText: 'Sign Up',
-                      colorCode: MyApp.white,
+                      colorCode: AppConstants.white,
                       buttonWidth: 120,
                       buttonHeight: 40,
                       onPressed: () => context.push('/registration_screen'),
-                      textColor: MyApp.black,
-                      textSize: MyApp.fontSizeMedium,
+                      textColor: AppConstants.black,
+                      textSize: AppConstants.fontSizeMedium,
                     ),
 
                     Padding(
@@ -104,7 +104,7 @@ class LoginScreen extends StatelessWidget {
                         "OR",
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: MyApp.fontSizeMedium,
+                          fontSize: AppConstants.fontSizeMedium,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -112,13 +112,13 @@ class LoginScreen extends StatelessWidget {
 
                     CustomButton(
                       buttonText: 'Log in with Google',
-                      colorCode: MyApp.white,
+                      colorCode: AppConstants.white,
                       buttonWidth: 200,
                       buttonHeight: 45,
                       onPressed: () {},
-                      textColor: MyApp.black,
-                      icon: Image.asset(MyApp.google_logo),
-                      textSize: MyApp.fontSizeMedium,
+                      textColor: AppConstants.black,
+                      icon: Image.asset(AppConstants.google_logo),
+                      textSize: AppConstants.fontSizeMedium,
                     ),
                   ],
                 ),

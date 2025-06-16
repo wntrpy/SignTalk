@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:signtalk/main.dart';
 import 'package:signtalk/widgets/textfields/custom_textfield_auth.dart';
 import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
+import 'package:signtalk/app_constants.dart';
 
 class ForgetPasswordScreen extends StatelessWidget {
   const ForgetPasswordScreen({super.key});
@@ -20,7 +20,7 @@ class ForgetPasswordScreen extends StatelessWidget {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(MyApp.signtalk_bg, fit: BoxFit.cover),
+            Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 80),
@@ -39,7 +39,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                   SizedBox(height: 40),
                   CustomButton(
                     buttonText: "SUBMIT",
-                    colorCode: MyApp.orange,
+                    colorCode: AppConstants.orange,
                     buttonWidth: 250,
                     buttonHeight: 70,
                     onPressed: () => context.push(

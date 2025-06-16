@@ -30,12 +30,23 @@ class CustomAppBar extends StatelessWidget {
           ),
 
           // ------------------------TEXT----------------------------
-          Text(
-            appBarText,
-            style: TextStyle(
-              color: AppConstants.white,
-              fontSize: AppConstants.fontSizeExtraLarge,
-              fontWeight: FontWeight.bold,
+          Container(
+            width:
+                MediaQuery.of(context).size.width * 0.5, // 50% of screen width
+            constraints: const BoxConstraints(
+              maxWidth: 200, // max w
+              minHeight: 40, // min h
+            ),
+            child: Text(
+              appBarText,
+              style: TextStyle(
+                color: AppConstants.white,
+                fontSize: AppConstants.fontSizeExtraLarge,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.visible,
+              maxLines: 2, // max lines bago mag new lione
             ),
           ),
 

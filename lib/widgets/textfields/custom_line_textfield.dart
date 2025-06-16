@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
 
 class CustomLineTextfield extends StatelessWidget {
   final String label;
@@ -28,8 +28,8 @@ class CustomLineTextfield extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: MyApp.darkViolet,
-                fontSize: MyApp.fontSizeSmall,
+                color: AppConstants.darkViolet,
+                fontSize: AppConstants.fontSizeSmall,
               ),
             ),
           ),

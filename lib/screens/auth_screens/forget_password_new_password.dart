@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:signtalk/main.dart';
+import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/custom_alert_dialog.dart';
 import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/textfields/custom_password_textfield.dart';
@@ -21,7 +21,7 @@ class ForgetPasswordNewPassword extends StatelessWidget {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            Image.asset(MyApp.signtalk_bg, fit: BoxFit.cover),
+            Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 80),
@@ -47,7 +47,7 @@ class ForgetPasswordNewPassword extends StatelessWidget {
                   SizedBox(height: 40),
                   CustomButton(
                     buttonText: "Confirm",
-                    colorCode: MyApp.orange,
+                    colorCode: AppConstants.orange,
                     buttonWidth: 250,
                     buttonHeight: 70,
                     onPressed: () {
