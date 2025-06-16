@@ -6,73 +6,6 @@ aral:
 - DAPAT PAG NASA MESSAGE SCREEN TAPOS PININDOT YUNG BACK BUTTON SA CP, DAPAT MAG QUIT YUNG APP, OR MAY LUMABAS NA ALERT DIALOG FOR CONFIRMATION
     
 
-CHEAT SHIT:
-PADDING
-EdgeInsets.all(value)	Padding on all sides
-EdgeInsets.symmetric(horizontal: x, vertical: y)	Padding on left-right and top-bottom
-EdgeInsets.only(left: x, right: y, top: z, bottom: w)	Custom padding per side
-EdgeInsets.zero	No padding (equivalent to 0)
-
-
-MARGIN
-
-EdgeInsets.all(20)	Margin on all sides
-EdgeInsets.symmetric(horizontal: 12, vertical: 8)	Horizontal and vertical margin
-EdgeInsets.only(top: 30, left: 10)	Specific side margin
-
-
-BUTTONS:
-ElevatedButton( - BUTTON NA MAY BG
-  onPressed: () {
-    print('ElevatedButton pressed');
-  },
-  child: Text('Elevated'),
-)
-
-
-TextButton( - TEXT ONLY BUTTON
-  onPressed: () {
-    print('TextButton pressed');
-  },
-  child: Text('Text Button'),
-)
-
-
-OutlinedButton( - MAY BORDER PERO WALANG BG
-  onPressed: () {
-    print('OutlinedButton pressed');
-  },
-  child: Text('Outlined'),
-)
-
-- ICON ONLY
-IconButton( 
-  icon: Icon(Icons.thumb_up),
-  onPressed: () {
-    print('Icon button pressed');
-  },
-)
-
-
-FloatingActionButton( - YUNG USUALLY NASA LOWER RIGHT
-  onPressed: () {
-    print('FAB pressed');
-  },
-  child: Icon(Icons.add),
-)
-
-//pang visualize
-  decoration: BoxDecoration(
-                            color: Colors.grey.withOpacity(
-                              0.3,
-                            ), // Light background color
-                            border: Border.all(
-                              color: Colors.red,
-                              width: 2,
-                            ), // Red border
-                          ),
-
-
 
 SIGNTALK TECHNOLOGY STACK
 - Flutter
@@ -111,7 +44,7 @@ saan magagamit si riverpod?
 - FastAPI
  - API para makonek yung flutter sa python, and para magamit yung functionalities na gagawin natin
 
-
+FEATURES
 SIGNTALK features:
 - login
   - can login through gmail
@@ -154,7 +87,7 @@ SIGNTALK features:
 
 
 
-
+CODEBASE
 signtalk/ - MAIN FOLDER
 │
 │ ├── lib/ FRONTEND FOLDER
@@ -187,6 +120,7 @@ signtalk/ - MAIN FOLDER
 └── README.md # MAIN DOCUMENTATION (setup, how to use)
 
 
+SCREENS
 Splash screen
 login screen
 registration screen / sign up screen

@@ -1,23 +1,15 @@
+// ignore_for_file: constant_identifier_names
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:signtalk/screens/auth_screens/forget_password_new_password.dart';
-import 'package:signtalk/screens/auth_screens/forget_password_screen.dart';
-import 'package:signtalk/screens/auth_screens/forget_password_verification.dart';
-import 'package:signtalk/screens/auth_screens/login_screen.dart';
-import 'package:signtalk/screens/auth_screens/registration_screen.dart';
-import 'package:signtalk/screens/auth_screens/welcome_screen.dart';
-import 'package:signtalk/screens/chat_screens/home_screen.dart';
-import 'package:signtalk/screens/chat_screens/user_profile_screen.dart';
-import 'package:signtalk/screens/settings_screens/settings_screen.dart';
-import 'screens/splash_screen.dart';
+import 'package:signtalk/core/navigation.dart';
 
 void main() {
   runApp(ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   //colors nakabased sa figma
   static const Color darkViolet = Color(0xFF481872); // dark violet
@@ -47,64 +39,12 @@ class MyApp extends StatelessWidget {
   static const String karina_pic = 'assets/images/karina.jpg';
   static const String default_user_pfp = 'assets/icons/default_user_pfp.jpg';
 
-  //TODO: ibukod mo ng file to
-  //routes using go_router
-  final GoRouter _router = GoRouter(
-    initialLocation: '/splash_screen',
-    routes: [
-      // ---------------------- AUTHENTICATION ----------------------
-      _goRouteWithSlide('/login_screen', LoginScreen()),
-      _goRouteWithSlide('/registration_screen', RegistrationScreen()),
-      _goRouteWithSlide('/welcome_screen', WelcomeScreen()),
-      _goRouteWithSlide('/forget_password_screen', ForgetPasswordScreen()),
-      _goRouteWithSlide(
-        '/forget_password_verification',
-        ForgetPasswordVerification(),
-      ),
-      _goRouteWithSlide(
-        '/forget_password_new_password',
-        ForgetPasswordNewPassword(),
-      ),
-
-      // ------------------------ CHATS ----------------------------
-      _goRouteWithSlide('/home_screen', HomeScreen()),
-      _goRouteWithSlide('/profile_screen', UserProfileScreen()),
-
-      // ------------------------ SETTINGS ----------------------------
-      _goRouteWithSlide('/settings_screen', SettingScreen()),
-
-      // ------------------------ SPLASH (no transition) ----------
-      GoRoute(
-        path: '/splash_screen',
-        builder: (context, state) => SplashScreen(),
-      ),
-    ],
-  );
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      routerConfig: _router,
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(),
     );
   }
-}
-
-GoRoute _goRouteWithSlide(String path, Widget page) {
-  return GoRoute(
-    path: path,
-    pageBuilder: (context, state) => CustomTransitionPage(
-      key: state.pageKey,
-      child: page,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final tween = Tween<Offset>(
-          begin: const Offset(1.0, 0.0), // Slide in from right
-          end: Offset.zero,
-        ).chain(CurveTween(curve: Curves.ease));
-
-        return SlideTransition(position: animation.drive(tween), child: child);
-      },
-    ),
-  );
 }
