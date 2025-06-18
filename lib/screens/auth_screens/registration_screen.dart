@@ -8,6 +8,7 @@ import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/textfields/custom_textfield_dropdown.dart';
 import 'package:signtalk/app_constants.dart';
 
+//TODO: linisin mo frontend neto buset
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
 

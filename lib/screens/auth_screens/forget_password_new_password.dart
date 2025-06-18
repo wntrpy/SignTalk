@@ -29,22 +29,27 @@ class ForgetPasswordNewPassword extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  //------------------------------------SIGNTALK LOGO-------------------------------------------------//
                   CustomSigntalkLogo(width: 150, height: 150),
                   SizedBox(height: 50),
 
+                  //------------------------------------NEW PASSWORD -------------------------------------------------//
                   CustomPasswordField(
                     controller: null,
                     labelText: "New Password",
                   ),
                   SizedBox(height: 40),
 
+                  //------------------------------------CONFIRM NEW PASSWORD-------------------------------------------------//
                   CustomPasswordField(
                     controller: null,
-                    labelText: "New Password",
+                    labelText: "Confirm New Password",
                   ),
                   SizedBox(height: 40),
 
                   SizedBox(height: 40),
+
+                  //------------------------------------CONFIRM BUTTON-------------------------------------------------//
                   CustomButton(
                     buttonText: "Confirm",
                     colorCode: AppConstants.orange,

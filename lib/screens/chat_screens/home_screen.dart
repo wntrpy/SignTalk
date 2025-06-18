@@ -67,7 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Row(
                                 children: [
+                                  //--------------------------SIGNTALK LOGO---------------------------
                                   CustomSigntalkLogo(width: 80, height: 80),
+
+                                  //--------------------------FIRST NAME ?? USERNAME---------------------------
                                   Text(
                                     "Hello, Sung!",
                                     style: TextStyle(
@@ -90,7 +93,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
+
                         SizedBox(height: 20),
+
+                        //--------------------------SEARCH BAR---------------------------
                         SearchBar(
                           leading: Icon(Icons.search),
                           hintText: "Search Contact...",

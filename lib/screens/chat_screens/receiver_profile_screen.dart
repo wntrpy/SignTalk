@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
+import 'package:signtalk/core/helper/helper_receiver_profile_screen.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/buttons/custom_icon_button.dart';
 import 'package:signtalk/widgets/chat/custom_receiver_profile_option.dart';
@@ -15,7 +16,7 @@ class ReceiverProfileScreen extends StatefulWidget {
 class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
   @override
   Widget build(BuildContext context) {
-    bool isToggled = true; //TODO: fix
+    final finalReceiverProfileOptions = getReceiverProfileOptions(context);
 
     return PopScope(
       canPop: false,
@@ -53,50 +54,17 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
                   // ------------------------USER INFO----------------------------
                   _buildUserProfileHeader(),
 
-                  // ------------------------CHANGE NICKNAME----------------------------
-                  //TODO: palitan mo mga icons
-                  CustomReceiverProfileOption(
-                    optionText: "Change Nickname",
-                    iconPath: AppConstants.receiver_change_nickname_icon,
-                  ),
-
-                  // ------------------------3D AVATAR SIGN LANGUAGE----------------------------
-                  CustomReceiverProfileOption(
-                    optionText: "3D Avatar Sign Language",
-                    iconPath: AppConstants.receiver_avatar_icon,
-                    trailingWidget: Switch(
-                      value: isToggled,
-                      onChanged: (val) => setState(() => isToggled = val),
+                  // ------------------------OPTIONS----------------------------
+                  ...finalReceiverProfileOptions.map(
+                    (option) => Column(
+                      children: [
+                        CustomReceiverProfileOption(
+                          optionText: option['optionText'],
+                          iconPath: option['iconPath'],
+                          trailingWidget: option['trailingWidget'],
+                        ),
+                      ],
                     ),
-                  ),
-
-                  // ------------------------TRANSLATED VOICE SPEECH----------------------------
-                  CustomReceiverProfileOption(
-                    optionText: "Translated Voice Speech",
-                    iconPath: AppConstants.receiver_voice_speech_icon,
-                    trailingWidget: Switch(
-                      value: isToggled,
-                      onChanged: (val) => setState(() => isToggled = val),
-                    ),
-                  ),
-
-                  // ------------------------NOTIFICATION----------------------------
-                  CustomReceiverProfileOption(
-                    optionText: "Notification",
-                    iconPath: AppConstants.receiver_notification_icon,
-                  ),
-
-                  // ------------------------BLOCK CONTACT----------------------------
-                  CustomReceiverProfileOption(
-                    optionText: "Block Contact",
-                    iconPath: AppConstants.receiver_block_contact_icon,
-                  ),
-
-                  // ------------------------DELETE----------------------------
-                  CustomReceiverProfileOption(
-                    optionText: "Delete",
-                    iconPath: AppConstants.receiver_delete_icon,
-                    color: Colors.red,
                   ),
                 ],
               ),

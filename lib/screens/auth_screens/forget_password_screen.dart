@@ -31,12 +31,15 @@ class ForgetPasswordScreen extends StatelessWidget {
                   CustomSigntalkLogo(width: 150, height: 150),
                   SizedBox(height: 50),
 
+                  //------------------------------------EMAIL/USERNAME-------------------------------------------------//
                   CustomTextfieldAuth(
                     labelText: "Enter the email/username of your account.",
                     controller: null,
                   ),
 
                   SizedBox(height: 40),
+
+                  //------------------------------------SUBMIT-------------------------------------------------//
                   CustomButton(
                     buttonText: "SUBMIT",
                     colorCode: AppConstants.orange,

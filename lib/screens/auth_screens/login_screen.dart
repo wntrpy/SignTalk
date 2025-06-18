@@ -34,17 +34,17 @@ class LoginScreen extends StatelessWidget {
 
                 SizedBox(height: 20),
 
-                // Input fields
+                //------------------------------------INPUT-FIELDS-------------------------------------------------//
                 Column(
                   children: [
-                    //username or email field
+                    //------------------------------------USERNAME OR EMAIL-------------------------------------------------//
                     CustomTextfieldAuth(
                       labelText: "Username or Email",
                       controller: customTextFieldAuthController,
                     ),
                     SizedBox(height: 20),
 
-                    //password field
+                    //------------------------------------PASSWORD-------------------------------------------------//
                     CustomPasswordField(
                       controller: null,
                       labelText: "Password",
@@ -54,7 +54,7 @@ class LoginScreen extends StatelessWidget {
 
                 SizedBox(height: 10),
 
-                // Forgot password
+                //------------------------------------FORGOT PASSWORD-------------------------------------------------//
                 Align(
                   alignment: Alignment.centerLeft,
                   child: CustomTextButton(
@@ -65,7 +65,7 @@ class LoginScreen extends StatelessWidget {
 
                 SizedBox(height: 10),
 
-                // Login button
+                //------------------------------------LOGIN BUTTON-------------------------------------------------//
                 Align(
                   alignment: Alignment.centerRight,
                   child: SizedBox(
@@ -85,9 +85,10 @@ class LoginScreen extends StatelessWidget {
 
                 SizedBox(height: 40),
 
-                // Sign up & Google login
+                //------------------------------------SIGN UP AND GOOGLE LOGIN-------------------------------------------------//
                 Column(
                   children: [
+                    //------------------------------------SIGN UP-------------------------------------------------//
                     CustomButton(
                       buttonText: 'Sign Up',
                       colorCode: AppConstants.white,
@@ -110,6 +111,7 @@ class LoginScreen extends StatelessWidget {
                       ),
                     ),
 
+                    //------------------------------------GOOGLE LOGIN-------------------------------------------------//
                     CustomButton(
                       buttonText: 'Log in with Google',
                       colorCode: AppConstants.white,
