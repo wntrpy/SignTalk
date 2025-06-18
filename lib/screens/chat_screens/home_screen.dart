@@ -13,13 +13,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Example data that will be refreshed
   List<String> dummyContacts = ['Contact 1', 'Contact 2', 'Contact 3'];
 
+  //TODO: tanggalin mo din to
   Future<void> _refresh() async {
-    await Future.delayed(const Duration(seconds: 2)); // simulate network fetch
+    await Future.delayed(const Duration(seconds: 2));
     setState(() {
-      // Update your data here
       dummyContacts.add('New Contact ${dummyContacts.length + 1}');
     });
   }

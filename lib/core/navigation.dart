@@ -6,7 +6,9 @@ import 'package:signtalk/screens/auth_screens/forget_password_verification.dart'
 import 'package:signtalk/screens/auth_screens/login_screen.dart';
 import 'package:signtalk/screens/auth_screens/registration_screen.dart';
 import 'package:signtalk/screens/auth_screens/welcome_screen.dart';
+import 'package:signtalk/screens/chat_screens/chat_screen.dart';
 import 'package:signtalk/screens/chat_screens/home_screen.dart';
+import 'package:signtalk/screens/chat_screens/receiver_profile_screen.dart';
 import 'package:signtalk/screens/chat_screens/user_profile_screen.dart';
 import 'package:signtalk/screens/settings_screens/settings_alphabet_chart_screen.dart';
 import 'package:signtalk/screens/settings_screens/settings_screen.dart';
@@ -33,6 +35,8 @@ final GoRouter router = GoRouter(
     // ------------------------ CHATS ----------------------------
     goRouteWithSlide('/home_screen', HomeScreen()),
     goRouteWithSlide('/profile_screen', UserProfileScreen()),
+    goRouteWithSlide('/chat_screen', ChatScreen()),
+    goRouteWithSlide('/receiver_profile_screen', ReceiverProfileScreen()),
 
     // ------------------------ SETTINGS ----------------------------
     goRouteWithSlide('/settings_screen', SettingScreen()),
@@ -49,6 +53,7 @@ final GoRouter router = GoRouter(
   ],
 );
 
+//transition
 GoRoute goRouteWithSlide(String path, Widget page) {
   return GoRoute(
     path: path,

@@ -31,7 +31,7 @@ class SettingScreen extends ConsumerWidget {
             Column(
               children: [
                 // ------------------------parang app bar----------------------------
-                CustomAppBar(
+                const CustomAppBar(
                   appBarText: "Settings",
                   rightWidget: CustomCirclePfpButton(
                     borderColor: AppConstants.white,

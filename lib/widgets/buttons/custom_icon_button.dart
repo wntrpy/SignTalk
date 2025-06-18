@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 
 class CustomIconButton extends StatelessWidget {
-  final IconData icon;
+  final Image? imageIcon;
+  final IconData? icon;
   final Color color;
   final double size;
   final VoidCallback onPressed;
 
   const CustomIconButton({
     super.key,
-    required this.icon,
+    this.imageIcon,
+    this.icon,
     required this.color,
     required this.size,
     required this.onPressed,
-  });
+  }) : assert(
+         imageIcon != null || icon != null,
+         'Either imageIcon or icon must be provided',
+       );
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(icon, color: color, size: size),
+      iconSize: size,
+      icon: imageIcon ?? Icon(icon, color: color, size: size),
       onPressed: onPressed,
     );
   }

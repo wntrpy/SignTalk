@@ -42,4 +42,6 @@ class AppConstants {
       'assets/icons/settings_icons/settings_blocked_list.svg';
   static const String settings_alphabet_chart =
       'assets/icons/settings_icons/settings_alphabet_chart.svg';
+
+  static const String three_dots_icon = 'assets/icons/three_dots_icon.png';
 }

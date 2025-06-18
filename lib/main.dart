@@ -4,7 +4,7 @@ import 'package:signtalk/core/navigation.dart';
 import 'package:signtalk/providers/dark_mode_provider.dart';
 
 void main() {
-  runApp(ProviderScope(child: MyApp()));
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends ConsumerWidget {

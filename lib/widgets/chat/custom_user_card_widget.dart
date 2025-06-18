@@ -44,55 +44,54 @@ class CustomUserCardWidget extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12), //  ripple effect pagpenendot
         onTap: () {
-          context.go('/login_screen');
+          //TODO: fix mo later = dapat mapunta lang sa chat screen
+          context.push('/chat_screen');
         },
-        child: Container(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              //--------------------------USER PFP---------------------------
-              CustomCirclePfpButton(
-                borderColor: AppConstants.darkViolet,
-                userImage: null,
-              ), //TODO: palitan ng pic galing sa db, if none edi default pic
-              //--------------------------FULL NAME AND CHAT---------------------------
-              Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //--------------------------FULL NAME---------------------------
-                    Text(
-                      "Asa Enami",
-                      style: TextStyle(
-                        color: AppConstants.darkViolet,
-                        fontWeight: FontWeight.bold,
-                        fontSize: AppConstants.fontSizeLarge,
-                      ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            //--------------------------USER PFP---------------------------
+            CustomCirclePfpButton(
+              borderColor: AppConstants.darkViolet,
+              userImage: null,
+            ), //TODO: palitan ng pic galing sa db, if none edi default pic
+            //--------------------------FULL NAME AND CHAT---------------------------
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  //--------------------------FULL NAME---------------------------
+                  Text(
+                    "Asa Enami",
+                    style: TextStyle(
+                      color: AppConstants.darkViolet,
+                      fontWeight: FontWeight.bold,
+                      fontSize: AppConstants.fontSizeLarge,
                     ),
+                  ),
 
-                    //--------------------------CHAT---------------------------
-                    Text(
-                      "Malaking ipikto sa bustun siltics",
-                      style: TextStyle(
-                        color: AppConstants.darkViolet,
-                        fontSize: AppConstants.fontSizeMedium,
-                      ),
+                  //--------------------------CHAT---------------------------
+                  Text(
+                    "Malaking ipikto sa bustun siltics",
+                    style: TextStyle(
+                      color: AppConstants.darkViolet,
+                      fontSize: AppConstants.fontSizeMedium,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+            ),
 
-              //--------------------------TIMESTAMP---------------------------
-              Text(
-                "12:11 AM",
-                style: TextStyle(
-                  color: AppConstants.darkViolet,
-                  fontSize: AppConstants.fontSizeSmall,
-                ),
+            //--------------------------TIMESTAMP---------------------------
+            Text(
+              "12:11 AM",
+              style: TextStyle(
+                color: AppConstants.darkViolet,
+                fontSize: AppConstants.fontSizeSmall,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

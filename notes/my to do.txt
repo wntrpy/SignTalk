@@ -1,4 +1,5 @@
 front end
 - settings screen
+    - alert dialogs nalang
 - chat screen
 - user receiver profile screen
