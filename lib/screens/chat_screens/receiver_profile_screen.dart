@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
@@ -18,79 +17,92 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
   Widget build(BuildContext context) {
     bool isToggled = true; //TODO: fix
 
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // ------------------------APP BG----------------------------
-          Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          context.pop();
+        }
+      },
+      child: Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            // ------------------------APP BG----------------------------
+            Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
-          // ------------------------BACK BUTTON----------------------------
-          Padding(
-            padding: const EdgeInsets.only(top: 24, left: 16),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: CustomIconButton(
-                icon: Icons.arrow_back,
-                color: Colors.white,
-                size: 30.0,
-                onPressed: () => context.pop(),
+            // ------------------------BACK BUTTON----------------------------
+            Padding(
+              padding: const EdgeInsets.only(top: 24, left: 16),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: CustomIconButton(
+                  icon: Icons.arrow_back,
+                  color: Colors.white,
+                  size: 30.0,
+                  onPressed: () => context.pop(),
+                ),
               ),
             ),
-          ),
 
-          Container(
-            padding: const EdgeInsets.only(top: 100, right: 20, left: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // ------------------------USER INFO----------------------------
-                _buildUserProfileHeader(),
+            Container(
+              padding: const EdgeInsets.only(top: 100, right: 20, left: 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // ------------------------USER INFO----------------------------
+                  _buildUserProfileHeader(),
 
-                // ------------------------OPTIONS----------------------------
-                //TODO: palitan mo mga icons
-                CustomReceiverProfileOption(
-                  optionText: "Change Nickname",
-                  iconPath: AppConstants.receiver_change_nickname_icon,
-                ),
-
-                CustomReceiverProfileOption(
-                  optionText: "3D Avatar Sign Language",
-                  iconPath: AppConstants.receiver_avatar_icon,
-                  trailingWidget: Switch(
-                    value: isToggled,
-                    onChanged: (val) => setState(() => isToggled = val),
+                  // ------------------------CHANGE NICKNAME----------------------------
+                  //TODO: palitan mo mga icons
+                  CustomReceiverProfileOption(
+                    optionText: "Change Nickname",
+                    iconPath: AppConstants.receiver_change_nickname_icon,
                   ),
-                ),
 
-                CustomReceiverProfileOption(
-                  optionText: "Translated Voice Speech",
-                  iconPath: AppConstants.receiver_voice_speech_icon,
-                  trailingWidget: Switch(
-                    value: isToggled,
-                    onChanged: (val) => setState(() => isToggled = val),
+                  // ------------------------3D AVATAR SIGN LANGUAGE----------------------------
+                  CustomReceiverProfileOption(
+                    optionText: "3D Avatar Sign Language",
+                    iconPath: AppConstants.receiver_avatar_icon,
+                    trailingWidget: Switch(
+                      value: isToggled,
+                      onChanged: (val) => setState(() => isToggled = val),
+                    ),
                   ),
-                ),
 
-                CustomReceiverProfileOption(
-                  optionText: "Notification",
-                  iconPath: AppConstants.receiver_notification_icon,
-                ),
+                  // ------------------------TRANSLATED VOICE SPEECH----------------------------
+                  CustomReceiverProfileOption(
+                    optionText: "Translated Voice Speech",
+                    iconPath: AppConstants.receiver_voice_speech_icon,
+                    trailingWidget: Switch(
+                      value: isToggled,
+                      onChanged: (val) => setState(() => isToggled = val),
+                    ),
+                  ),
 
-                CustomReceiverProfileOption(
-                  optionText: "Block Contact",
-                  iconPath: AppConstants.receiver_block_contact_icon,
-                ),
+                  // ------------------------NOTIFICATION----------------------------
+                  CustomReceiverProfileOption(
+                    optionText: "Notification",
+                    iconPath: AppConstants.receiver_notification_icon,
+                  ),
 
-                CustomReceiverProfileOption(
-                  optionText: "Delete",
-                  iconPath: AppConstants.receiver_delete_icon,
-                  color: Colors.red,
-                ),
-              ],
+                  // ------------------------BLOCK CONTACT----------------------------
+                  CustomReceiverProfileOption(
+                    optionText: "Block Contact",
+                    iconPath: AppConstants.receiver_block_contact_icon,
+                  ),
+
+                  // ------------------------DELETE----------------------------
+                  CustomReceiverProfileOption(
+                    optionText: "Delete",
+                    iconPath: AppConstants.receiver_delete_icon,
+                    color: Colors.red,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

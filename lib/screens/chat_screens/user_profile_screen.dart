@@ -14,126 +14,115 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
-  void changeEditButtonState() {
-    //pag penendot yng button dapat:
-    //mabago yung color to orange
-    //mabago yung text to save
-    //maenable yung pag-iinput ng text sa textfield
-    //riverpod state, na nagchecheck if false or true ba yung value
-    //if false, yung default button
-    //if true, then change to orange and such
+  bool _isEditMode = false;
+  //TODO: basahen mu
+  //pag penendot yng button dapat:
+  //mabago yung color to orange
+  //mabago yung text to save
+  //maenable yung pag-iinput ng text sa textfield
+  //riverpod state, na nagchecheck if false or true ba yung value
+  //if false, yung default button
+  //if true, then change to orange and such
+
+  //TODO: manggagaling to sa state, change mo later
+  final Map<String, String> _userData = {
+    'name': 'Byeon Woo Seok',
+    'username': 'RyuSunJae',
+    'age': '24',
+    'type': 'Hearing',
+    'email': 'ByeinWooSeok@gmail.com',
+  };
+
+  void _toggleEditMode() {
+    setState(() => _isEditMode = !_isEditMode);
+  }
+
+  Widget _buildProfileHeader() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        const CustomAppBar(appBarText: "Profile"),
+        CustomCirclePfpButton(
+          borderColor: AppConstants.white,
+          userImage: AppConstants.default_user_pfp,
+          width: 120,
+          height: 120,
+        ),
+        const SizedBox(height: 7),
+        Text(
+          _userData['name']!,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppConstants.white,
+            fontSize: AppConstants.fontSizeExtraLarge,
+          ),
+        ),
+        const SizedBox(height: 15),
+        CustomButton(
+          buttonText: _isEditMode ? "Save" : "Edit Profile",
+          colorCode: _isEditMode
+              ? AppConstants.orange
+              : Theme.of(context).colorScheme.surface,
+          buttonWidth: 150,
+          buttonHeight: 45,
+          onPressed: _toggleEditMode,
+          textSize: AppConstants.fontSizeMedium,
+          textColor: _isEditMode ? AppConstants.white : AppConstants.darkViolet,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileForm() {
+    return Column(
+      children: [
+        CustomLineTextfield(defaultValue: _userData['name']!, label: 'Name'),
+        CustomLineTextfield(
+          defaultValue: _userData['username']!,
+          label: 'Username',
+        ),
+        CustomLineTextfield(defaultValue: _userData['age']!, label: 'Age'),
+        CustomLineTextfield(
+          defaultValue: _userData['type']!,
+          label: 'User Type',
+        ),
+        CustomLineTextfield(defaultValue: _userData['email']!, label: 'Email'),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
-        if (!didPop) {
-          context.pop();
-        }
-      },
+      onPopInvoked: (didPop) => !didPop ? context.pop() : null,
       child: Scaffold(
         body: Column(
           children: [
+            // Header Section
             Expanded(
               flex: 2,
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(40.0),
-                  bottomRight: Radius.circular(40.0),
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
                 ),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // signtalk bg
-                    Image.asset(
-                      AppConstants.signtalk_bg,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    ),
-
-                    //main column
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        // ------------------------parang app bar----------------------------
-                        CustomAppBar(appBarText: "Profile"),
-
-                        // ------------------------USER PFP MALAKI----------------------------
-                        CustomCirclePfpButton(
-                          borderColor: AppConstants.white,
-                          userImage: AppConstants.default_user_pfp,
-                          width: 120,
-                          height: 120,
-                        ),
-                        SizedBox(height: 7),
-
-                        // ------------------------USER FULL NAME----------------------------
-                        Text(
-                          "Byeon Woo Seok",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: AppConstants.white,
-                            fontSize: AppConstants.fontSizeExtraLarge,
-                          ),
-                        ),
-                        SizedBox(height: 15),
-
-                        // ------------------------EDIT BUTTON----------------------------
-                        CustomButton(
-                          buttonText: "Edit Profile",
-                          colorCode: Theme.of(
-                            context,
-                          ).colorScheme.surface, //TODO: bagohin mo
-                          buttonWidth: 150,
-                          buttonHeight: 45,
-                          onPressed: () {}, //TODO: fix later
-                          textSize: AppConstants.fontSizeMedium,
-                          textColor: AppConstants.darkViolet,
-                        ),
-                      ],
-                    ),
+                    Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+                    _buildProfileHeader(),
                   ],
                 ),
               ),
             ),
-
-            // white container
+            // Form Section
             Expanded(
               flex: 3,
               child: Container(
-                padding: EdgeInsets.only(top: 12.0),
-                width: double.infinity,
+                padding: const EdgeInsets.only(top: 12),
                 color: AppConstants.white,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    // ------------------------NAME----------------------------
-                    CustomLineTextfield(defaultValue: "Byeon", label: 'Name'),
-
-                    // ------------------------USERNAME----------------------------
-                    CustomLineTextfield(
-                      defaultValue: "RyuSunJae",
-                      label: 'Username',
-                    ),
-
-                    // ------------------------AGE----------------------------
-                    CustomLineTextfield(defaultValue: "24", label: 'Age'),
-
-                    // ------------------------USER TYPE----------------------------
-                    CustomLineTextfield(
-                      defaultValue: "Hearing",
-                      label: 'User Type',
-                    ),
-
-                    // ------------------------EMAIL----------------------------
-                    CustomLineTextfield(
-                      defaultValue: "ByeinWooSeok@gmail.com",
-                      label: 'Email',
-                    ),
-                  ],
-                ),
+                child: _buildProfileForm(),
               ),
             ),
           ],

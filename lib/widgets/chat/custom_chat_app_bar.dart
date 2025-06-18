@@ -38,26 +38,7 @@ class CustomChatAppBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ------------------------FULL NAME----------------------------
-              Container(
-                width:
-                    MediaQuery.of(context).size.width *
-                    0.5, // 50% of screen width
-                constraints: const BoxConstraints(
-                  maxWidth: 200, // max w
-                  minHeight: 0, // min h
-                ),
-                child: Text(
-                  fullName,
-                  style: TextStyle(
-                    color: AppConstants.white,
-                    fontSize: AppConstants.fontSizeLarge,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  textAlign: TextAlign.start,
-                  overflow: TextOverflow.visible,
-                  maxLines: 2, // max lines bago mag new lione
-                ),
-              ),
+              _fullName(context, fullName),
 
               // ------------------------TIME STAMP----------------------------
               Text(
@@ -69,9 +50,9 @@ class CustomChatAppBar extends StatelessWidget {
 
           // ------------------------OPTION (yung 3dots)----------------------------
           CustomIconButton(
-            imageIcon: Image.asset(AppConstants.settings_feedback_icon),
+            imageIcon: Image.asset(AppConstants.receiver_avatar_icon),
             color: Colors.white,
-            size: 10.0,
+            size: 5.0,
             onPressed: () => context.push(
               '/receiver_profile_screen',
             ), //TODO: fix later ?? idk
@@ -80,4 +61,25 @@ class CustomChatAppBar extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _fullName(BuildContext context, String fullName) {
+  return Container(
+    width: MediaQuery.of(context).size.width * 0.5, // 50% of screen width
+    constraints: const BoxConstraints(
+      maxWidth: 200, // max w
+      minHeight: 0, // min h
+    ),
+    child: Text(
+      fullName,
+      style: TextStyle(
+        color: AppConstants.white,
+        fontSize: AppConstants.fontSizeLarge,
+        fontWeight: FontWeight.w500,
+      ),
+      textAlign: TextAlign.start,
+      overflow: TextOverflow.visible,
+      maxLines: 2, // max lines bago mag new lione
+    ),
+  );
 }

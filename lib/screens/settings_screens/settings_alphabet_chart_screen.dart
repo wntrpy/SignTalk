@@ -34,11 +34,6 @@ class SettingsAlphabetChart extends StatelessWidget {
               child: Column(
                 children: [
                   //TODO: palitan mo to ng learning mats for ASL and FSL
-                  Image.asset(AppConstants.karina_pic),
-                  SizedBox(height: 20),
-                  Image.asset(AppConstants.karina_pic),
-                  SizedBox(height: 20),
-                  Image.asset(AppConstants.karina_pic),
                 ],
               ),
             ),

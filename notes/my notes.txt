@@ -6,7 +6,7 @@ CHAT:
 - kapag mag reread ng messages, hindi dapat iload lahat ng messages, dapat 15-20 messages lang ang maload
     - parang sa messenger, maloload lang yung ibang messages kapag nag scroll
 - push notification
-
+- compressed dapat mga images??
 
 BACKEND STUFFS:
 Login screen

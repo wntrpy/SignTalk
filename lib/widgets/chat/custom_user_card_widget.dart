@@ -56,32 +56,7 @@ class CustomUserCardWidget extends StatelessWidget {
               userImage: null,
             ), //TODO: palitan ng pic galing sa db, if none edi default pic
             //--------------------------FULL NAME AND CHAT---------------------------
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  //--------------------------FULL NAME---------------------------
-                  Text(
-                    "Asa Enami",
-                    style: TextStyle(
-                      color: AppConstants.darkViolet,
-                      fontWeight: FontWeight.bold,
-                      fontSize: AppConstants.fontSizeLarge,
-                    ),
-                  ),
-
-                  //--------------------------CHAT---------------------------
-                  Text(
-                    "Malaking ipikto sa bustun siltics",
-                    style: TextStyle(
-                      color: AppConstants.darkViolet,
-                      fontSize: AppConstants.fontSizeMedium,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _fullNameAndChat(),
 
             //--------------------------TIMESTAMP---------------------------
             Text(
@@ -96,4 +71,33 @@ class CustomUserCardWidget extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _fullNameAndChat() {
+  return Padding(
+    padding: const EdgeInsets.only(top: 8.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        //--------------------------FULL NAME---------------------------
+        Text(
+          "Asa Enami",
+          style: TextStyle(
+            color: AppConstants.darkViolet,
+            fontWeight: FontWeight.bold,
+            fontSize: AppConstants.fontSizeLarge,
+          ),
+        ),
+
+        //--------------------------CHAT---------------------------
+        Text(
+          "Malaking ipikto sa bustun siltics",
+          style: TextStyle(
+            color: AppConstants.darkViolet,
+            fontSize: AppConstants.fontSizeMedium,
+          ),
+        ),
+      ],
+    ),
+  );
 }
