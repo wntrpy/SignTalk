@@ -17,6 +17,7 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final finalReceiverProfileOptions = getReceiverProfileOptions(context);
+    // /  finalReceiverProfileOptions.forEach(print);
 
     return PopScope(
       canPop: false,
@@ -32,36 +33,44 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
             // ------------------------APP BG----------------------------
             Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
-            // ------------------------BACK BUTTON----------------------------
-            Padding(
-              padding: const EdgeInsets.only(top: 24, left: 16),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: CustomIconButton(
-                  icon: Icons.arrow_back,
-                  color: Colors.white,
-                  size: 30.0,
-                  onPressed: () => context.pop(),
-                ),
-              ),
-            ),
-
-            Container(
-              padding: const EdgeInsets.only(top: 100, right: 20, left: 20),
+            SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // ------------------------USER INFO----------------------------
-                  _buildUserProfileHeader(),
+                  // ------------------------BACK BUTTON----------------------------
+                  Container(
+                    padding: EdgeInsets.only(right: 350, top: 30),
+                    child: CustomIconButton(
+                      icon: Icons.arrow_back,
+                      color: Colors.white,
+                      size: 30.0,
+                      onPressed: () => context.pop(),
+                    ),
+                  ),
 
-                  // ------------------------OPTIONS----------------------------
-                  ...finalReceiverProfileOptions.map(
-                    (option) => Column(
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      top: 20,
+                      right: 20,
+                      left: 20,
+                    ),
+                    child: Column(
                       children: [
-                        CustomReceiverProfileOption(
-                          optionText: option['optionText'],
-                          iconPath: option['iconPath'],
-                          trailingWidget: option['trailingWidget'],
+                        // ------------------------USER INFO----------------------------
+                        _buildUserProfileHeader(),
+
+                        // ------------------------OPTIONS----------------------------
+                        ...finalReceiverProfileOptions.map(
+                          (option) => Column(
+                            children: [
+                              CustomReceiverProfileOption(
+                                optionText: option['optionText'],
+                                iconPath: option['iconPath'],
+
+                                trailingWidget: option['trailingWidget'],
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),

@@ -3,6 +3,11 @@ import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/buttons/custom_button.dart';
 
 class CustomAlertDialog extends StatelessWidget {
+  //TODO: hindi fixed yung widget sa gitna, dapat naipapasa din?
+  //text
+  //textfield
+  //
+
   final String dialogTitle;
   final String dialogTextContent;
   final String buttonText;

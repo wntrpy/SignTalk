@@ -42,13 +42,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const CustomAppBar(appBarText: "Profile"),
+
+        // ------------------------USER PPFP----------------------------
         CustomCirclePfpButton(
           borderColor: AppConstants.white,
           userImage: AppConstants.default_user_pfp,
-          width: 120,
-          height: 120,
+          width: 100,
+          height: 100,
         ),
         const SizedBox(height: 7),
+
+        // ------------------------FULL NAME----------------------------
         Text(
           _userData['name']!,
           style: const TextStyle(
@@ -58,6 +62,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ),
         ),
         const SizedBox(height: 15),
+
+        // ------------------------EDIT/SAVE BUTTON----------------------------
         CustomButton(
           buttonText: _isEditMode ? "Save" : "Edit Profile",
           colorCode: _isEditMode
@@ -74,20 +80,34 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Widget _buildProfileForm() {
-    return Column(
-      children: [
-        CustomLineTextfield(defaultValue: _userData['name']!, label: 'Name'),
-        CustomLineTextfield(
-          defaultValue: _userData['username']!,
-          label: 'Username',
-        ),
-        CustomLineTextfield(defaultValue: _userData['age']!, label: 'Age'),
-        CustomLineTextfield(
-          defaultValue: _userData['type']!,
-          label: 'User Type',
-        ),
-        CustomLineTextfield(defaultValue: _userData['email']!, label: 'Email'),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // ------------------------FULL NAME FIELD----------------------------
+          CustomLineTextfield(defaultValue: _userData['name']!, label: 'Name'),
+
+          // ------------------------USERNAME FIELD----------------------------
+          CustomLineTextfield(
+            defaultValue: _userData['username']!,
+            label: 'Username',
+          ),
+
+          // ------------------------AGE FIELD----------------------------
+          CustomLineTextfield(defaultValue: _userData['age']!, label: 'Age'),
+
+          // ------------------------USER TYPE FIELD----------------------------
+          CustomLineTextfield(
+            defaultValue: _userData['type']!,
+            label: 'User Type',
+          ),
+
+          // ------------------------EMAIL FIELD----------------------------
+          CustomLineTextfield(
+            defaultValue: _userData['email']!,
+            label: 'Email',
+          ),
+        ],
+      ),
     );
   }
 
@@ -99,9 +119,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       child: Scaffold(
         body: Column(
           children: [
-            // Header Section
-            Expanded(
-              flex: 2,
+            // ------------------------CONTAINER FOR PROFILE HEADER----------------------------
+            SizedBox(
+              height: 334,
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(40),
@@ -116,9 +136,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 ),
               ),
             ),
-            // Form Section
+
+            // ------------------------CONTAINER FOR FIELDS----------------------------
             Expanded(
-              flex: 3,
               child: Container(
                 padding: const EdgeInsets.only(top: 12),
                 color: AppConstants.white,
