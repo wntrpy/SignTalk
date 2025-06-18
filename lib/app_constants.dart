@@ -32,6 +32,7 @@ class AppConstants {
   static const String google_logo = 'assets/icons/google_icon.png';
   static const String default_user_pfp = 'assets/icons/default_user_pfp.png';
 
+  //SETTINGS ICONS PATHS
   static const String settings_switch_language_icon =
       'assets/icons/settings_icons/settings_switch_language.svg';
   static const String settings_feedback_icon =
@@ -44,4 +45,18 @@ class AppConstants {
       'assets/icons/settings_icons/settings_alphabet_chart.svg';
 
   static const String three_dots_icon = 'assets/icons/three_dots_icon.png';
+
+  //RECEIVER PROFILE ICON PATHS
+  static const receiver_avatar_icon =
+      'assets/icons/receiver_profile_icons/avatar_sign_language_icon.svg';
+  static const receiver_block_contact_icon =
+      'assets/icons/receiver_profile_icons/block_contact_icon.svg';
+  static const receiver_change_nickname_icon =
+      'assets/icons/receiver_profile_icons/change_nickname_icon.svg';
+  static const receiver_delete_icon =
+      'assets/icons/receiver_profile_icons/delete_icon.svg';
+  static const receiver_notification_icon =
+      'assets/icons/receiver_profile_icons/notification_icon.svg';
+  static const receiver_voice_speech_icon =
+      'assets/icons/receiver_profile_icons/voice_speech_icon.svg';
 }

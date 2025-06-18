@@ -51,12 +51,12 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
                 //TODO: palitan mo mga icons
                 CustomReceiverProfileOption(
                   optionText: "Change Nickname",
-                  iconPath: AppConstants.settings_alphabet_chart,
+                  iconPath: AppConstants.receiver_change_nickname_icon,
                 ),
 
                 CustomReceiverProfileOption(
                   optionText: "3D Avatar Sign Language",
-                  iconPath: AppConstants.settings_alphabet_chart,
+                  iconPath: AppConstants.receiver_avatar_icon,
                   trailingWidget: Switch(
                     value: isToggled,
                     onChanged: (val) => setState(() => isToggled = val),
@@ -65,7 +65,7 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
 
                 CustomReceiverProfileOption(
                   optionText: "Translated Voice Speech",
-                  iconPath: AppConstants.settings_alphabet_chart,
+                  iconPath: AppConstants.receiver_voice_speech_icon,
                   trailingWidget: Switch(
                     value: isToggled,
                     onChanged: (val) => setState(() => isToggled = val),
@@ -74,17 +74,17 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
 
                 CustomReceiverProfileOption(
                   optionText: "Notification",
-                  iconPath: AppConstants.settings_alphabet_chart,
+                  iconPath: AppConstants.receiver_notification_icon,
                 ),
 
                 CustomReceiverProfileOption(
                   optionText: "Block Contact",
-                  iconPath: AppConstants.settings_alphabet_chart,
+                  iconPath: AppConstants.receiver_block_contact_icon,
                 ),
 
                 CustomReceiverProfileOption(
                   optionText: "Delete",
-                  iconPath: AppConstants.settings_alphabet_chart,
+                  iconPath: AppConstants.receiver_delete_icon,
                   color: Colors.red,
                 ),
               ],
