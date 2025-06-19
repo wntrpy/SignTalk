@@ -29,7 +29,9 @@ List<Map<String, dynamic>> getSettingsOptions(
         context,
         AppConstants.settings_switch_language_icon,
       ),
-      'onTap': null,
+      'onTap': () {
+        //TODO: show dialog
+      },
     },
     {
       'text': 'Dark Mode',

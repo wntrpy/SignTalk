@@ -10,63 +10,61 @@ class CustomUserCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Slidable(
-      //mute block delete options
       endActionPane: ActionPane(
-        motion: StretchMotion(),
+        motion: const StretchMotion(),
         children: [
           SlidableAction(
-            //mute
-            onPressed: (context) {},
+            onPressed: (context) {}, //TODO: lagyan function
             icon: Icons.notifications,
             backgroundColor: AppConstants.darkViolet,
             borderRadius: BorderRadius.circular(12),
           ),
-
-          //block
           SlidableAction(
-            onPressed: (context) {},
+            onPressed: (context) {}, //TODO: lagyan function
             icon: Icons.block,
             backgroundColor: AppConstants.darkViolet,
             borderRadius: BorderRadius.circular(12),
           ),
-
-          //delete
           SlidableAction(
-            onPressed: (context) {},
+            onPressed: (context) {}, //TODO: lagyan function
             icon: Icons.delete,
             backgroundColor: AppConstants.darkViolet,
             borderRadius: BorderRadius.circular(12),
           ),
         ],
       ),
-
-      //TODO: dito content
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12), //  ripple effect pagpenendot
-        onTap: () {
-          //TODO: fix mo later = dapat mapunta lang sa chat screen
-          context.push('/chat_screen');
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            //--------------------------USER PFP---------------------------
-            CustomCirclePfpButton(
-              borderColor: AppConstants.darkViolet,
-              userImage: null,
-            ), //TODO: palitan ng pic galing sa db, if none edi default pic
-            //--------------------------FULL NAME AND CHAT---------------------------
-            _fullNameAndChat(),
-
-            //--------------------------TIMESTAMP---------------------------
-            Text(
-              "12:11 AM",
-              style: TextStyle(
-                color: AppConstants.darkViolet,
-                fontSize: AppConstants.fontSizeSmall,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            context.push('/chat_screen');
+          },
+          // splash and ripple fx
+          splashColor: AppConstants.darkViolet.withOpacity(0.2),
+          highlightColor: AppConstants.darkViolet.withOpacity(0.1),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //--------------------------USER PFP---------------------------
+              CustomCirclePfpButton(
+                borderColor: AppConstants.darkViolet,
+                userImage: null,
               ),
-            ),
-          ],
+
+              //--------------------------FULL NAME AND CHAT---------------------------
+              Expanded(child: _fullNameAndChat()),
+
+              //--------------------------TIMESTAMP---------------------------
+              Text(
+                "12:11 AM", //TODO: palitan later
+                style: TextStyle(
+                  color: AppConstants.darkViolet,
+                  fontSize: AppConstants.fontSizeSmall,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -75,13 +73,13 @@ class CustomUserCardWidget extends StatelessWidget {
 
 Widget _fullNameAndChat() {
   return Padding(
-    padding: const EdgeInsets.only(top: 8.0),
+    padding: const EdgeInsets.only(top: 8.0, left: 8.0),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         //--------------------------FULL NAME---------------------------
         Text(
-          "Asa Enami",
+          "Asa Enami", //TODO: palitan later
           style: TextStyle(
             color: AppConstants.darkViolet,
             fontWeight: FontWeight.bold,
@@ -91,6 +89,7 @@ Widget _fullNameAndChat() {
 
         //--------------------------CHAT---------------------------
         Text(
+          //TODO: palitan later
           "Malaking ipikto sa bustun siltics",
           style: TextStyle(
             color: AppConstants.darkViolet,

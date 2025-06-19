@@ -19,7 +19,7 @@ class CustomSettingsOptionCard extends StatelessWidget {
       onTap: onTap, //clicabke
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
         decoration: BoxDecoration(
           color: AppConstants.darkViolet,
           borderRadius: BorderRadius.circular(20.0),
