@@ -40,6 +40,7 @@ class ForgetPasswordVerification extends StatelessWidget {
                   CustomTextButton(
                     buttonText: "Resend Code",
                     onPressed: () {},
+                    textColor: Colors.white,
                   ), //TODO: fix later
 
                   SizedBox(height: 40),

@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/dark_mode_provider.dart';
+import 'package:signtalk/widgets/settings/custom_switch_language_dialog.dart';
 
 // helper method for SVG icons
 Widget _settingsIcon(BuildContext context, String assetPath) {
@@ -31,6 +32,12 @@ List<Map<String, dynamic>> getSettingsOptions(
       ),
       'onTap': () {
         //TODO: show dialog
+        showDialog(
+          context: context,
+          builder: (context) {
+            return CustomSwitchLanguageDialog();
+          },
+        );
       },
     },
     {

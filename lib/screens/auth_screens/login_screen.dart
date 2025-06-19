@@ -60,6 +60,7 @@ class LoginScreen extends StatelessWidget {
                   child: CustomTextButton(
                     buttonText: "Forgot Password?",
                     onPressed: () => context.push('/forget_password_screen'),
+                    textColor: Colors.white,
                   ),
                 ),
 
