@@ -130,6 +130,8 @@ class _CustomSwitchLanguageDialogState
                     print('Sign Language: $selectedSignLanguage');
                     print('App Language: $selectedInAppLanguage');
                     context.pop(context);
+
+                    //TODO: disable mo dito yung activeSettingsProvider
                   },
                   textSize: null,
                 ),

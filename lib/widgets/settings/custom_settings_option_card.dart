@@ -5,12 +5,14 @@ class CustomSettingsOptionCard extends StatelessWidget {
   final String optionText;
   final Widget trailing; // anywidgetg
   final VoidCallback? onTap; // funct
+  final Color? activeStateColor; //for active state
 
   const CustomSettingsOptionCard({
     super.key,
     required this.optionText,
     required this.trailing,
     this.onTap,
+    this.activeStateColor,
   });
 
   @override
@@ -21,7 +23,7 @@ class CustomSettingsOptionCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
         decoration: BoxDecoration(
-          color: AppConstants.darkViolet,
+          color: activeStateColor ?? AppConstants.darkViolet,
           borderRadius: BorderRadius.circular(20.0),
           boxShadow: [
             BoxShadow(

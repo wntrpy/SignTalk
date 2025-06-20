@@ -19,30 +19,36 @@ final GoRouter router = GoRouter(
   initialLocation: '/splash_screen',
   routes: [
     // ---------------------- AUTHENTICATION ----------------------
-    goRouteWithSlide('/login_screen', LoginScreen()),
-    goRouteWithSlide('/registration_screen', RegistrationScreen()),
-    goRouteWithSlide('/welcome_screen', WelcomeScreen()),
-    goRouteWithSlide('/forget_password_screen', ForgetPasswordScreen()),
+    goRouteWithSlide('/login_screen', (context) => LoginScreen()),
+    goRouteWithSlide('/registration_screen', (context) => RegistrationScreen()),
+    goRouteWithSlide('/welcome_screen', (context) => WelcomeScreen()),
+    goRouteWithSlide(
+      '/forget_password_screen',
+      (context) => ForgetPasswordScreen(),
+    ),
     goRouteWithSlide(
       '/forget_password_verification',
-      ForgetPasswordVerification(),
+      (context) => ForgetPasswordVerification(),
     ),
     goRouteWithSlide(
       '/forget_password_new_password',
-      ForgetPasswordNewPassword(),
+      (context) => ForgetPasswordNewPassword(),
     ),
 
     // ------------------------ CHATS ----------------------------
-    goRouteWithSlide('/home_screen', HomeScreen()),
-    goRouteWithSlide('/profile_screen', UserProfileScreen()),
-    goRouteWithSlide('/chat_screen', ChatScreen()),
-    goRouteWithSlide('/receiver_profile_screen', ReceiverProfileScreen()),
+    goRouteWithSlide('/home_screen', (context) => HomeScreen()),
+    goRouteWithSlide('/profile_screen', (context) => UserProfileScreen()),
+    goRouteWithSlide('/chat_screen', (context) => ChatScreen()),
+    goRouteWithSlide(
+      '/receiver_profile_screen',
+      (context) => ReceiverProfileScreen(),
+    ),
 
     // ------------------------ SETTINGS ----------------------------
-    goRouteWithSlide('/settings_screen', SettingScreen()),
+    goRouteWithSlide('/settings_screen', (context) => SettingScreen()),
     goRouteWithSlide(
       '/settings_alphabet_chart_screen',
-      SettingsAlphabetChart(),
+      (context) => SettingsAlphabetChart(),
     ),
 
     // ------------------------ SPLASH (no transition) ----------
@@ -54,12 +60,12 @@ final GoRouter router = GoRouter(
 );
 
 //transition
-GoRoute goRouteWithSlide(String path, Widget page) {
+GoRoute goRouteWithSlide(String path, Widget Function(BuildContext) builder) {
   return GoRoute(
     path: path,
     pageBuilder: (context, state) => CustomTransitionPage(
       key: state.pageKey,
-      child: page,
+      child: builder(context), // Lazy build
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final tween = Tween<Offset>(
           begin: const Offset(1.0, 0.0),

@@ -11,19 +11,27 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    Future.delayed(const Duration(seconds: 3), () {
-      context.go('/login_screen');
-    });
     super.initState();
+
+    WidgetsBinding.instance.endOfFrame.then((_) async {
+      // Hide status bar
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+
+      // Delay AFTER frame + preload
+      await Future.delayed(const Duration(seconds: 3));
+
+      if (mounted) {
+        context.go('/login_screen');
+      }
+    });
   }
 
   @override
   void dispose() {
+    // Reset status bar
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
@@ -32,11 +40,29 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    Future.wait([
+      precacheImage(const AssetImage(AppConstants.signtalk_bg), context),
+      precacheImage(const AssetImage(AppConstants.google_logo), context),
+      precacheImage(const AssetImage(AppConstants.signtalk_logo), context),
+      precacheImage(const AssetImage(AppConstants.default_user_pfp), context),
+
+      // add more if they're used right after splash
+    ]);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+        Container(color: Colors.black),
+
+        RepaintBoundary(
+          child: Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+        ),
 
         Center(child: CustomSigntalkLogo(width: 200, height: 200)),
       ],

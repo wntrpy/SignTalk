@@ -48,6 +48,11 @@ class SettingScreen extends ConsumerWidget {
                               optionText: option['text'],
                               trailing: option['icon'],
                               onTap: option['onTap'],
+                              activeStateColor: option['active'] == true
+                                  ? AppConstants.extraLightViolet.withOpacity(
+                                      0.5,
+                                    )
+                                  : null,
                             ),
                             spacer,
                           ],

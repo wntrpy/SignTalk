@@ -62,13 +62,17 @@ class ForgetPasswordNewPassword extends StatelessWidget {
                         builder: (context) {
                           return CustomAlertDialog(
                             dialogTitle: 'Password Changed!',
-                            dialogTextContent: 'tstsedfsdf',
-                            buttonText: 'asdas',
+
+                            buttonText: 'Back to Login',
                             onPressed: () => context.go(
                               '/login_screen',
                             ), //TODO: fix mo later
-                            dialogWidth: 100.0,
-                            dialogHeight: 200.0,
+                            dialogWidth: 150.0,
+                            dialogHeight: 250.0,
+                            buttonHeight: 50,
+                            buttonWidth: 150,
+                            dialogTextContent:
+                                'Your password have successfully changed.',
                           );
                         },
                       );

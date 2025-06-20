@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signtalk/core/navigation.dart';
-import 'package:signtalk/providers/dark_mode_provider.dart';
+import 'package:signtalk/providers/settings_provider.dart';
 
 void main() {
   runApp(ProviderScope(child: const MyApp()));
@@ -17,6 +17,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp.router(
       routerConfig: router,
+
       debugShowCheckedModeBanner: false,
       theme: ThemeData.light().copyWith(
         iconTheme: const IconThemeData(

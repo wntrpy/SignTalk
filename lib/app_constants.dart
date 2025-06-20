@@ -6,6 +6,7 @@ class AppConstants {
   // Colors
   static const Color darkViolet = Color(0xFF481872);
   static const Color lightViolet = Color(0xFF6F22A3);
+  static const Color extraLightViolet = Color(0xFFEEE5FF);
   static const Color orange = Color(0xFFFF8B00);
   static const Color red = Color(0xFFFF0000);
   static const Color white = Color.fromARGB(255, 255, 255, 255);
@@ -19,18 +20,18 @@ class AppConstants {
   static const double fontSizeExtraLarge = 24.0;
 
   //IMAGE PATHS
-  static const String signtalk_bg = 'assets/images/signtalk_bg.png';
+  static const String signtalk_bg = 'assets/images/signtalk_bg.webp';
   static const String welcome_screen_icon =
-      'assets/images/welcome_screen_icon.png';
+      'assets/images/welcome_screen_icon.webp';
   static const String welcome_screen_text =
-      'assets/images/welcome_screen_text.png';
-  static const String welcome_screen_bg = 'assets/images/welcome_screen_bg.png';
-  static const String karina_pic = 'assets/images/karina.jpg';
+      'assets/images/welcome_screen_text.webp';
+  static const String welcome_screen_bg =
+      'assets/images/welcome_screen_bg.webp';
 
   //ICON PATHS
-  static const String signtalk_logo = 'assets/icons/signtalk_logo.png';
-  static const String google_logo = 'assets/icons/google_icon.png';
-  static const String default_user_pfp = 'assets/icons/default_user_pfp.png';
+  static const String signtalk_logo = 'assets/icons/signtalk_logo.webp';
+  static const String google_logo = 'assets/icons/google_icon.webp';
+  static const String default_user_pfp = 'assets/icons/default_user_pfp.webp';
 
   //SETTINGS ICONS PATHS
   static const String settings_switch_language_icon =

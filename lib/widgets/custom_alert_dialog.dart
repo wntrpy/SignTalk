@@ -3,80 +3,107 @@ import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/buttons/custom_button.dart';
 
 class CustomAlertDialog extends StatelessWidget {
-  //TODO: hindi fixed yung widget sa gitna, dapat naipapasa din?
-  //text
-  //textfield
-  //
-
   final String dialogTitle;
-  final String dialogTextContent;
+  final String?
+  dialogTextContent; //if text widget, then dapat iprovide lang yung content ng text
   final String buttonText;
   final double? buttonHeight;
   final double? buttonWidth;
-  final double? dialogWidth; // dialo
-  final double? dialogHeight; // daol;go height
-  final void Function() onPressed;
+  final double? dialogWidth;
+  final double? dialogHeight;
+  final VoidCallback onPressed;
+  final Widget? customWidget;
+  final bool showCancelButton;
+  final VoidCallback? onCancel;
 
   const CustomAlertDialog({
     super.key,
     required this.dialogTitle,
-    required this.dialogTextContent,
     required this.buttonText,
     this.buttonHeight,
     this.buttonWidth,
     this.dialogWidth,
     this.dialogHeight,
     required this.onPressed,
+    this.customWidget,
+    this.showCancelButton = false,
+    this.onCancel,
+    this.dialogTextContent,
   });
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
       child: Container(
-        width: dialogWidth ?? 100,
-        height: dialogHeight ?? 200,
-        padding: const EdgeInsets.all(20),
+        width: dialogWidth ?? 320,
+        height: dialogHeight ?? 320,
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppConstants.white,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // DIALOG TITLE
-            Text(
-              dialogTitle,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: AppConstants.fontSizeLarge,
+            // Header
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: AppConstants.darkViolet,
+                borderRadius: BorderRadius.circular(10),
               ),
-              textAlign: TextAlign.center,
+              child: Text(
+                dialogTitle,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppConstants.white,
+                  fontSize: AppConstants.fontSizeLarge,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
 
             const SizedBox(height: 16),
 
-            // DIALOG TEXT CONTENT
-            Text(
-              dialogTextContent,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: AppConstants.fontSizeLarge,
-              ),
-              textAlign: TextAlign.center,
+            // Custom Widget like TextField, Text, etc.
+            Expanded(
+              child:
+                  customWidget ??
+                  Text(
+                    dialogTextContent ?? "No content",
+                    textAlign: TextAlign.center,
+                  ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
-            // DIALOG BUTTON
-            CustomButton(
-              buttonText: buttonText,
-              colorCode: AppConstants.orange,
-              buttonWidth: buttonWidth ?? 150,
-              buttonHeight: buttonHeight ?? 50,
-              onPressed: onPressed,
-              textSize: AppConstants.fontSizeMedium,
+            // Buttons Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                if (showCancelButton)
+                  TextButton(
+                    onPressed: onCancel ?? () => Navigator.of(context).pop(),
+                    child: Text(
+                      "Cancel",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: AppConstants.fontSizeMedium,
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 8),
+                CustomButton(
+                  buttonText: buttonText,
+                  colorCode: AppConstants.orange,
+                  buttonWidth: buttonWidth ?? 100,
+                  buttonHeight: buttonHeight ?? 40,
+                  onPressed: onPressed,
+                  textSize: AppConstants.fontSizeMedium,
+                ),
+              ],
             ),
           ],
         ),
