@@ -10,7 +10,7 @@ import 'package:path/path.dart' as path;
 Future<void> uploadProfilePicture(BuildContext context) async {
   final picker = ImagePicker();
   final uid = FirebaseAuth.instance.currentUser?.uid;
-
+  
   if (uid == null) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("User not signed in")));
     return;
