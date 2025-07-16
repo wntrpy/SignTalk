@@ -1,10 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // for providerscope
+import 'package:provider/provider.dart' as provider;
 import 'package:signtalk/core/navigation.dart';
 import 'package:signtalk/providers/dark_mode_provider.dart';
+import 'package:signtalk/providers/auth_provider.dart';
+import 'package:signtalk/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
-  runApp(ProviderScope(child: const MyApp()));
+
+void main() async {
+  // Initialize Firebase
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); 
+
+
+ runApp(
+  provider.MultiProvider(
+    providers: [
+      provider.ChangeNotifierProvider(create: (_) => AuthProvider()),
+    ],
+    child: ProviderScope(child: const MyApp()),
+  ),
+);
+
 }
 
 class MyApp extends ConsumerWidget {
@@ -33,4 +53,6 @@ class MyApp extends ConsumerWidget {
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
     );
   }
+
+ 
 }

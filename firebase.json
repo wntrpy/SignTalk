@@ -1,0 +1,49 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "signtalk-cb7eb",
+          "appId": "1:1618713415:android:2fad8f1565b5e19a7c0a62",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "signtalk-cb7eb",
+          "configurations": {
+            "android": "1:1618713415:android:2fad8f1565b5e19a7c0a62",
+            "ios": "1:1618713415:ios:ce000c065bac6a1f7c0a62",
+            "macos": "1:1618713415:ios:ce000c065bac6a1f7c0a62",
+            "web": "1:1618713415:web:498c03c8109129897c0a62",
+            "windows": "1:1618713415:web:85b4ade8999058697c0a62"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    },
+    {
+      "source": "providers",
+      "codebase": "code_request",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}

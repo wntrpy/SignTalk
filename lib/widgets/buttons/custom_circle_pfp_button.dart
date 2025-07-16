@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:signtalk/app_constants.dart';
 
+bool isNetworkUrl(String? path) {
+  return path != null && (path.startsWith('http') || path.startsWith('https'));
+}
+
 class CustomCirclePfpButton extends StatelessWidget {
   final Color borderColor; // color for border
   final String? userImage; // path to user image
@@ -21,6 +25,17 @@ class CustomCirclePfpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+      ImageProvider imageProvider;
+
+    if (userImage == null || userImage!.isEmpty) {
+      imageProvider = AssetImage(AppConstants.default_user_pfp);
+    } else if (isNetworkUrl(userImage)) {
+      imageProvider = NetworkImage(userImage!);
+    } else {
+      imageProvider = AssetImage(userImage!);
+    }
+
     return IconButton(
       onPressed: onPressed,
       splashRadius: width / 2 + 5,
@@ -33,9 +48,7 @@ class CustomCirclePfpButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(100),
         ),
         child: CircleAvatar(
-          backgroundImage: userImage != null
-              ? AssetImage(userImage!)
-              : const AssetImage('assets/icons/default_user_pfp.png'),
+         backgroundImage: imageProvider,
           backgroundColor: AppConstants.orange,
         ),
       ),

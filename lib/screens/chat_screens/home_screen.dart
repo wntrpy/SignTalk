@@ -1,18 +1,24 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/chat/custom_user_card_widget.dart';
+import 'package:signtalk/widgets/firstname_greeting.dart';
+import 'package:signtalk/providers/user_info_provider.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  
   List<String> dummyContacts = ['Contact 1', 'Contact 2', 'Contact 3'];
 
   //TODO: tanggalin mo din to
@@ -24,7 +30,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build (BuildContext context) {
+    final userAsync = ref.watch(userProvider);
+
+    return userAsync.when(
+      data: (user) {
     return PopScope(
       //TODO: tanggalin mo to
       canPop: false,
@@ -71,21 +81,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                   CustomSigntalkLogo(width: 80, height: 80),
 
                                   //--------------------------FIRST NAME ?? USERNAME---------------------------
-                                  Text(
-                                    "Hello, Sung!",
-                                    style: TextStyle(
-                                      fontSize: AppConstants.fontSizeLarge,
-                                      color: AppConstants.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                  const FirstNameGreeting(),
                                 ],
                               ),
 
                               //--------------------------CIRCLE PFP---------------------------
                               CustomCirclePfpButton(
                                 borderColor: AppConstants.white,
-                                userImage: null,
+                                userImage: user.photoUrl ?? AppConstants.default_user_pfp,
                                 onPressed: () => context.push(
                                   '/profile_screen',
                                 ), // TODO: goto profile screen
@@ -93,6 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
+                    
 
                         SizedBox(height: 20),
 
@@ -141,5 +145,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+    );
   }
 }
+  

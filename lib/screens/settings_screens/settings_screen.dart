@@ -6,16 +6,19 @@ import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/custom_app_bar.dart';
 import 'package:signtalk/widgets/settings/custom_settings_option_card.dart';
 import 'package:signtalk/app_constants.dart';
+import 'package:signtalk/providers/user_info_provider.dart';
 
 class SettingScreen extends ConsumerWidget {
   const SettingScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+     final userAsync = ref.watch(userProvider);
     final settingsOptions = getSettingsOptions(context, ref);
     const spacer = SizedBox(height: 20);
-
-    return PopScope(
+    
+    return userAsync.when(
+      data: (user) => PopScope(
       canPop: false,
       onPopInvoked: (didPop) => !didPop ? context.pop() : null,
       child: Scaffold(
@@ -25,11 +28,11 @@ class SettingScreen extends ConsumerWidget {
             Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
             Column(
               children: [
-                const CustomAppBar(
+                CustomAppBar(
                   appBarText: "Settings",
                   rightWidget: CustomCirclePfpButton(
                     borderColor: AppConstants.white,
-                    userImage: AppConstants.default_user_pfp,
+                    userImage: user.photoUrl ?? AppConstants.default_user_pfp,
                     width: 40,
                     height: 40,
                   ),
@@ -61,6 +64,9 @@ class SettingScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+    );    
   }
 }

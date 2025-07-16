@@ -5,12 +5,14 @@ class CustomPasswordField extends StatefulWidget {
   final TextEditingController? controller;
   final String labelText;
   final String? errorText;
+  final String? Function(String?)? validator;
 
   const CustomPasswordField({
     super.key,
     required this.controller,
     required this.labelText,
     this.errorText,
+    this.validator,
   });
 
   @override
@@ -19,6 +21,7 @@ class CustomPasswordField extends StatefulWidget {
 
 class _CustomPasswordFieldState extends State<CustomPasswordField> {
   bool _obscureText = true;
+
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +39,9 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
         const SizedBox(height: 5),
 
         // textfield with mata icon
-        TextField(
+        TextFormField(
           controller: widget.controller,
+          validator: widget.validator,
           obscureText: _obscureText,
           keyboardType: TextInputType.visiblePassword,
           decoration: InputDecoration(

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "1618713415",
+    "project_id": "signtalk-cb7eb",
+    "storage_bucket": "signtalk-cb7eb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1618713415:android:2fad8f1565b5e19a7c0a62",
+        "android_client_info": {
+          "package_name": "com.example.signtalk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1618713415-0gs0c9e8d7ejehfecp7te7j8t91b9m28.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.signtalk",
+            "certificate_hash": "4bc1f6072b14c382a17859afc02e8d062f605d8b"
+          }
+        },
+        {
+          "client_id": "1618713415-h9qa4ccnbvoq8om9qlove18chcd0bqma.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCr4QZ45MdiDdN3I5WQnS0TVPcNi1sTdo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1618713415-h9qa4ccnbvoq8om9qlove18chcd0bqma.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1618713415-2e1t1d2cedo3mnb8e6itgkt6n6slqv2f.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.signtalk"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

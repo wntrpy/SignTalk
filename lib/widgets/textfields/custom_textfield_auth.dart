@@ -4,11 +4,17 @@ import 'package:signtalk/app_constants.dart';
 class CustomTextfieldAuth extends StatelessWidget {
   final String labelText;
   final TextEditingController? controller;
+  final String? errorText;
+  final void Function(String)? onChanged;
+  final String? Function(String?)? validator;
 
   const CustomTextfieldAuth({
     super.key,
     required this.labelText,
-    required this.controller,
+    required this.controller, 
+    this.errorText,
+    this.onChanged,
+    this.validator,
   });
 
   @override
@@ -25,7 +31,10 @@ class CustomTextfieldAuth extends StatelessWidget {
         ), //label text na nasa taas ng textfield
         SizedBox(height: 5),
 
-        TextField(
+        TextFormField(
+          controller: controller,
+          onChanged: onChanged,
+          validator: validator,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
@@ -34,6 +43,8 @@ class CustomTextfieldAuth extends StatelessWidget {
               borderSide: BorderSide.none,
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+            errorText: errorText,
+            errorStyle: TextStyle(color: Colors.yellow),
           ),
         ),
       ],

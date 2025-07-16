@@ -4,18 +4,21 @@ import 'package:signtalk/app_constants.dart';
 class CustomLineTextfield extends StatelessWidget {
   final String label;
   final String defaultValue;
-  final bool isEditable;
+  final bool enabled;
+  final TextEditingController? controller;
 
   const CustomLineTextfield({
     super.key,
     required this.label,
     required this.defaultValue,
-    this.isEditable = false,
+    this.enabled = false,
+    this.controller
   });
 
   @override
   Widget build(BuildContext context) {
-    final controller = TextEditingController(text: defaultValue);
+   final usedController = controller ?? TextEditingController(text: defaultValue);
+
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
@@ -36,8 +39,8 @@ class CustomLineTextfield extends StatelessWidget {
 
           // ------------------------ TEXT FIELD WITH CUSTOM UNDERLINE ------------------------
           TextField(
-            controller: controller,
-            enabled: isEditable,
+            controller: usedController,
+            enabled: enabled,
             style: const TextStyle(color: Colors.black),
             decoration: const InputDecoration(
               contentPadding: EdgeInsets.only(left: 16.0, bottom: 8.0),

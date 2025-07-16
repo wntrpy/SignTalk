@@ -7,8 +7,10 @@ void validateAndSubmit({
   required TextEditingController confirmPasswordController,
   required void Function(String? errorText) onValidationResult,
 }) {
+
   final password = passwordController.text.trim();
   final confirm = confirmPasswordController.text.trim();
+
 
   if (password.isEmpty && confirm.isEmpty) {
     onValidationResult("Password can't be empty");

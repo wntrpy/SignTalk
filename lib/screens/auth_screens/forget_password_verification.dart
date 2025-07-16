@@ -35,6 +35,7 @@ class ForgetPasswordVerification extends StatelessWidget {
                   CustomTextfieldAuth(
                     labelText: "A Verification Code was sent  to your Email.",
                     controller: null,
+                    errorText: null,
                   ),
 
                   CustomTextButton(

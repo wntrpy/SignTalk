@@ -1,12 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:signtalk/providers/auth_provider.dart' as authentication;
 import 'package:signtalk/widgets/textfields/custom_textfield_auth.dart';
 import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/app_constants.dart';
 
-class ForgetPasswordScreen extends StatelessWidget {
+class ForgetPasswordScreen extends StatefulWidget {
   const ForgetPasswordScreen({super.key});
+
+     @override
+  State<ForgetPasswordScreen> createState() => _ForgetPasswordScreenState();
+}
+
+class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
+  final TextEditingController _emailController = TextEditingController();
+
+  String? _emailerror; 
+  bool _isLoading = false;
+
+  Future<void> _submit() async {
+    setState(() {
+      _emailerror = null;
+      _isLoading = true;
+    });
+
+    final email = _emailController.text.trim();
+    final provider = Provider.of<authentication.AuthProvider>(context, listen: false);
+
+    try {
+      final exists = await provider.resetPasswordIfExists(email);
+      if (!mounted) return;
+
+      if (exists) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Reset link sent to $email')),
+        );
+        context.push('/login_screen'); // Navigate to login screen after successful submission
+      } else {
+        setState(() {
+          _emailerror = 'Email not found';
+        });
+      }
+    } catch (e) {
+
+      if (!mounted) return;
+      setState(() {
+        _emailerror = 'Something went wrong. Please try again.';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,21 +81,20 @@ class ForgetPasswordScreen extends StatelessWidget {
 
                   //------------------------------------EMAIL/USERNAME-------------------------------------------------//
                   CustomTextfieldAuth(
-                    labelText: "Enter the email/username of your account.",
-                    controller: null,
+                    labelText: "Enter your email address",
+                    controller: _emailController,
+                    errorText: _emailerror,
                   ),
 
                   SizedBox(height: 40),
 
                   //------------------------------------SUBMIT-------------------------------------------------//
                   CustomButton(
-                    buttonText: "SUBMIT",
+                    buttonText:"SUBMIT",
                     colorCode: AppConstants.orange,
                     buttonWidth: 250,
                     buttonHeight: 70,
-                    onPressed: () => context.push(
-                      '/forget_password_verification',
-                    ), //TODO: FIX LATER
+                    onPressed: _isLoading ? () {} : () { _submit(); }, //TODO: FIX LATER
                     textSize: 18,
                   ),
                 ],

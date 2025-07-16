@@ -13,13 +13,18 @@ import 'package:signtalk/screens/chat_screens/user_profile_screen.dart';
 import 'package:signtalk/screens/settings_screens/settings_alphabet_chart_screen.dart';
 import 'package:signtalk/screens/settings_screens/settings_screen.dart';
 import 'package:signtalk/screens/splash_screen.dart';
+import 'package:signtalk/screens/auth_screens/2FA_screen.dart';
+import 'package:signtalk/providers/functions/authstate_checker.dart';
 
 //routes using go_router
 final GoRouter router = GoRouter(
   initialLocation: '/splash_screen',
   routes: [
+    goRouteWithSlide('/auth_wrapper', AuthenticationWrapper()),
+    
     // ---------------------- AUTHENTICATION ----------------------
     goRouteWithSlide('/login_screen', LoginScreen()),
+    goRouteWithSlide('/2FA_screen', TwoFactorScreen()), // Two-Factor Authentication Screen
     goRouteWithSlide('/registration_screen', RegistrationScreen()),
     goRouteWithSlide('/welcome_screen', WelcomeScreen()),
     goRouteWithSlide('/forget_password_screen', ForgetPasswordScreen()),
