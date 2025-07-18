@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http; // Importing http package for making HTTP requests
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final authProvider = ChangeNotifierProvider<AuthProvider>((ref) {
   return AuthProvider();
@@ -53,8 +54,11 @@ class AuthProvider with ChangeNotifier {
 
 //Directly send email using SendGrid API ---direct call from flutter to SendGrid w/o using intermediary Firebase Function
  Future<void> sendEmailDirectlyViaSendGrid(String email, String code) async {
-  const String sendGridApiKey = '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'; //Shouldn't be hardcoded -- NOT SECURE
+  final String? sendGridApiKey = dotenv.env['SENDGRID_API_KEY']; //Shouldn't be hardcoded -- NOT SECURE
   const String senderEmail = '<vistan_jamila@icloud.com>';
+  if (sendGridApiKey == null) {
+    throw Exception('SendGrid API key not found in environment variables');
+  }
 
   final url = Uri.parse('https://api.sendgrid.com/v3/mail/send');
   final emailPayload = {
@@ -166,10 +170,10 @@ class AuthProvider with ChangeNotifier {
 
 
 //Sign in using Google
- Future<bool> signInWithGoogle() async {
+ Future<String> signInWithGoogle() async {
   try {
     final googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) return false; // User cancelled the sign-in
+    if (googleUser == null) return "cancelled"; // User closed the sign-in dialog
 
     final googleAuth = await googleUser.authentication; // Get the authentication details from the Google sign-in process
 
@@ -194,12 +198,12 @@ class AuthProvider with ChangeNotifier {
         });
       }
       notifyListeners();
-      return true;
+      return "success";
     }
-    return false;
+    return "error"; 
   } catch (e) {
     print("Google Sign-In Error: $e");
-    return false;
+    return "error"; 
   }
 }
 

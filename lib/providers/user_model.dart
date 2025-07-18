@@ -21,7 +21,7 @@ class UserModel {
       name: data['name'] ?? '',
       email: data['email'] ?? '',
       photoUrl: data['photoUrl'],
-      age: data['age'] ?? '',
+      age: data['age']?.toString() ?? '',
       userType: data['userType'] ?? '',
     );
   }

@@ -6,6 +6,7 @@ class CustomTextfieldDropdown extends StatelessWidget {
   final String? value;
   final List<String> items;
   final ValueChanged<String?> onChanged;
+  final bool enabled;
 
   const CustomTextfieldDropdown({
     super.key,
@@ -13,6 +14,7 @@ class CustomTextfieldDropdown extends StatelessWidget {
     this.value,
     required this.items,
     required this.onChanged,
+    this.enabled = true,
   });
 
   @override
@@ -48,7 +50,7 @@ class CustomTextfieldDropdown extends StatelessWidget {
                       DropdownMenuItem<String>(value: item, child: Text(item)),
                 )
                 .toList(),
-            onChanged: onChanged,
+            onChanged: enabled ? onChanged: null,
           ),
         ),
       ],

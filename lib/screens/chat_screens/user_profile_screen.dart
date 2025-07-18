@@ -23,10 +23,11 @@ class UserProfileScreen extends ConsumerStatefulWidget {
 class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
+  final List<String> userTypes = ['Hearing', 'Non-Hearing']; //laman ng dropdown
   UserModel? _userModel; //Keeps last loaded user data
   bool _isEditingName = false;
   bool _isEditingAge = false;
-  
+  String? selectedUserType; //var na naghohold ng value ng dropdown
 
 //controller allocates memory, use .dispose() to free up memory after use
   @override
@@ -158,11 +159,77 @@ bool _toggleEditMode() {
           ],
         ),
         
-        CustomLineTextfield(
-          defaultValue: user.userType,
-          label: 'User Type',
-          enabled: false,
+      // --- USER TYPE LABEL + DROPDOWN FIELD WITH SAVE BUTTON ONLY IF NULL ---
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(left: 16.0),
+              child: Text(
+                'User Type',
+                style: TextStyle(
+                  fontSize: AppConstants.fontSizeSmall,
+                  color: AppConstants.darkViolet,
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 16.0),
+                    child: DropdownButtonFormField<String>(
+                      value: selectedUserType,
+                      isExpanded: true,
+                      icon: const Icon(Icons.arrow_drop_down),
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.only(bottom: 8.0),
+                        border: InputBorder.none,
+                      ),
+                      style: const TextStyle(color: Colors.black), // selected text color
+                      dropdownColor: Colors.white,
+                      items: userTypes
+                          .map((String item) => DropdownMenuItem<String>(
+                                value: item,
+                                child: Text(item),
+                              ))
+                          .toList(),
+                      onChanged: (_userModel?.userType == null || _userModel!.userType.isEmpty)
+                          ? (value) => setState(() => selectedUserType = value)
+                          : null,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                if ((_userModel?.userType == null || _userModel!.userType.isEmpty) &&
+                    selectedUserType != null)
+                  CustomButton(
+                    buttonText: "Save",
+                    colorCode: AppConstants.orange,
+                    textColor: AppConstants.white,
+                    buttonWidth: 70,
+                    buttonHeight: 38,
+                    textSize: 14,
+                    onPressed: () async {
+                      await _saveField("userType", selectedUserType!);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("User type saved.")),
+                      );
+                    },
+                  ),
+              ],
+            ),
+            const Padding(
+              padding: EdgeInsets.only(left: 16.0),
+              child: Divider(thickness: 1, color: Colors.black, height: 1),
+            ),
+          ],
         ),
+      ),
+
+
         CustomLineTextfield(
           defaultValue: user.email,
           label: 'Email',
@@ -215,6 +282,7 @@ bool _toggleEditMode() {
             if (_userModel == null || _userModel!.uid != user.uid || !isEditMode) {
               _nameController.text = user.name;
               _ageController.text = user.age;
+              selectedUserType = user.userType.isNotEmpty ? user.userType : selectedUserType;
               _userModel = user;
             }
 

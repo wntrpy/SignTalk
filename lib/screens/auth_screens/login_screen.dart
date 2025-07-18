@@ -180,14 +180,15 @@ Future<void> _handlelogin() async {
                       onPressed: () async {
                         final authProvider = Provider.of<AuthProvider>(context, listen: false);
                         final result = await authProvider.signInWithGoogle();
-                        if (result) {
+                        if (result == "success") {
                           context.push('/home_screen');
-                        } else {
+                        } else if (result == "error") {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text("Google sign-in failed. Please try again."))
                           );
                         }
                       },
+                      
                       textColor: AppConstants.black,
                       icon: Image.asset(AppConstants.google_logo),
                       textSize: AppConstants.fontSizeMedium,
