@@ -34,7 +34,7 @@ migrate_working_dir/
 /build/
 
 # Ignore environment configuration file
-.env
+key.env
 
 # Symbolication related
 app.*.symbols
