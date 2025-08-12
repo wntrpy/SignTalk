@@ -1,154 +1,209 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
+import 'package:signtalk/providers/chat_provider.dart';
+import 'package:signtalk/screens/chat_screens/user_search_screen.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
-import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/chat/custom_user_card_widget.dart';
+import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/firstname_greeting.dart';
-import 'package:signtalk/providers/user_info_provider.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+//TODO: dapat naka sort yung user card widget based sa timestamp
+//TODO: walang email_lowercase kapag mag reregister
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  final uid = FirebaseAuth.instance.currentUser?.uid;
-  
-  List<String> dummyContacts = ['Contact 1', 'Contact 2', 'Contact 3'];
+class _HomeScreenState extends State<HomeScreen> {
+  final _auth = FirebaseAuth.instance;
+  User? loggedInUser;
 
-  //TODO: tanggalin mo din to
-  Future<void> _refresh() async {
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() {
-      dummyContacts.add('New Contact ${dummyContacts.length + 1}');
-    });
+  @override
+  void initState() {
+    super.initState();
+    getCurrentUser();
+  }
+
+  void getCurrentUser() {
+    final user = _auth.currentUser;
+    if (user != null) {
+      setState(() {
+        loggedInUser = user;
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>> _fetchChatData(String chatId) async {
+    final chatDoc = await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .get();
+    final chatData = chatDoc.data();
+    final users = chatData!['users'] as List<dynamic>;
+    final receiverId = users.firstWhere((id) => id != loggedInUser!.uid);
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(receiverId)
+        .get();
+    final userData = userDoc.data()!;
+    return {
+      'chatId': chatId,
+      'lastMessage': chatData['lastMessage'] ?? '',
+      'timeStamp': chatData['timestamp']?.toDate() ?? DateTime.now(),
+      'userData': userData,
+    };
   }
 
   @override
-  Widget build (BuildContext context) {
-    final userAsync = ref.watch(userProvider);
+  Widget build(BuildContext context) {
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
 
-    return userAsync.when(
-      data: (user) {
+    if (loggedInUser == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return PopScope(
-      //TODO: tanggalin mo to
       canPop: false,
-      onPopInvoked: (didPop) {
-        if (!didPop) {
-          context.pop();
-        }
-      },
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        body: RefreshIndicator(
-          onRefresh: _refresh,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
-              Column(
-                children: [
-                  //--------------------------SIGNTALK LOGO AND USERNAME---------------------------
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 20,
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.only(bottom: 10),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: Colors.white,
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+            Column(
+              children: [
+                //-----------------------------------------HEADER--------------------------------------------//
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
                             children: [
-                              Row(
-                                children: [
-                                  //--------------------------SIGNTALK LOGO---------------------------
-                                  CustomSigntalkLogo(width: 80, height: 80),
+                              CustomSigntalkLogo(width: 60, height: 60),
+                              const SizedBox(width: 10),
+                              const FirstNameGreeting(),
+                            ],
+                          ),
+                          CustomCirclePfpButton(
+                            borderColor: AppConstants.white,
+                            userImage: AppConstants.default_user_pfp,
+                            onPressed: () => context.push('/profile_screen'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 30),
 
-                                  //--------------------------FIRST NAME ?? USERNAME---------------------------
-                                  const FirstNameGreeting(),
-                                ],
-                              ),
-
-                              //--------------------------CIRCLE PFP---------------------------
-                              CustomCirclePfpButton(
-                                borderColor: AppConstants.white,
-                                userImage: user.photoUrl ?? AppConstants.default_user_pfp,
-                                onPressed: () => context.push(
-                                  '/profile_screen',
-                                ), // TODO: goto profile screen
+                      //-----------------------------------------SEARCH BAR--------------------------------------------//
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => UserSearchScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.search, color: Colors.grey),
+                              SizedBox(width: 10),
+                              Text(
+                                "Search contact...",
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                    
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 20),
 
-                        SizedBox(height: 20),
-
-                        //--------------------------SEARCH BAR---------------------------
-                        SearchBar(
-                          leading: Icon(Icons.search),
-                          hintText: "Search Contact...",
-                          padding: WidgetStatePropertyAll(
-                            EdgeInsets.symmetric(horizontal: 16.0),
+                //-----------------------------------------LIST OF USERS--------------------------------------------//
+                Expanded(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(40.0),
+                        topRight: Radius.circular(40.0),
+                      ),
+                    ),
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: chatProvider.getChats(loggedInUser!.uid),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        final chatDocs = snapshot.data!.docs;
+                        return FutureBuilder<List<Map<String, dynamic>>>(
+                          future: Future.wait(
+                            chatDocs.map(
+                              (chatDoc) => _fetchChatData(chatDoc.id),
+                            ),
                           ),
-                          onChanged: (value) {},
-                          onSubmitted: (value) {},
-                        ),
-                      ],
-                    ),
-                  ),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            final chatDataList = snapshot.data!;
 
-                  // ------------------------USER CARD WIDGET CONTIANER----------------------------
-                  //listview builder
-                  //narerefresh dapat
-                  //dapat pagkachat, marebuild tong dynamic content, and masort based sa recent na nagchat, based sa timestamp
-                  //may padding
-                  //sliaable
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(40.0),
-                          topRight: Radius.circular(40.0),
-                        ),
-                      ),
-                      child: ListView.builder(
-                        padding: EdgeInsets.all(16.0),
-                        itemCount: dummyContacts.length,
-                        itemBuilder: (context, index) {
-                          return CustomUserCardWidget();
-                        },
-                      ),
+                            // Sort newest to oldest
+                            chatDataList.sort(
+                              (a, b) =>
+                                  b['timeStamp'].compareTo(a['timeStamp']),
+                            );
+
+                            return ListView.builder(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              itemCount: chatDataList.length,
+                              itemBuilder: (context, index) {
+                                final chatData = chatDataList[index];
+                                return CustomUserCardWidget(
+                                  lastMessage: chatData['lastMessage'],
+                                  timestamp: chatData['timeStamp'],
+                                  chatId: chatData['chatId'],
+                                  receiverData: chatData['userData'],
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
-  },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text('Error: $e')),
-    );
   }
 }
-  

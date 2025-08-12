@@ -57,3 +57,36 @@ User information (login screen and registration screen)
      - pede magamit yung username dito, sa may appbar
         -Text("Welcome, ${user?.username ?? 'Guest'}");
 
+
+
+
+CHAT screen
+- search feature
+-- kada type ng character ni user, dapat mag-appear yung names na available
+---pag pinindot ni user yung USER CARD sa search, dapat mag-open yung chat room
+----ngayon pag nag open yung chat room, may option si user na ichat, or walang gawin
+-----if chinat ni user, dapat mapunta yung USER CARD, sa home screen ni USER
+-----if hindi chinat, dapat walang mangyari, hindi ma-add sa home screen ni USER
+--dapat yung user card, naka sort based sa timestamp, kung sino yung latest na nag-chat/update
+
+
+
+   //------------------------CHAT LIST / OTHER CONTENT------------------------
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(40.0),
+                            topRight: Radius.circular(40.0),
+                          ),
+                        ),
+                        child: ListView.builder(
+                          padding: EdgeInsets.all(16.0),
+                          itemCount: dummyContacts.length,
+                          itemBuilder: (context, index) {
+                            return CustomUserCardWidget();
+                          },
+                        ),
+                      ),
+                    ),

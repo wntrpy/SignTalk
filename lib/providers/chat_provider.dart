@@ -1,0 +1,110 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+class ChatProvider with ChangeNotifier {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Stream<QuerySnapshot> getChats(String userId) {
+    return _firestore
+        .collection("chats")
+        .where('users', arrayContains: userId)
+        .snapshots();
+  }
+
+  //TODO: search din based on NAME, ndi lang by EMAIL
+  Stream<QuerySnapshot> searchUsers(String query) {
+    final lowercaseQuery = query.toLowerCase();
+    return _firestore
+        .collection("users")
+        .where('email_lowercase', isGreaterThanOrEqualTo: lowercaseQuery)
+        .where('email_lowercase', isLessThanOrEqualTo: '$lowercaseQuery\uf8ff')
+        .snapshots();
+  }
+
+  Future<void> sendMessage(
+    String chatId,
+    String message,
+    String receiverId,
+  ) async {
+    final currentUser = _auth.currentUser;
+
+    if (currentUser != null) {
+      await _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .add({
+            'senderId': currentUser.uid,
+            'receiverId': receiverId,
+            'messageBody': message,
+            'timestamp': FieldValue.serverTimestamp(),
+          });
+
+      await _firestore.collection('chats').doc(chatId).set({
+        'users': [currentUser.uid, receiverId],
+        'lastMessage': message,
+        'timestamp': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
+  }
+
+  Future<String?> getChatRoom(String receiverId) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser != null) {
+      final chatQuery = await _firestore
+          .collection('chats')
+          .where('users', arrayContains: currentUser.uid)
+          .get();
+
+      final chats = chatQuery.docs
+          .where((chat) => chat['users'].contains(receiverId))
+          .toList();
+
+      if (chats.isNotEmpty) {
+        return chats.first.id;
+      }
+    }
+    return null;
+  }
+
+  Future<String> createChatRoom(String receiverId) async {
+    final currentUser = _auth.currentUser;
+
+    if (currentUser != null) {
+      final chatRoom = await _firestore.collection('chats').add({
+        'users': [currentUser.uid, receiverId],
+        'lastMessage': '',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+      return chatRoom.id;
+    }
+    throw Exception('Current User is Null');
+  }
+
+  //typing status
+  Future<void> updateTypingStatus(
+    String chatId,
+    String userId,
+    bool isTyping,
+  ) async {
+    await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
+      'typing.$userId': isTyping,
+    });
+  }
+
+  //user active state
+  void setUserOnlineStatus(bool isOnline) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({
+            'isOnline': isOnline,
+            'lastSeen': FieldValue.serverTimestamp(),
+          });
+    }
+  }
+}

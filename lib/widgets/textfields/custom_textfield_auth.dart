@@ -7,14 +7,16 @@ class CustomTextfieldAuth extends StatelessWidget {
   final String? errorText;
   final void Function(String)? onChanged;
   final String? Function(String?)? validator;
+  final TextInputType keyboardType;
 
   const CustomTextfieldAuth({
     super.key,
     required this.labelText,
-    required this.controller, 
+    required this.controller,
     this.errorText,
     this.onChanged,
     this.validator,
+    this.keyboardType = TextInputType.text, // default value
   });
 
   @override
@@ -35,6 +37,8 @@ class CustomTextfieldAuth extends StatelessWidget {
           controller: controller,
           onChanged: onChanged,
           validator: validator,
+          keyboardType: keyboardType,
+
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,

@@ -6,7 +6,7 @@ bool isNetworkUrl(String? path) {
 }
 
 class CustomCirclePfpButton extends StatelessWidget {
-  final Color borderColor; // color for border
+  final Color? borderColor; // color for border
   final String? userImage; // path to user image
   final void Function()? onPressed;
 
@@ -16,7 +16,7 @@ class CustomCirclePfpButton extends StatelessWidget {
 
   const CustomCirclePfpButton({
     super.key,
-    required this.borderColor,
+    this.borderColor,
     required this.userImage,
     this.onPressed,
     this.width = 50.0,
@@ -25,8 +25,7 @@ class CustomCirclePfpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-      ImageProvider imageProvider;
+    ImageProvider imageProvider;
 
     if (userImage == null || userImage!.isEmpty) {
       imageProvider = AssetImage(AppConstants.default_user_pfp);
@@ -48,7 +47,7 @@ class CustomCirclePfpButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(100),
         ),
         child: CircleAvatar(
-         backgroundImage: imageProvider,
+          backgroundImage: imageProvider,
           backgroundColor: AppConstants.orange,
         ),
       ),

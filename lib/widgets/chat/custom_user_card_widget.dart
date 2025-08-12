@@ -1,103 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
+import 'package:signtalk/screens/chat_screens/chat_screen.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 
+//TODO: slidable, design sa figma
+
 class CustomUserCardWidget extends StatelessWidget {
-  const CustomUserCardWidget({super.key});
+  final String chatId;
+  final String lastMessage;
+  final DateTime timestamp;
+  final Map<String, dynamic> receiverData;
+
+  const CustomUserCardWidget({
+    super.key,
+    required this.lastMessage,
+    required this.timestamp,
+    required this.chatId,
+    required this.receiverData,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      //mute block delete options
-      endActionPane: ActionPane(
-        motion: StretchMotion(),
-        children: [
-          SlidableAction(
-            //mute
-            onPressed: (context) {},
-            icon: Icons.notifications,
-            backgroundColor: AppConstants.darkViolet,
-            borderRadius: BorderRadius.circular(12),
-          ),
-
-          //block
-          SlidableAction(
-            onPressed: (context) {},
-            icon: Icons.block,
-            backgroundColor: AppConstants.darkViolet,
-            borderRadius: BorderRadius.circular(12),
-          ),
-
-          //delete
-          SlidableAction(
-            onPressed: (context) {},
-            icon: Icons.delete,
-            backgroundColor: AppConstants.darkViolet,
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ],
-      ),
-
-      //TODO: dito content
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12), //  ripple effect pagpenendot
-        onTap: () {
-          //TODO: fix mo later = dapat mapunta lang sa chat screen
-          context.push('/chat_screen');
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            //--------------------------USER PFP---------------------------
-            CustomCirclePfpButton(
+    return lastMessage != ""
+        ? ListTile(
+            leading: CustomCirclePfpButton(
               borderColor: AppConstants.darkViolet,
-              userImage: null,
-            ), //TODO: palitan ng pic galing sa db, if none edi default pic
-            //--------------------------FULL NAME AND CHAT---------------------------
-            _fullNameAndChat(),
-
-            //--------------------------TIMESTAMP---------------------------
-            Text(
-              "12:11 AM",
-              style: TextStyle(
-                color: AppConstants.darkViolet,
-                fontSize: AppConstants.fontSizeSmall,
-              ),
+              userImage: AppConstants.default_user_pfp,
             ),
-          ],
-        ),
-      ),
-    );
+            title: Text(receiverData['name']),
+            subtitle: Text(lastMessage, maxLines: 2),
+            trailing: Text(
+              '${timestamp.hour} : ${timestamp.minute}',
+              style: TextStyle(fontSize: 12, color: Colors.grey),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    chatId: chatId,
+                    receiverId: receiverData['uid'],
+                  ),
+                ),
+              );
+            },
+          )
+        : Container();
   }
-}
-
-Widget _fullNameAndChat() {
-  return Padding(
-    padding: const EdgeInsets.only(top: 8.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        //--------------------------FULL NAME---------------------------
-        Text(
-          "Asa Enami",
-          style: TextStyle(
-            color: AppConstants.darkViolet,
-            fontWeight: FontWeight.bold,
-            fontSize: AppConstants.fontSizeLarge,
-          ),
-        ),
-
-        //--------------------------CHAT---------------------------
-        Text(
-          "Malaking ipikto sa bustun siltics",
-          style: TextStyle(
-            color: AppConstants.darkViolet,
-            fontSize: AppConstants.fontSizeMedium,
-          ),
-        ),
-      ],
-    ),
-  );
 }

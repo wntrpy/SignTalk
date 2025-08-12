@@ -21,10 +21,13 @@ final GoRouter router = GoRouter(
   initialLocation: '/splash_screen',
   routes: [
     goRouteWithSlide('/auth_wrapper', AuthenticationWrapper()),
-    
+
     // ---------------------- AUTHENTICATION ----------------------
     goRouteWithSlide('/login_screen', LoginScreen()),
-    goRouteWithSlide('/2FA_screen', TwoFactorScreen()), // Two-Factor Authentication Screen
+    goRouteWithSlide(
+      '/2FA_screen',
+      TwoFactorScreen(),
+    ), // Two-Factor Authentication Screen
     goRouteWithSlide('/registration_screen', RegistrationScreen()),
     goRouteWithSlide('/welcome_screen', WelcomeScreen()),
     goRouteWithSlide('/forget_password_screen', ForgetPasswordScreen()),
@@ -40,7 +43,7 @@ final GoRouter router = GoRouter(
     // ------------------------ CHATS ----------------------------
     goRouteWithSlide('/home_screen', HomeScreen()),
     goRouteWithSlide('/profile_screen', UserProfileScreen()),
-    goRouteWithSlide('/chat_screen', ChatScreen()),
+    // goRouteWithSlide('/chat_screen', ChatScreen(recipientId: '',, recipientName: '',, currentUserId: '',)),
     goRouteWithSlide('/receiver_profile_screen', ReceiverProfileScreen()),
 
     // ------------------------ SETTINGS ----------------------------
