@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/chat_provider.dart';
-import 'package:signtalk/screens/chat_screens/chat_screen.dart';
-import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
+import 'package:signtalk/widgets/chat/search_user_card_widget.dart';
 
 class UserSearchScreen extends StatefulWidget {
   const UserSearchScreen({super.key});
@@ -38,7 +37,6 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     setState(() {
       searchQuery = query;
     });
-    print('Searching for: $query');
   }
 
   @override
@@ -48,89 +46,138 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
     return Scaffold(
       body: Column(
         children: [
+          // HEADER
+          Container(
+            padding: const EdgeInsets.only(
+              top: 50,
+              left: 20,
+              right: 20,
+              bottom: 20,
+            ),
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppConstants.darkViolet, AppConstants.lightViolet],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(20),
+                bottomRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: AppConstants.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  "Search Users",
+                  style: TextStyle(
+                    color: AppConstants.white,
+                    fontSize: AppConstants.fontSizeLarge,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // SEARCH BAR
           Padding(
-            padding: EdgeInsets.all(10),
+            padding: const EdgeInsets.all(16.0),
             child: TextField(
               decoration: InputDecoration(
-                hintText: "Search Users....",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.grey[100],
+                hintText: "Search Users...",
+                prefixIcon: const Icon(
+                  Icons.search,
+                  color: AppConstants.lightViolet,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
               ),
               onChanged: handleSearch,
             ),
           ),
 
+          // RESULTS
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: searchQuery.isEmpty
-                  ? Stream.empty()
-                  : chatProvider.searchUsers(searchQuery),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
-                }
+            child: searchQuery.isEmpty
+                ? _buildEmptyState("Type to search for users")
+                : StreamBuilder<QuerySnapshot>(
+                    stream: chatProvider.searchUsers(searchQuery),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
 
-                final users = snapshot.data!.docs;
-                List<Widget> userWidgets = [];
+                      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                        return _buildEmptyState("No users found");
+                      }
 
-                for (var user in users) {
-                  final userData = user.data() as Map<String, dynamic>;
-                  print('user email from Firestore: ${userData['email']}');
+                      final users = snapshot.data!.docs;
 
-                  if (userData['uid'] != loggedInUser?.uid) {
-                    userWidgets.add(
-                      SearchUserTile(
-                        userId: userData['uid'],
-                        name: userData['name'],
-                        email: userData['email'],
-                      ),
-                    );
-                  }
-                }
+                      return ListView.builder(
+                        itemCount: users.length,
+                        itemBuilder: (context, index) {
+                          final userData =
+                              users[index].data() as Map<String, dynamic>;
 
-                return ListView(children: userWidgets);
-              },
-            ),
+                          if (userData['uid'] == loggedInUser?.uid) {
+                            return const SizedBox.shrink();
+                          }
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            elevation: 2,
+                            child: SearchUserCardWidget(
+                              userId: userData['uid'],
+                              name: userData['name'],
+                              email: userData['email'],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
     );
   }
-}
 
-class SearchUserTile extends StatelessWidget {
-  final String userId;
-  final String name;
-  final String email;
-  const SearchUserTile({
-    super.key,
-    required this.userId,
-    required this.name,
-    required this.email,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-    return ListTile(
-      leading: CustomCirclePfpButton(
-        borderColor: Colors.white,
-        userImage: AppConstants.default_user_pfp,
-      ),
-      title: Text(name),
-      subtitle: Text(email),
-      onTap: () async {
-        final chatId =
-            await chatProvider.getChatRoom(userId) ??
-            await chatProvider.createChatRoom(userId);
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                ChatScreen(chatId: chatId, receiverId: userId),
+  Widget _buildEmptyState(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            AppConstants.signtalk_logo,
+            height: 100,
+            color: Colors.grey[400],
           ),
-        );
-      },
+          const SizedBox(height: 20),
+          Text(
+            message,
+            style: const TextStyle(
+              fontSize: AppConstants.fontSizeMedium,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

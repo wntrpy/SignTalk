@@ -10,6 +10,7 @@ class AppConstants {
   static const Color red = Color(0xFFFF0000);
   static const Color white = Color.fromARGB(255, 255, 255, 255);
   static const Color black = Color.fromARGB(255, 0, 0, 0);
+  static const Color extraLightViolet = Color(0xFFBA71E3);
 
   // Font sizes
   static const double fontSizeExtraSmall = 9.0;

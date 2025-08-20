@@ -1,5 +1,11 @@
 front end
-- settings screen
-    - alert dialogs nalang
 - chat screen
+--typing indicator
+--sent/seen indicator
+--receipient profile screen
+--front end 
+
+-home screen
+--slidable functions
+
 - user receiver profile screen

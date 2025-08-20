@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signtalk/screens/chat_screens/chat_screen.dart';
-
+/*
 class UserCard extends ConsumerWidget {
   final Map<String, dynamic> user;
 
@@ -34,3 +34,4 @@ class UserCard extends ConsumerWidget {
     );
   }
 }
+*/

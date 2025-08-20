@@ -1,4 +1,3 @@
-// ChatScreen.dart (replace your existing file with this)
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -8,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
+import 'package:signtalk/widgets/chat/custom_message_bubble.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? chatId;
@@ -191,38 +191,84 @@ class _ChatScreenState extends State<ChatScreen> {
                   vertical: 8,
                   horizontal: 15,
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: textController,
-                        decoration: const InputDecoration(
-                          hintText: "Enter your message....",
-                          border: InputBorder.none,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 6,
+                  ),
+                  margin: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: textController,
+                          decoration: InputDecoration(
+                            hintText: "Type a message...",
+                            hintStyle: TextStyle(color: Colors.grey[500]),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        if (textController.text.isNotEmpty) {
-                          if (chatId == null || chatId!.isEmpty) {
-                            chatId = await chatProvider.createChatRoom(
-                              widget.receiverId,
-                            );
-                          }
-                          if (chatId != null) {
-                            chatProvider.sendMessage(
-                              chatId!,
-                              textController.text,
-                              widget.receiverId,
-                            );
-                            textController.clear();
-                          }
-                        }
-                      },
-                      icon: Icon(Icons.send, color: AppConstants.darkViolet),
-                    ),
-                  ],
+                      IconButton(
+                        onPressed: () {
+                          // TODO: camera action
+                        },
+                        icon: const Icon(
+                          Icons.camera_alt,
+                          color: AppConstants.lightViolet,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          // TODO: mic action
+                        },
+                        icon: const Icon(
+                          Icons.mic,
+                          color: AppConstants.lightViolet,
+                        ),
+                      ),
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: AppConstants.darkViolet,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: () async {
+                            if (textController.text.isNotEmpty) {
+                              if (chatId == null || chatId!.isEmpty) {
+                                chatId = await chatProvider.createChatRoom(
+                                  widget.receiverId,
+                                );
+                              }
+                              if (chatId != null) {
+                                chatProvider.sendMessage(
+                                  chatId!,
+                                  textController.text,
+                                  widget.receiverId,
+                                );
+                                textController.clear();
+                              }
+                            }
+                          },
+                          icon: const Icon(Icons.send, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -258,7 +304,7 @@ class MessageStream extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
 
         final messages = snapshot.data!.docs;
-        List<MessageBubble> messageWidgets = [];
+        List<CustomMessageBubble> messageWidgets = [];
         for (var message in messages) {
           final messageData = message.data() as Map<String, dynamic>;
           final messageText = messageData['messageBody'];
@@ -266,7 +312,7 @@ class MessageStream extends StatelessWidget {
           final timestamp = messageData['timestamp'];
 
           final currentUser = FirebaseAuth.instance.currentUser!.uid;
-          final messageWidget = MessageBubble(
+          final messageWidget = CustomMessageBubble(
             sender: messageSender,
             text: messageText,
             isMe: currentUser == messageSender,
@@ -278,91 +324,6 @@ class MessageStream extends StatelessWidget {
 
         return ListView(reverse: true, children: messageWidgets);
       },
-    );
-  }
-}
-
-class MessageBubble extends StatelessWidget {
-  final String sender;
-  final String text;
-  final bool isMe;
-  final dynamic timestamp;
-  final DateTime Function(dynamic) timestampToLocal;
-
-  const MessageBubble({
-    super.key,
-    required this.sender,
-    required this.text,
-    required this.isMe,
-    this.timestamp,
-    required this.timestampToLocal,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final DateTime messageTime = timestampToLocal(timestamp);
-    final formatted =
-        '${messageTime.hour % 12 == 0 ? 12 : messageTime.hour % 12}:${messageTime.minute.toString().padLeft(2, '0')} ${messageTime.hour >= 12 ? 'PM' : 'AM'}';
-
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        crossAxisAlignment: isMe
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: [
-          Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.75,
-            ),
-            decoration: BoxDecoration(
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  spreadRadius: 2,
-                ),
-              ],
-              borderRadius: isMe
-                  ? const BorderRadius.only(
-                      topLeft: Radius.circular(15),
-                      bottomLeft: Radius.circular(15),
-                      bottomRight: Radius.circular(15),
-                    )
-                  : const BorderRadius.only(
-                      topRight: Radius.circular(15),
-                      bottomLeft: Radius.circular(15),
-                      bottomRight: Radius.circular(15),
-                    ),
-              color: isMe ? AppConstants.darkViolet : Colors.white,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    text,
-                    style: TextStyle(
-                      color: isMe ? Colors.white : Colors.black54,
-                      fontSize: 15,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    formatted,
-                    style: TextStyle(
-                      color: isMe ? Colors.white : Colors.black54,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
