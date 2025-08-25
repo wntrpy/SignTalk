@@ -1,50 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/screens/chat_screens/chat_screen.dart';
-import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 
-//TODO: slidable, design sa figma
+// import your MessageStatus enum
+import 'package:signtalk/models/message_status.dart';
 
 class CustomUserCardWidget extends StatelessWidget {
-  final String chatId;
+  final String userId;
+  final String userName;
   final String lastMessage;
-  final DateTime timestamp;
-  final Map<String, dynamic> receiverData;
+  final String lastMessageSenderId;
+  final DateTime lastMessageTime;
+  final MessageStatus lastMessageStatus;
+  final String currentUserId;
+  final VoidCallback? onTap;
 
   const CustomUserCardWidget({
     super.key,
+    required this.userId,
+    required this.userName,
     required this.lastMessage,
-    required this.timestamp,
-    required this.chatId,
-    required this.receiverData,
+    required this.lastMessageSenderId,
+    required this.lastMessageTime,
+    required this.lastMessageStatus,
+    required this.currentUserId,
+    this.onTap,
   });
+
+  /// ✅ Fix: define buildStatusIcon here
+  Widget buildStatusIcon(MessageStatus status) {
+    switch (status) {
+      case MessageStatus.sent:
+        return const Icon(Icons.check, size: 16, color: Colors.grey);
+      case MessageStatus.delivered:
+        return const Icon(Icons.done_all, size: 16, color: Colors.grey);
+      case MessageStatus.read:
+        return const Icon(Icons.done_all, size: 16, color: Colors.blue);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return lastMessage != ""
-        ? ListTile(
-            leading: CustomCirclePfpButton(
-              borderColor: AppConstants.darkViolet,
-              userImage: AppConstants.default_user_pfp,
+    final isMe = lastMessageSenderId == currentUserId;
+
+    return ListTile(
+      onTap: onTap,
+      leading: CircleAvatar(child: Text(userName[0].toUpperCase())),
+      title: Text(userName),
+      subtitle: Row(
+        children: [
+          if (isMe) buildStatusIcon(lastMessageStatus),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              lastMessage,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            title: Text(receiverData['name']),
-            subtitle: Text(lastMessage, maxLines: 2),
-            trailing: Text(
-              '${timestamp.hour} : ${timestamp.minute}',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ChatScreen(
-                    chatId: chatId,
-                    receiverId: receiverData['uid'],
-                  ),
-                ),
-              );
-            },
-          )
-        : Container();
+          ),
+        ],
+      ),
+      trailing: Text(
+        "${lastMessageTime.hour}:${lastMessageTime.minute.toString().padLeft(2, '0')}",
+        style: const TextStyle(color: Colors.black54, fontSize: 12),
+      ),
+    );
   }
 }

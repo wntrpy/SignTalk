@@ -10,7 +10,6 @@ class CustomCirclePfpButton extends StatelessWidget {
   final String? userImage; // path to user image
   final void Function()? onPressed;
 
-  // ✅ New optional size parameters
   final double width;
   final double height;
 

@@ -1,9 +1,9 @@
 front end
 - chat screen
---typing indicator
 --sent/seen indicator
 --receipient profile screen
 --front end 
+--push notification - blaze account nalang
 
 -home screen
 --slidable functions

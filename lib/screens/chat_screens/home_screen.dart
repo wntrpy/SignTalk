@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
+import 'package:signtalk/models/message_status.dart';
 import 'package:signtalk/providers/chat_provider.dart';
+import 'package:signtalk/screens/chat_screens/chat_screen.dart';
 import 'package:signtalk/screens/chat_screens/user_search_screen.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/chat/custom_user_card_widget.dart';
@@ -40,14 +42,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /*
   Future<Map<String, dynamic>> _fetchChatData(String chatId) async {
+    //get the users, last message, and timestamp
     final chatDoc = await FirebaseFirestore.instance
         .collection('chats')
         .doc(chatId)
         .get();
     final chatData = chatDoc.data();
     final users = chatData!['users'] as List<dynamic>;
+
+    //get the receiver id
     final receiverId = users.firstWhere((id) => id != loggedInUser!.uid);
+
+    //get the receiver's user doc
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(receiverId)
@@ -56,6 +64,32 @@ class _HomeScreenState extends State<HomeScreen> {
     return {
       'chatId': chatId,
       'lastMessage': chatData['lastMessage'] ?? '',
+      'timeStamp': chatData['timestamp']?.toDate() ?? DateTime.now(),
+      'userData': userData,
+    };
+  }
+*/
+
+  Future<Map<String, dynamic>> _fetchChatData(String chatId) async {
+    final chatDoc = await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .get();
+    final chatData = chatDoc.data()!;
+    final users = chatData['users'] as List<dynamic>;
+
+    final receiverId = users.firstWhere((id) => id != loggedInUser!.uid);
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(receiverId)
+        .get();
+    final userData = userDoc.data()!;
+
+    return {
+      'chatId': chatId,
+      'lastMessage': chatData['lastMessage'] ?? '',
+      'lastMessageSenderId': chatData['lastMessageSenderId'] ?? '',
+      'lastMessageStatus': chatData['lastMessageStatus'] ?? 'sent',
       'timeStamp': chatData['timestamp']?.toDate() ?? DateTime.now(),
       'userData': userData,
     };
@@ -159,6 +193,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: CircularProgressIndicator(),
                           );
                         }
+
+                        //get the LIST of raw chat documents
+                        //id, users(array)m, last message, timestamp
                         final chatDocs = snapshot.data!.docs;
                         return FutureBuilder<List<Map<String, dynamic>>>(
                           future: Future.wait(
@@ -186,10 +223,29 @@ class _HomeScreenState extends State<HomeScreen> {
                               itemBuilder: (context, index) {
                                 final chatData = chatDataList[index];
                                 return CustomUserCardWidget(
+                                  userId: chatData['userData']['uid'],
+                                  userName:
+                                      chatData['userData']['name'] ?? 'Unknown',
                                   lastMessage: chatData['lastMessage'],
-                                  timestamp: chatData['timeStamp'],
-                                  chatId: chatData['chatId'],
-                                  receiverData: chatData['userData'],
+                                  lastMessageSenderId:
+                                      chatData['lastMessageSenderId'],
+                                  lastMessageTime: chatData['timeStamp'],
+                                  lastMessageStatus: messageStatusFromString(
+                                    chatData['lastMessageStatus'],
+                                  ),
+                                  currentUserId: loggedInUser!.uid,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatScreen(
+                                          chatId: chatData['chatId'],
+                                          receiverId:
+                                              chatData['userData']['uid'],
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 );
                               },
                             );

@@ -6,7 +6,6 @@ import 'package:signtalk/screens/auth_screens/forget_password_verification.dart'
 import 'package:signtalk/screens/auth_screens/login_screen.dart';
 import 'package:signtalk/screens/auth_screens/registration_screen.dart';
 import 'package:signtalk/screens/auth_screens/welcome_screen.dart';
-import 'package:signtalk/screens/chat_screens/chat_screen.dart';
 import 'package:signtalk/screens/chat_screens/home_screen.dart';
 import 'package:signtalk/screens/chat_screens/receiver_profile_screen.dart';
 import 'package:signtalk/screens/chat_screens/user_profile_screen.dart';

@@ -2,9 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
+import 'package:signtalk/models/message_status.dart';
 import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/chat/custom_message_bubble.dart';
@@ -22,6 +23,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  final TextEditingController textController = TextEditingController();
 
   User? loggedInUser;
   String? chatId;
@@ -31,6 +33,12 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     chatId = widget.chatId;
     getCurrentUser();
+  }
+
+  @override
+  void dispose() {
+    textController.dispose();
+    super.dispose();
   }
 
   void getCurrentUser() {
@@ -109,7 +117,6 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
-    final TextEditingController textController = TextEditingController();
 
     return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.collection('users').doc(widget.receiverId).snapshots(),
@@ -154,8 +161,12 @@ class _ChatScreenState extends State<ChatScreen> {
           appBar: AppBar(
             title: Row(
               children: [
-                const CustomCirclePfpButton(
+                CustomCirclePfpButton(
                   userImage: AppConstants.default_user_pfp,
+                  onPressed: () {
+                    context.push('/receiver_profile_screen');
+                    //args: receiver data snapshot
+                  },
                 ),
                 const SizedBox(width: 10),
                 Column(
@@ -290,6 +301,49 @@ class MessageStream extends StatelessWidget {
     required this.timestampToLocal,
   });
 
+  Future<void> _markIncomingAsRead(
+    String chatId,
+    List<QueryDocumentSnapshot> docs,
+  ) async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final fs = FirebaseFirestore.instance;
+
+    // collect updates
+    final batch = fs.batch();
+    bool shouldUpdateChatSummary = false;
+    Timestamp? latestTs;
+
+    for (final d in docs) {
+      final data = d.data() as Map<String, dynamic>;
+      final receiverId = data['receiverId'] as String?;
+      final status = (data['status'] as String?) ?? 'sent';
+
+      // only incoming to me, and not already read
+      if (receiverId == uid && status != 'read') {
+        batch.update(d.reference, {'status': 'read'});
+
+        // track newest incoming message so we can set chat summary to read
+        final ts = data['timestamp'];
+        if (ts is Timestamp) {
+          if (latestTs == null || ts.compareTo(latestTs) > 0) {
+            latestTs = ts;
+            shouldUpdateChatSummary = true;
+          }
+        }
+      }
+    }
+
+    if (shouldUpdateChatSummary) {
+      batch.set(fs.collection('chats').doc(chatId), {
+        'lastMessageStatus': 'read',
+      }, SetOptions(merge: true));
+    }
+
+    if (shouldUpdateChatSummary) {
+      await batch.commit();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
@@ -300,29 +354,41 @@ class MessageStream extends StatelessWidget {
           .orderBy('timestamp', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
+        if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
-
-        final messages = snapshot.data!.docs;
-        List<CustomMessageBubble> messageWidgets = [];
-        for (var message in messages) {
-          final messageData = message.data() as Map<String, dynamic>;
-          final messageText = messageData['messageBody'];
-          final messageSender = messageData['senderId'];
-          final timestamp = messageData['timestamp'];
-
-          final currentUser = FirebaseAuth.instance.currentUser!.uid;
-          final messageWidget = CustomMessageBubble(
-            sender: messageSender,
-            text: messageText,
-            isMe: currentUser == messageSender,
-            timestamp: timestamp,
-            timestampToLocal: timestampToLocal,
-          );
-          messageWidgets.add(messageWidget);
         }
 
-        return ListView(reverse: true, children: messageWidgets);
+        final docs = snapshot.data!.docs;
+
+        // 🔹 After building the list, mark incoming as READ
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _markIncomingAsRead(chatId, docs);
+        });
+
+        final currentUser = FirebaseAuth.instance.currentUser!.uid;
+        final bubbles = <CustomMessageBubble>[];
+
+        for (final message in docs) {
+          final data = message.data() as Map<String, dynamic>;
+          final text = data['messageBody'] as String? ?? '';
+          final senderId = data['senderId'] as String? ?? '';
+          final ts = data['timestamp'];
+          final statusStr = (data['status'] as String?) ?? 'sent';
+          final status = messageStatusFromString(statusStr);
+
+          bubbles.add(
+            CustomMessageBubble(
+              sender: senderId,
+              text: text,
+              isMe: currentUser == senderId,
+              timestamp: ts,
+              timestampToLocal: timestampToLocal,
+              status: status,
+            ),
+          );
+        }
+
+        return ListView(reverse: true, children: bubbles);
       },
     );
   }

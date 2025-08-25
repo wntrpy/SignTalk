@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:signtalk/app_constants.dart';
+import 'package:signtalk/models/message_status.dart'; // 👈 add this enum file
 
-/// Force app display timezone to Asia/Manila (UTC+8).
-/// If you later fix the device timezone, you can swap this to:
-///   const Duration kAppTzOffset = Duration(hours: 8); // keep for Manila
 const Duration kAppTzOffset = Duration(hours: 8);
 
 DateTime _toAppLocal(dynamic ts) {
@@ -14,7 +12,6 @@ DateTime _toAppLocal(dynamic ts) {
       return ts.toUtc().add(kAppTzOffset);
     }
     if (ts is int) {
-      // epoch ms
       return DateTime.fromMillisecondsSinceEpoch(
         ts,
         isUtc: true,
@@ -40,8 +37,10 @@ class CustomMessageBubble extends StatelessWidget {
   final String text;
   final bool isMe;
   final dynamic timestamp;
-  final DateTime Function(dynamic)
-  timestampToLocal; // kept for compatibility, unused now
+  final DateTime Function(dynamic) timestampToLocal;
+
+  /// 👇 new: status of this message
+  final MessageStatus status;
 
   const CustomMessageBubble({
     super.key,
@@ -50,7 +49,19 @@ class CustomMessageBubble extends StatelessWidget {
     required this.isMe,
     this.timestamp,
     required this.timestampToLocal,
+    required this.status, // 👈 required now
   });
+
+  Widget _buildStatusIcon(MessageStatus status) {
+    switch (status) {
+      case MessageStatus.sent:
+        return const Icon(Icons.check, size: 16, color: Colors.grey);
+      case MessageStatus.delivered:
+        return const Icon(Icons.done_all, size: 16, color: Colors.grey);
+      case MessageStatus.read:
+        return const Icon(Icons.done_all, size: 16, color: Colors.blue);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,14 +83,20 @@ class CustomMessageBubble extends StatelessWidget {
             children: [
               if (isMe)
                 Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: Text(
-                    formatted,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Row(
+                    children: [
+                      Text(
+                        formatted,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      _buildStatusIcon(status), // 👈 status icon next to time
+                    ],
                   ),
                 ),
               // MESSAGE BUBBLE
@@ -116,7 +133,7 @@ class CustomMessageBubble extends StatelessWidget {
               ),
               if (!isMe)
                 Padding(
-                  padding: const EdgeInsets.only(left: 20),
+                  padding: const EdgeInsets.only(left: 6),
                   child: Text(
                     formatted,
                     style: const TextStyle(

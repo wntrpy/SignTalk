@@ -1,32 +1,54 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const { setGlobalOptions } = require("firebase-functions");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const admin = require("firebase-admin");
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
+admin.initializeApp();
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
 setGlobalOptions({ maxInstances: 10 });
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+// Fire when a new message is created
+exports.sendChatNotification = onDocumentCreated(
+  "chats/{chatId}/messages/{messageId}",
+  async (event) => {
+    const message = event.data.data(); // message document
+    const receiverId = message.receiverId;
+    const senderId = message.senderId;
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+    // get sender info
+    const senderDoc = await admin
+      .firestore()
+      .collection("users")
+      .doc(senderId)
+      .get();
+    const senderName = senderDoc.exists ? senderDoc.data().name : "Someone";
+
+    // get receiver’s FCM token
+    const receiverDoc = await admin
+      .firestore()
+      .collection("users")
+      .doc(receiverId)
+      .get();
+    if (!receiverDoc.exists) return;
+    const fcmToken = receiverDoc.data().fcmToken;
+    if (!fcmToken) return;
+
+    const payload = {
+      notification: {
+        title: senderName,
+        body: message.messageBody,
+      },
+      data: {
+        chatId: event.params.chatId,
+        senderId: senderId,
+        receiverId: receiverId,
+      },
+    };
+
+    try {
+      await admin.messaging().sendToDevice(fcmToken, payload);
+      console.log("✅ Notification sent to", receiverId);
+    } catch (e) {
+      console.error("❌ Error sending notification:", e);
+    }
+  }
+);

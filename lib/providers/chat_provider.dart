@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:signtalk/models/message_status.dart';
 
 class ChatProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -31,6 +32,7 @@ class ChatProvider with ChangeNotifier {
     final currentUser = _auth.currentUser;
 
     if (currentUser != null) {
+      // Create message with initial status = sent
       await _firestore
           .collection('chats')
           .doc(chatId)
@@ -40,11 +42,15 @@ class ChatProvider with ChangeNotifier {
             'receiverId': receiverId,
             'messageBody': message,
             'timestamp': FieldValue.serverTimestamp(),
+            'status': 'sent', // sent status
           });
 
+      // Update chat summary (for the list view)
       await _firestore.collection('chats').doc(chatId).set({
         'users': [currentUser.uid, receiverId],
         'lastMessage': message,
+        'lastMessageSenderId': currentUser.uid, // for CustomUserCardWidget
+        'lastMessageStatus': 'sent', //  for CustomUserCardWidget
         'timestamp': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     }
@@ -106,5 +112,24 @@ class ChatProvider with ChangeNotifier {
             'lastSeen': FieldValue.serverTimestamp(),
           });
     }
+  }
+
+  //read, sent, delivered indicator
+  Future<void> updateMessageStatus(
+    String chatId,
+    String messageId,
+    MessageStatus newStatus,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .doc(messageId)
+        .update({'status': messageStatusToString(newStatus)});
+
+    // also update the lastMessageStatus in chats collection
+    await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
+      'lastMessageStatus': messageStatusToString(newStatus),
+    });
   }
 }
