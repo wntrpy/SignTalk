@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:signtalk/app_constants.dart';
-import 'package:signtalk/screens/chat_screens/chat_screen.dart';
-
-// import your MessageStatus enum
 import 'package:signtalk/models/message_status.dart';
 
 class CustomUserCardWidget extends StatelessWidget {
@@ -27,7 +23,6 @@ class CustomUserCardWidget extends StatelessWidget {
     this.onTap,
   });
 
-  /// ✅ Fix: define buildStatusIcon here
   Widget buildStatusIcon(MessageStatus status) {
     switch (status) {
       case MessageStatus.sent:

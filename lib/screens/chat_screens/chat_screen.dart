@@ -50,7 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // Convert Firestore Timestamp/DateTime/int/string into a correct local DateTime.
+  // convert Firestore Timestamp/DateTime/int/string into a correct local DateTime.
   DateTime timestampToLocal(dynamic ts) {
     try {
       if (ts is Timestamp) {
@@ -322,7 +322,8 @@ class MessageStream extends StatelessWidget {
       if (receiverId == uid && status != 'read') {
         batch.update(d.reference, {'status': 'read'});
 
-        // track newest incoming message so we can set chat summary to read
+        // track newest incoming message
+        //set chat to reasd
         final ts = data['timestamp'];
         if (ts is Timestamp) {
           if (latestTs == null || ts.compareTo(latestTs) > 0) {
@@ -360,7 +361,7 @@ class MessageStream extends StatelessWidget {
 
         final docs = snapshot.data!.docs;
 
-        // 🔹 After building the list, mark incoming as READ
+        // after building the list, mark incoming as READ
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _markIncomingAsRead(chatId, docs);
         });

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:signtalk/app_constants.dart';
-import 'package:signtalk/models/message_status.dart'; // 👈 add this enum file
+import 'package:signtalk/models/message_status.dart';
 
 const Duration kAppTzOffset = Duration(hours: 8);
 
@@ -39,7 +39,6 @@ class CustomMessageBubble extends StatelessWidget {
   final dynamic timestamp;
   final DateTime Function(dynamic) timestampToLocal;
 
-  /// 👇 new: status of this message
   final MessageStatus status;
 
   const CustomMessageBubble({
@@ -49,7 +48,7 @@ class CustomMessageBubble extends StatelessWidget {
     required this.isMe,
     this.timestamp,
     required this.timestampToLocal,
-    required this.status, // 👈 required now
+    required this.status,
   });
 
   Widget _buildStatusIcon(MessageStatus status) {
@@ -95,7 +94,7 @@ class CustomMessageBubble extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      _buildStatusIcon(status), // 👈 status icon next to time
+                      _buildStatusIcon(status), //status icon
                     ],
                   ),
                 ),

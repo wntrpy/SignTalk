@@ -1,6 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
+//TODO: continue - push notif
 class FirebaseApi {
   final _firebaseMessaging = FirebaseMessaging.instance;
 
@@ -16,15 +17,12 @@ class FirebaseApi {
     // TODO: Save this token to Firestore under the logged-in user’s document
   }
 
-  // Handle messages when the app is in foreground
+  // handle messages when the app is in foreground
   void handleMessage(RemoteMessage? message) {
     if (message == null) return;
-
-    // Example: Navigate to chat screen when notification tapped
-    // You can include receiverId in `message.data`
   }
 
-  // Listen for messages
+  // listen for messages
   void initListeners() {
     FirebaseMessaging.onMessage.listen((message) {
       print("Got foreground message: ${message.notification?.title}");
