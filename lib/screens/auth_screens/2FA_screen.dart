@@ -44,8 +44,10 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
         }
       } else {
         setState(() => _error = 'Missing credentials. Please try again.');
-      }
-    }
+      } 
+    } else {
+        setState(() => _error = 'Invalid verification code.');
+      } 
   }
 
   void _resendCode(AuthProvider authProvider) async {
@@ -122,8 +124,7 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
                 ),
               CustomTextButton(
                 buttonText: 'Resend Code',
-                onPressed: () =>
-                    _resendDisabled ? null : () => _resendCode(authProvider),
+                onPressed: _resendDisabled ? () {} : () => _resendCode(authProvider),
               ),
             ],
           ),

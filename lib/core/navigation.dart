@@ -23,21 +23,12 @@ final GoRouter router = GoRouter(
 
     // ---------------------- AUTHENTICATION ----------------------
     goRouteWithSlide('/login_screen', LoginScreen()),
-    goRouteWithSlide(
-      '/2FA_screen',
-      TwoFactorScreen(),
-    ), // Two-Factor Authentication Screen
+    goRouteWithSlide('/2FA_screen', TwoFactorScreen()),
     goRouteWithSlide('/registration_screen', RegistrationScreen()),
     goRouteWithSlide('/welcome_screen', WelcomeScreen()),
     goRouteWithSlide('/forget_password_screen', ForgetPasswordScreen()),
-    goRouteWithSlide(
-      '/forget_password_verification',
-      ForgetPasswordVerification(),
-    ),
-    goRouteWithSlide(
-      '/forget_password_new_password',
-      ForgetPasswordNewPassword(),
-    ),
+    goRouteWithSlide('/forget_password_verification', ForgetPasswordVerification()),
+    goRouteWithSlide('/forget_password_new_password',ForgetPasswordNewPassword()),
 
     // ------------------------ CHATS ----------------------------
     goRouteWithSlide('/home_screen', HomeScreen()),
@@ -47,10 +38,8 @@ final GoRouter router = GoRouter(
 
     // ------------------------ SETTINGS ----------------------------
     goRouteWithSlide('/settings_screen', SettingScreen()),
-    goRouteWithSlide(
-      '/settings_alphabet_chart_screen',
-      SettingsAlphabetChart(),
-    ),
+    goRouteWithSlide('/settings_alphabet_chart_screen', SettingsAlphabetChart()),
+
 
     // ------------------------ SPLASH (no transition) ----------
     GoRoute(

@@ -4,6 +4,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/dark_mode_provider.dart';
+import 'package:signtalk/screens/settings_screens/settings_feedback_screen.dart';
+
+
 
 // helper method for SVG icons
 Widget _settingsIcon(BuildContext context, String assetPath) {
@@ -42,7 +45,7 @@ List<Map<String, dynamic>> getSettingsOptions(
     {
       'text': 'Feedback',
       'icon': _settingsIcon(context, AppConstants.settings_feedback_icon),
-      'onTap': null,
+      'onTap': () => showFeedbackDialog(context),
     },
     {
       'text': 'Avatar Translation Speed',

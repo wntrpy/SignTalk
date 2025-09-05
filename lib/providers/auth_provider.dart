@@ -5,8 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart'
-    as http; // Importing http package for making HTTP requests
+import 'package:http/http.dart'as http; // Importing http package for making HTTP requests
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:signtalk/providers/presence_service.dart';
 
@@ -67,7 +66,7 @@ class AuthProvider with ChangeNotifier {
   Future<void> sendEmailDirectlyViaSendGrid(String email, String code) async {
     final String? sendGridApiKey =
         dotenv.env['SENDGRID_API_KEY']; //Shouldn't be hardcoded -- NOT SECURE
-    const String senderEmail = '<vistan_jamila@icloud.com>';
+    const String senderEmail = '<signtalk625@icloud.com>';
     if (sendGridApiKey == null) {
       throw Exception('SendGrid API key not found in environment variables');
     }

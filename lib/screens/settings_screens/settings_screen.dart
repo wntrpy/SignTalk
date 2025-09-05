@@ -13,7 +13,7 @@ class SettingScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-     final userAsync = ref.watch(userProvider);
+    final userAsync = ref.watch(userProvider);
     final settingsOptions = getSettingsOptions(context, ref);
     const spacer = SizedBox(height: 20);
     
