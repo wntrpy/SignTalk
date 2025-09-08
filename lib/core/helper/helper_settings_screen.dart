@@ -6,8 +6,6 @@ import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/dark_mode_provider.dart';
 import 'package:signtalk/screens/settings_screens/settings_feedback_screen.dart';
 
-
-
 // helper method for SVG icons
 Widget _settingsIcon(BuildContext context, String assetPath) {
   return SvgPicture.asset(
@@ -47,18 +45,14 @@ List<Map<String, dynamic>> getSettingsOptions(
       'icon': _settingsIcon(context, AppConstants.settings_feedback_icon),
       'onTap': () => showFeedbackDialog(context),
     },
-    {
-      'text': 'Avatar Translation Speed',
-      'icon': _settingsIcon(context, AppConstants.settings_avatar_speed),
-      'onTap': null,
-    },
+
     {
       'text': 'Blocked Lists',
       'icon': _settingsIcon(context, AppConstants.settings_blocked_list),
       'onTap': null,
     },
     {
-      'text': 'ASL and FSL Alphabet (Chart)',
+      'text': 'ASL Alphabet (Chart)',
       'icon': _settingsIcon(context, AppConstants.settings_alphabet_chart),
       'onTap': () => context.push('/settings_alphabet_chart_screen'),
     },

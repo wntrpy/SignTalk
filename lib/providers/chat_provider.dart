@@ -132,4 +132,24 @@ class ChatProvider with ChangeNotifier {
       'lastMessageStatus': messageStatusToString(newStatus),
     });
   }
+
+  //delete convo
+  Future<void> deleteConversation(String chatId) async {
+    final fs = FirebaseFirestore.instance;
+    final batch = fs.batch();
+
+    final messages = await fs
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .get();
+
+    for (var doc in messages.docs) {
+      batch.delete(doc.reference);
+    }
+
+    batch.delete(fs.collection('chats').doc(chatId));
+
+    await batch.commit();
+  }
 }
