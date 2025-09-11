@@ -1,11 +1,8 @@
 plugins {
     id("com.android.application")
-    id("kotlin-android") 
-    //id("com.google.gms.google-services") version "4.4.2" apply false
-    id("com.google.gms.google-services")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
-    
+    id("kotlin-android")
+    id("com.google.gms.google-services") // ✅ Needed for Firebase
+    id("dev.flutter.flutter-gradle-plugin") // Must come after android/kotlin
 }
 
 android {
@@ -16,6 +13,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -23,11 +21,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.signtalk"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
+        minSdk = 23 // ✅ required for Firebase Messaging
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -35,8 +30,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Replace with your real signing config
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -47,12 +41,21 @@ flutter {
 }
 
 dependencies {
-    //Firebase BoM (Bill of Materials)
+    // Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
 
-    //Firebase Auth
+    // Firebase Core (always needed)
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Firebase Auth
     implementation("com.google.firebase:firebase-auth")
 
-    //Google Play Services Auth
+    // Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-messaging")
+
+    // Google Play Services Auth
     implementation("com.google.android.gms:play-services-auth:21.3.0")
+
+    // Required for desugaring (coreLibraryDesugaringEnabled true)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

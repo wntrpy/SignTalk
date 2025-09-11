@@ -1,33 +1,33 @@
+// lib/core/firebase_api.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 
-//TODO: continue - push notif
 class FirebaseApi {
-  final _firebaseMessaging = FirebaseMessaging.instance;
+  static Future<void> saveFcmToken() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print('[FirebaseApi] no current user — skipping saveFcmToken');
+      return;
+    }
 
-  // Initialize FCM
-  Future<void> initNotifications() async {
-    // Request permission
-    await _firebaseMessaging.requestPermission();
+    final token = await FirebaseMessaging.instance.getToken();
+    print('[FirebaseApi] FCM token for ${user.uid}: $token');
 
-    // Get token
-    final fcmToken = await _firebaseMessaging.getToken();
-    print("FCM Token: $fcmToken");
+    if (token != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'fcmToken': token,
+        'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    }
 
-    // TODO: Save this token to Firestore under the logged-in user’s document
-  }
-
-  // handle messages when the app is in foreground
-  void handleMessage(RemoteMessage? message) {
-    if (message == null) return;
-  }
-
-  // listen for messages
-  void initListeners() {
-    FirebaseMessaging.onMessage.listen((message) {
-      print("Got foreground message: ${message.notification?.title}");
+    // Listen for token refresh and update Firestore
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+      print('[FirebaseApi] token refreshed for ${user.uid}: $newToken');
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'fcmToken': newToken,
+        'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
     });
-
-    FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
   }
 }

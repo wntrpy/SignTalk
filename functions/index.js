@@ -1,54 +1,85 @@
-const { setGlobalOptions } = require("firebase-functions");
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const admin = require("firebase-admin");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const functions = require("firebase-functions");
 
-admin.initializeApp();
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+  projectId: process.env.GCLOUD_PROJECT,
+});
 
-setGlobalOptions({ maxInstances: 10 });
-
-// Fire when a new message is created
 exports.sendChatNotification = onDocumentCreated(
   "chats/{chatId}/messages/{messageId}",
   async (event) => {
-    const message = event.data.data(); // message document
-    const receiverId = message.receiverId;
-    const senderId = message.senderId;
+    const snap = event.data;
+    if (!snap) return null;
 
-    // get sender info
+    const data = snap.data() || {};
+    const receiverId = data.receiverId;
+    const senderId = data.senderId;
+    const messageText = data.messageBody || "";
+
+    if (!receiverId || !senderId) return null;
+    console.log("Receiver:", receiverId, "Sender:", senderId);
+
+    // Get receiver’s FCM token
+    const userDoc = await admin
+      .firestore()
+      .collection("users")
+      .doc(receiverId)
+      .get();
+    if (!userDoc.exists) return null;
+
+    const userData = userDoc.data();
+    const token = userData?.fcmToken;
+    console.log("Token found:", token);
+
+    if (!token) {
+      console.log("No token for user", receiverId);
+      return null;
+    }
+
+    // Get sender’s name
     const senderDoc = await admin
       .firestore()
       .collection("users")
       .doc(senderId)
       .get();
-    const senderName = senderDoc.exists ? senderDoc.data().name : "Someone";
+    const senderName =
+      senderDoc.exists && senderDoc.data().name
+        ? senderDoc.data().name
+        : "Someone";
 
-    // get receiver’s FCM token
-    const receiverDoc = await admin
-      .firestore()
-      .collection("users")
-      .doc(receiverId)
-      .get();
-    if (!receiverDoc.exists) return;
-    const fcmToken = receiverDoc.data().fcmToken;
-    if (!fcmToken) return;
+    const notification = {
+      title: senderName,
+      body: messageText,
+    };
 
-    const payload = {
-      notification: {
-        title: senderName,
-        body: message.messageBody,
-      },
-      data: {
-        chatId: event.params.chatId,
-        senderId: senderId,
-        receiverId: receiverId,
-      },
+    const payloadData = {
+      chatId: event.params.chatId,
+      senderId,
+      receiverId,
+      click_action: "FLUTTER_NOTIFICATION_CLICK",
     };
 
     try {
-      await admin.messaging().sendToDevice(fcmToken, payload);
-      console.log("✅ Notification sent to", receiverId);
-    } catch (e) {
-      console.error("❌ Error sending notification:", e);
+      if (Array.isArray(token)) {
+        await admin.messaging().sendMulticast({
+          tokens: token,
+          notification,
+          data: payloadData,
+        });
+      } else {
+        await admin.messaging().send({
+          token,
+          notification,
+          data: payloadData,
+        });
+      }
+      console.log("Notification sent to:", receiverId);
+    } catch (err) {
+      console.error("Error sending notification:", err);
     }
+
+    return null;
   }
 );
