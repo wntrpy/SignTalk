@@ -158,10 +158,11 @@ class _ChatScreenState extends State<ChatScreen> {
               appBar: AppBar(
                 title: Row(
                   children: [
-                    CustomCirclePfpButton(
-                      userImage: AppConstants.default_user_pfp,
-                      onPressed: () {
-                        // inside ChatScreen when opening profile
+                    InkWell(
+                      child: CircleAvatar(
+                        child: Text(displayName[0].toUpperCase()),
+                      ),
+                      onTap: () {
                         context.push(
                           '/receiver_profile_screen',
                           extra: {

@@ -105,16 +105,27 @@ Widget _buildUserProfileHeader(
     ),
     child: Row(
       children: [
-        CustomCirclePfpButton(
+        /*  CustomCirclePfpButton(
           borderColor: Colors.white,
           userImage: receiverData['photoUrl'] ?? AppConstants.default_user_pfp,
           width: 120,
           height: 120,
+        ),*/
+        SizedBox(
+          width: 120,
+          height: 120,
+          child: CircleAvatar(
+            child: Text(
+              display[0].toUpperCase(),
+              style: TextStyle(fontSize: 48),
+            ),
+          ),
         ),
         const SizedBox(width: 20),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            //TODO: MAY PROBLEM SA FRONT END DITO SA TEXT, NAG-OOVERFLOW
             Text(
               display,
               style: const TextStyle(
