@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
@@ -6,33 +8,44 @@ import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/buttons/custom_icon_button.dart';
 import 'package:signtalk/widgets/chat/custom_receiver_profile_option.dart';
 
-class ReceiverProfileScreen extends StatefulWidget {
-  const ReceiverProfileScreen({super.key});
+class ReceiverProfileScreen extends StatelessWidget {
+  // required constructor fields
+  final Map<String, dynamic> receiverData;
+  final String chatId;
+  final String receiverId;
+  final String nickname;
 
-  @override
-  State<ReceiverProfileScreen> createState() => _ReceiverProfileScreenState();
-}
+  const ReceiverProfileScreen({
+    super.key,
+    required this.receiverData,
+    required this.chatId,
+    required this.receiverId,
+    required this.nickname,
+  });
 
-class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
   @override
   Widget build(BuildContext context) {
-    final finalReceiverProfileOptions = getReceiverProfileOptions(context);
+    final loggedInUserId = FirebaseAuth.instance.currentUser!.uid;
+
+    final finalReceiverProfileOptions = getReceiverProfileOptions(
+      context,
+      chatId: chatId,
+      loggedInUserId: loggedInUserId,
+      receiverId: receiverId,
+    );
 
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        if (!didPop) {
-          context.pop();
-        }
+        if (!didPop) context.pop();
       },
       child: Scaffold(
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // ------------------------APP BG----------------------------
             Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
-            // ------------------------BACK BUTTON----------------------------
+            // back button
             Padding(
               padding: const EdgeInsets.only(top: 24, left: 16),
               child: Align(
@@ -51,10 +64,10 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // ------------------------USER INFO----------------------------
-                  _buildUserProfileHeader(),
+                  // header uses nickname passed in constructor
+                  _buildUserProfileHeader(receiverData, nickname),
 
-                  // ------------------------OPTIONS----------------------------
+                  // options
                   ...finalReceiverProfileOptions.map(
                     (option) => Column(
                       children: [
@@ -62,6 +75,7 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
                           optionText: option['optionText'],
                           iconPath: option['iconPath'],
                           trailingWidget: option['trailingWidget'],
+                          onTap: option['onTap'],
                         ),
                       ],
                     ),
@@ -76,44 +90,92 @@ class _ReceiverProfileScreenState extends State<ReceiverProfileScreen> {
   }
 }
 
-//user info
-Widget _buildUserProfileHeader() {
+Widget _buildUserProfileHeader(
+  Map<String, dynamic> receiverData,
+  String nickname,
+) {
+  final display = (nickname.isNotEmpty)
+      ? nickname
+      : (receiverData['name'] as String?) ?? 'Unknown User';
+
   return Container(
-    padding: EdgeInsets.only(bottom: 15),
-    decoration: BoxDecoration(
+    padding: const EdgeInsets.only(bottom: 15),
+    decoration: const BoxDecoration(
       border: Border(bottom: BorderSide(color: Colors.white, width: 1.5)),
     ),
     child: Row(
       children: [
         CustomCirclePfpButton(
           borderColor: Colors.white,
-          userImage: null,
+          userImage: receiverData['photoUrl'] ?? AppConstants.default_user_pfp,
           width: 120,
           height: 120,
         ),
-        SizedBox(width: 20),
+        const SizedBox(width: 20),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Kim Chaewon",
-              style: TextStyle(
+              display,
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
                 fontSize: AppConstants.fontSizeExtraLarge,
-              ),
-            ),
-            Text(
-              "kimchaewon123",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-                fontSize: AppConstants.fontSizeMedium,
               ),
             ),
           ],
         ),
       ],
     ),
+  );
+}
+
+void showChangeNicknameDialog(
+  BuildContext context,
+  Map<String, dynamic> receiverData,
+) {
+  final TextEditingController controller = TextEditingController(
+    text: receiverData['nickname'] ?? receiverData['name'],
+  );
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text("Change Nickname"),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: "Enter nickname"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              final uid = FirebaseAuth.instance.currentUser!.uid;
+              final chatId = receiverData['chatId'];
+              final receiverId = receiverData['uid'];
+              final newNickname = controller.text.trim();
+
+              if (chatId != null && newNickname.isNotEmpty) {
+                await FirebaseFirestore.instance
+                    .collection('chats')
+                    .doc(chatId)
+                    .set({
+                      'nicknames': {
+                        uid: {receiverId: newNickname},
+                      },
+                    }, SetOptions(merge: true));
+              }
+
+              Navigator.pop(context);
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      );
+    },
   );
 }

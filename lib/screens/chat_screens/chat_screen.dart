@@ -5,10 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
-import 'package:signtalk/models/message_status.dart';
 import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
-import 'package:signtalk/widgets/chat/custom_message_bubble.dart';
+import 'package:signtalk/widgets/chat/custom_message_stream.dart';
 
 class ChatScreen extends StatefulWidget {
   final String? chatId;
@@ -50,36 +49,16 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // convert Firestore Timestamp/DateTime/int/string into a correct local DateTime.
   DateTime timestampToLocal(dynamic ts) {
     try {
       if (ts is Timestamp) {
-        // exact epoch ms using seconds + nanoseconds
         final int epochMs = ts.seconds * 1000 + (ts.nanoseconds ~/ 1000000);
         final DateTime dtUtc = DateTime.fromMillisecondsSinceEpoch(
           epochMs,
           isUtc: true,
         );
-
-        // apply device timezone offset explicitly (safer than relying only on toLocal())
         final Duration tzOffset = DateTime.now().timeZoneOffset;
-        final DateTime dtLocal = dtUtc.add(tzOffset);
-
-        if (kDebugMode) {
-          print('--- timestampToLocal debug ---');
-          print('raw Timestamp: $ts');
-          print(
-            'seconds: ${ts.seconds}, nanoseconds: ${ts.nanoseconds}, epochMs: $epochMs',
-          );
-          print('dtUtc: $dtUtc');
-          print('tzOffset: $tzOffset');
-          print('dtLocal (after add offset): $dtLocal');
-          print(
-            'Device now: ${DateTime.now()} tzName: ${DateTime.now().timeZoneName} offset: ${DateTime.now().timeZoneOffset}',
-          );
-        }
-
-        return dtLocal;
+        return dtUtc.add(tzOffset);
       } else if (ts is DateTime) {
         return ts.toLocal();
       } else if (ts is int) {
@@ -106,9 +85,9 @@ class _ChatScreenState extends State<ChatScreen> {
     if (diff.inMinutes < 1) {
       return 'Last seen just now';
     } else if (diff.inMinutes < 60) {
-      return 'Last seen ${diff.inMinutes} minute${diff.inMinutes > 1 ? 's' : ''} ago';
+      return 'Last seen ${diff.inMinutes} min ago';
     } else if (diff.inHours < 24) {
-      return 'Last seen ${diff.inHours} hour${diff.inHours > 1 ? 's' : ''} ago';
+      return 'Last seen ${diff.inHours} hr ago';
     } else {
       return 'Last seen ${diff.inDays} day${diff.inDays > 1 ? 's' : ''} ago';
     }
@@ -118,33 +97,23 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
 
+    if (chatId == null) {
+      return const Scaffold(body: Center(child: Text("No chat available")));
+    }
+
+    // Combine both user and chat data
     return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.collection('users').doc(widget.receiverId).snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            appBar: AppBar(),
-            body: const Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return Scaffold(
-            appBar: AppBar(),
-            body: Center(child: Text('Error: ${snapshot.error}')),
-          );
-        }
-
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Scaffold(
-            appBar: AppBar(),
-            body: const Center(child: Text('User not found')),
+      builder: (context, userSnapshot) {
+        if (!userSnapshot.hasData) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
         final receiverData =
-            snapshot.data!.data() as Map<String, dynamic>? ?? {};
-        final name = receiverData['name'] ?? 'User';
+            userSnapshot.data!.data() as Map<String, dynamic>? ?? {};
+        final realName = receiverData['name'] ?? 'User';
         final bool isOnline = receiverData['isOnline'] ?? false;
         final dynamic lastSeenTs = receiverData['lastSeen'];
 
@@ -157,239 +126,175 @@ class _ChatScreenState extends State<ChatScreen> {
           statusText = 'Offline';
         }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Row(
-              children: [
-                CustomCirclePfpButton(
-                  userImage: AppConstants.default_user_pfp,
-                  onPressed: () {
-                    context.push('/receiver_profile_screen');
-                    //args: receiver data snapshot
-                  },
-                ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        return StreamBuilder<DocumentSnapshot>(
+          stream: _firestore.collection('chats').doc(chatId).snapshots(),
+          builder: (context, chatSnapshot) {
+            if (!chatSnapshot.hasData) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            final chatData =
+                chatSnapshot.data!.data() as Map<String, dynamic>? ?? {};
+            String displayName = realName;
+
+            // check for nickname
+            if (chatData['nicknames'] != null && loggedInUser != null) {
+              final nickMap = Map<String, dynamic>.from(
+                chatData['nicknames'] ?? {},
+              );
+              if (nickMap.containsKey(loggedInUser!.uid)) {
+                final userNicknames = Map<String, dynamic>.from(
+                  nickMap[loggedInUser!.uid],
+                );
+                if (userNicknames.containsKey(widget.receiverId)) {
+                  displayName = userNicknames[widget.receiverId];
+                }
+              }
+            }
+
+            return Scaffold(
+              appBar: AppBar(
+                title: Row(
                   children: [
-                    Text(name, style: const TextStyle(color: Colors.white)),
-                    Text(
-                      statusText,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                      ),
+                    CustomCirclePfpButton(
+                      userImage: AppConstants.default_user_pfp,
+                      onPressed: () {
+                        // inside ChatScreen when opening profile
+                        context.push(
+                          '/receiver_profile_screen',
+                          extra: {
+                            'receiverData': receiverData, // Map<String,dynamic>
+                            'chatId': chatId, // String (chat doc id)
+                            'receiverId': widget.receiverId, // String
+                            'nickname':
+                                displayName, // String (may be real name if no nickname)
+                          },
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          displayName,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        Text(
+                          statusText,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-            backgroundColor: AppConstants.darkViolet,
-          ),
-          body: Column(
-            children: [
-              Expanded(
-                child: chatId != null && chatId!.isNotEmpty
-                    ? MessageStream(
-                        chatId: chatId!,
-                        timestampToLocal: timestampToLocal,
-                      )
-                    : const Center(child: Text("No Message Yet")),
+                backgroundColor: AppConstants.darkViolet,
               ),
-              Container(
-                color: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 15,
-                ),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
+              body: Column(
+                children: [
+                  Expanded(
+                    child: CustomMessageStream(
+                      chatId: chatId!,
+                      timestampToLocal: timestampToLocal,
+                    ),
                   ),
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
+                  Container(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 4,
-                        offset: Offset(0, 2),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 15,
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
                       ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: textController,
-                          decoration: InputDecoration(
-                            hintText: "Type a message...",
-                            hintStyle: TextStyle(color: Colors.grey[500]),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: textController,
+                              decoration: InputDecoration(
+                                hintText: "Type a message...",
+                                hintStyle: TextStyle(color: Colors.grey[500]),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          IconButton(
+                            onPressed: () {
+                              // TODO: camera action
+                            },
+                            icon: const Icon(
+                              Icons.camera_alt,
+                              color: AppConstants.lightViolet,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // TODO: mic action
+                            },
+                            icon: const Icon(
+                              Icons.mic,
+                              color: AppConstants.lightViolet,
+                            ),
+                          ),
+                          Container(
+                            decoration: const BoxDecoration(
+                              color: AppConstants.darkViolet,
+                              shape: BoxShape.circle,
+                            ),
+                            child: IconButton(
+                              onPressed: () async {
+                                if (textController.text.isNotEmpty) {
+                                  if (chatId == null || chatId!.isEmpty) {
+                                    chatId = await chatProvider.createChatRoom(
+                                      widget.receiverId,
+                                    );
+                                  }
+                                  if (chatId != null) {
+                                    chatProvider.sendMessage(
+                                      chatId!,
+                                      textController.text,
+                                      widget.receiverId,
+                                    );
+                                    textController.clear();
+                                  }
+                                }
+                              },
+                              icon: const Icon(Icons.send, color: Colors.white),
+                            ),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        onPressed: () {
-                          // TODO: camera action
-                        },
-                        icon: const Icon(
-                          Icons.camera_alt,
-                          color: AppConstants.lightViolet,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          // TODO: mic action
-                        },
-                        icon: const Icon(
-                          Icons.mic,
-                          color: AppConstants.lightViolet,
-                        ),
-                      ),
-                      Container(
-                        decoration: const BoxDecoration(
-                          color: AppConstants.darkViolet,
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          onPressed: () async {
-                            if (textController.text.isNotEmpty) {
-                              if (chatId == null || chatId!.isEmpty) {
-                                chatId = await chatProvider.createChatRoom(
-                                  widget.receiverId,
-                                );
-                              }
-                              if (chatId != null) {
-                                chatProvider.sendMessage(
-                                  chatId!,
-                                  textController.text,
-                                  widget.receiverId,
-                                );
-                                textController.clear();
-                              }
-                            }
-                          },
-                          icon: const Icon(Icons.send, color: Colors.white),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-          backgroundColor: Colors.white,
+              backgroundColor: Colors.white,
+            );
+          },
         );
-      },
-    );
-  }
-}
-
-class MessageStream extends StatelessWidget {
-  final String chatId;
-  final DateTime Function(dynamic) timestampToLocal;
-
-  const MessageStream({
-    super.key,
-    required this.chatId,
-    required this.timestampToLocal,
-  });
-
-  Future<void> _markIncomingAsRead(
-    String chatId,
-    List<QueryDocumentSnapshot> docs,
-  ) async {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
-    final fs = FirebaseFirestore.instance;
-
-    // collect updates
-    final batch = fs.batch();
-    bool shouldUpdateChatSummary = false;
-    Timestamp? latestTs;
-
-    for (final d in docs) {
-      final data = d.data() as Map<String, dynamic>;
-      final receiverId = data['receiverId'] as String?;
-      final status = (data['status'] as String?) ?? 'sent';
-
-      // only incoming to me, and not already read
-      if (receiverId == uid && status != 'read') {
-        batch.update(d.reference, {'status': 'read'});
-
-        // track newest incoming message
-        //set chat to reasd
-        final ts = data['timestamp'];
-        if (ts is Timestamp) {
-          if (latestTs == null || ts.compareTo(latestTs) > 0) {
-            latestTs = ts;
-            shouldUpdateChatSummary = true;
-          }
-        }
-      }
-    }
-
-    if (shouldUpdateChatSummary) {
-      batch.set(fs.collection('chats').doc(chatId), {
-        'lastMessageStatus': 'read',
-      }, SetOptions(merge: true));
-    }
-
-    if (shouldUpdateChatSummary) {
-      await batch.commit();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('chats')
-          .doc(chatId)
-          .collection('messages')
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final docs = snapshot.data!.docs;
-
-        // after building the list, mark incoming as READ
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _markIncomingAsRead(chatId, docs);
-        });
-
-        final currentUser = FirebaseAuth.instance.currentUser!.uid;
-        final bubbles = <CustomMessageBubble>[];
-
-        for (final message in docs) {
-          final data = message.data() as Map<String, dynamic>;
-          final text = data['messageBody'] as String? ?? '';
-          final senderId = data['senderId'] as String? ?? '';
-          final ts = data['timestamp'];
-          final statusStr = (data['status'] as String?) ?? 'sent';
-          final status = messageStatusFromString(statusStr);
-
-          bubbles.add(
-            CustomMessageBubble(
-              sender: senderId,
-              text: text,
-              isMe: currentUser == senderId,
-              timestamp: ts,
-              timestampToLocal: timestampToLocal,
-              status: status,
-            ),
-          );
-        }
-
-        return ListView(reverse: true, children: bubbles);
       },
     );
   }

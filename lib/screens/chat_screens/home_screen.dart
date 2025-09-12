@@ -13,7 +13,6 @@ import 'package:signtalk/widgets/chat/custom_user_card_widget.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/firstname_greeting.dart';
 
-//TODO: dapat naka sort yung user card widget based sa timestamp
 //TODO: walang email_lowercase kapag mag reregister
 
 class HomeScreen extends StatefulWidget {
@@ -85,6 +84,18 @@ class _HomeScreenState extends State<HomeScreen> {
         .get();
     final userData = userDoc.data()!;
 
+    // --- check nickname ---
+    String? nickname;
+    if (chatData['nicknames'] != null) {
+      final nickMap = Map<String, dynamic>.from(chatData['nicknames']);
+      if (nickMap.containsKey(loggedInUser?.uid)) {
+        final userNicknames = Map<String, dynamic>.from(
+          nickMap[loggedInUser?.uid],
+        );
+        nickname = userNicknames[receiverId];
+      }
+    }
+
     return {
       'chatId': chatId,
       'lastMessage': chatData['lastMessage'] ?? '',
@@ -92,6 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'lastMessageStatus': chatData['lastMessageStatus'] ?? 'sent',
       'timeStamp': chatData['timestamp']?.toDate() ?? DateTime.now(),
       'userData': userData,
+      'nickname': nickname,
     };
   }
 
@@ -226,6 +238,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   userId: chatData['userData']['uid'],
                                   userName:
                                       chatData['userData']['name'] ?? 'Unknown',
+                                  nickname:
+                                      chatData['nickname'], // <<--- ADD THIS
                                   lastMessage: chatData['lastMessage'],
                                   lastMessageSenderId:
                                       chatData['lastMessageSenderId'],

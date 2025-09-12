@@ -3,7 +3,8 @@ import 'package:signtalk/models/message_status.dart';
 
 class CustomUserCardWidget extends StatelessWidget {
   final String userId;
-  final String userName;
+  final String userName; // real display name
+  final String? nickname; // optional nickname
   final String lastMessage;
   final String lastMessageSenderId;
   final DateTime lastMessageTime;
@@ -15,6 +16,7 @@ class CustomUserCardWidget extends StatelessWidget {
     super.key,
     required this.userId,
     required this.userName,
+    this.nickname,
     required this.lastMessage,
     required this.lastMessageSenderId,
     required this.lastMessageTime,
@@ -37,11 +39,12 @@ class CustomUserCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMe = lastMessageSenderId == currentUserId;
+    final displayName = nickname?.isNotEmpty == true ? nickname! : userName;
 
     return ListTile(
       onTap: onTap,
-      leading: CircleAvatar(child: Text(userName[0].toUpperCase())),
-      title: Text(userName),
+      leading: CircleAvatar(child: Text(displayName[0].toUpperCase())),
+      title: Text(displayName),
       subtitle: Row(
         children: [
           if (isMe) buildStatusIcon(lastMessageStatus),

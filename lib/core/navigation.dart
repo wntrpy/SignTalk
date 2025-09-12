@@ -45,7 +45,27 @@ final GoRouter router = GoRouter(
     // ------------------------ CHATS ----------------------------
     goRouteWithSlide('/home_screen', HomeScreen()),
     goRouteWithSlide('/profile_screen', UserProfileScreen()),
-    goRouteWithSlide('/receiver_profile_screen', ReceiverProfileScreen()),
+
+    GoRoute(
+      path: '/receiver_profile_screen',
+      builder: (context, state) {
+        final args = state.extra as Map<String, dynamic>? ?? {};
+
+        final receiverData =
+            args['receiverData'] as Map<String, dynamic>? ?? {};
+        final chatId = args['chatId'] as String? ?? '';
+        final receiverId = args['receiverId'] as String? ?? '';
+        final nickname = (args['nickname'] ?? receiverData['name'] ?? '')
+            .toString();
+
+        return ReceiverProfileScreen(
+          receiverData: receiverData,
+          chatId: chatId,
+          receiverId: receiverId,
+          nickname: nickname,
+        );
+      },
+    ),
 
     // ------------------------ SETTINGS ----------------------------
     goRouteWithSlide('/settings_screen', SettingScreen()),
