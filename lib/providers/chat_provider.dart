@@ -14,7 +14,6 @@ class ChatProvider with ChangeNotifier {
         .snapshots();
   }
 
-  //TODO: search din based on NAME, ndi lang by EMAIL
   Stream<QuerySnapshot> searchUsers(String query) {
     final lowercaseQuery = query.toLowerCase();
     return _firestore
