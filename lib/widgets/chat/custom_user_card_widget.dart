@@ -1,5 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:signtalk/models/message_status.dart';
+
+// 🔹 Same offset logic as your CustomMessageBubble
+const Duration kAppTzOffset = Duration(hours: 8);
+
+DateTime _toAppLocal(dynamic ts) {
+  if (ts == null) return DateTime.now().toUtc().add(kAppTzOffset);
+  try {
+    if (ts is DateTime) {
+      return ts.toUtc().add(kAppTzOffset);
+    }
+    if (ts is int) {
+      return DateTime.fromMillisecondsSinceEpoch(
+        ts,
+        isUtc: true,
+      ).add(kAppTzOffset);
+    }
+    // Firestore Timestamp
+    final seconds = ts.seconds as int;
+    final nanos = ts.nanoseconds as int;
+    final epochMs = seconds * 1000 + (nanos ~/ 1000000);
+    return DateTime.fromMillisecondsSinceEpoch(
+      epochMs,
+      isUtc: true,
+    ).add(kAppTzOffset);
+  } catch (_) {
+    return DateTime.now().toUtc().add(kAppTzOffset);
+  }
+}
+
+String _formatTimeHM(DateTime dt) => DateFormat('h:mm a').format(dt);
 
 class CustomUserCardWidget extends StatelessWidget {
   final String userId;
@@ -41,6 +72,10 @@ class CustomUserCardWidget extends StatelessWidget {
     final isMe = lastMessageSenderId == currentUserId;
     final displayName = nickname?.isNotEmpty == true ? nickname! : userName;
 
+    // 🔹 Convert and format like in your bubble
+    final localTime = _toAppLocal(lastMessageTime);
+    final formattedTime = _formatTimeHM(localTime);
+
     return ListTile(
       onTap: onTap,
       leading: CircleAvatar(child: Text(displayName[0].toUpperCase())),
@@ -59,7 +94,7 @@ class CustomUserCardWidget extends StatelessWidget {
         ],
       ),
       trailing: Text(
-        "${lastMessageTime.hour}:${lastMessageTime.minute.toString().padLeft(2, '0')}",
+        formattedTime,
         style: const TextStyle(color: Colors.black54, fontSize: 12),
       ),
     );

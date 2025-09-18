@@ -102,7 +102,10 @@ class _HomeScreenState extends State<HomeScreen> {
       'lastMessage': chatData['lastMessage'] ?? '',
       'lastMessageSenderId': chatData['lastMessageSenderId'] ?? '',
       'lastMessageStatus': chatData['lastMessageStatus'] ?? 'sent',
-      'timeStamp': chatData['timestamp']?.toDate() ?? DateTime.now(),
+      'timeStamp': chatData['timestamp'] != null
+          ? (chatData['timestamp'] as Timestamp).toDate().toLocal()
+          : DateTime.now(),
+
       'userData': userData,
       'nickname': nickname,
     };
