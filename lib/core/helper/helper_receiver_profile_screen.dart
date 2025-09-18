@@ -18,7 +18,6 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
         final newName = await showDialog<String>(
           context: context,
           builder: (context) {
-            print("TEST NICKNAME");
             String temp = '';
             return AlertDialog(
               title: const Text("Change Nickname"),
@@ -27,10 +26,40 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
                 decoration: const InputDecoration(hintText: "Enter nickname"),
               ),
               actions: [
+                // cancel
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text("Cancel"),
                 ),
+                // reset to original name from users collection
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      final userDoc = await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(receiverId)
+                          .get();
+                      final originalName =
+                          userDoc.data()?['name'] ?? 'Unknown User';
+
+                      // update nickname in chats doc
+                      await FirebaseFirestore.instance
+                          .collection('chats')
+                          .doc(chatId)
+                          .set({
+                            'nicknames': {
+                              loggedInUserId: {receiverId: originalName},
+                            },
+                          }, SetOptions(merge: true));
+
+                      Navigator.pop(context, originalName);
+                    } catch (e) {
+                      Navigator.pop(context); // close if may unexpected error
+                    }
+                  },
+                  child: const Text("Reset"),
+                ),
+                // save new nickname
                 TextButton(
                   onPressed: () => Navigator.pop(context, temp),
                   child: const Text("Save"),
@@ -41,7 +70,7 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
         );
 
         if (newName != null && newName.trim().isNotEmpty) {
-          // update Firestore nicknames
+          // update Firestore nicknames (if not reset already handled above)
           await FirebaseFirestore.instance.collection('chats').doc(chatId).set({
             'nicknames': {
               loggedInUserId: {receiverId: newName},

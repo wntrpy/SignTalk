@@ -290,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             backgroundColor: Colors.orange,
                                             foregroundColor: Colors.white,
 
-                                            // 🔔 dynamic icon + label
+                                            // dyanmic icon and label based sa isMuted
                                             icon: isMuted
                                                 ? Icons.notifications_off
                                                 : Icons.notifications,
