@@ -19,8 +19,8 @@ class ChatProvider with ChangeNotifier {
     final lowercaseQuery = query.toLowerCase();
     return _firestore
         .collection("users")
-        .where('email_lowercase', isGreaterThanOrEqualTo: lowercaseQuery)
-        .where('email_lowercase', isLessThanOrEqualTo: '$lowercaseQuery\uf8ff')
+        .where('name_lowercase', isGreaterThanOrEqualTo: lowercaseQuery)
+        .where('name_lowercase', isLessThanOrEqualTo: '$lowercaseQuery\uf8ff')
         .snapshots();
   }
 

@@ -5,7 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart'as http; // Importing http package for making HTTP requests
+import 'package:http/http.dart'
+    as http; // Importing http package for making HTTP requests
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:signtalk/providers/presence_service.dart';
 
@@ -49,13 +50,17 @@ class AuthProvider with ChangeNotifier {
     try {
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
+
       await _firestore.collection('users').doc(userCredential.user?.uid).set({
         'uid': userCredential.user?.uid,
         'name': name,
+        'name_lowercase': name.toLowerCase(), // need to for search feature
         'age': age,
         'userType': userTypes,
         'email': email,
+        'email_lowercase': email.toLowerCase(),
       });
+
       notifyListeners();
     } catch (e) {
       rethrow; // Handle error appropriately

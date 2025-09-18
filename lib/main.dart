@@ -1,4 +1,5 @@
 // lib/main.dart
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
@@ -47,6 +48,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = ref.watch(darkModeProvider);
+    migrateUsers();
 
     return MaterialApp.router(
       routerConfig: router,
@@ -60,4 +62,24 @@ class MyApp extends ConsumerWidget {
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
     );
   }
+}
+
+Future<void> migrateUsers() async {
+  final firestore = FirebaseFirestore.instance;
+  final usersSnapshot = await firestore.collection('users').get();
+
+  for (var doc in usersSnapshot.docs) {
+    final data = doc.data();
+    final name = data['name'];
+
+    if (name != null) {
+      await doc.reference.update({
+        'name_lowercase': name.toString().toLowerCase(),
+      });
+      debugPrint(
+        "Updated ${doc.id}: $name -> ${name.toString().toLowerCase()}",
+      );
+    }
+  }
+  debugPrint("Migration completed!");
 }
