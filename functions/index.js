@@ -21,6 +21,21 @@ exports.sendChatNotification = onDocumentCreated(
     if (!receiverId || !senderId) return null;
     console.log("Receiver:", receiverId, "Sender:", senderId);
 
+    // ✅ Check mute status in the chat doc
+    const chatDoc = await admin
+      .firestore()
+      .collection("chats")
+      .doc(event.params.chatId)
+      .get();
+
+    const chatData = chatDoc.data();
+    if (chatData?.mute && chatData.mute[receiverId] === true) {
+      console.log(
+        `User ${receiverId} has muted this chat. Skipping notification.`
+      );
+      return null;
+    }
+
     // Get receiver’s FCM token
     const userDoc = await admin
       .firestore()

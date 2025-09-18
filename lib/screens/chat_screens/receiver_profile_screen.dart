@@ -73,7 +73,8 @@ class ReceiverProfileScreen extends StatelessWidget {
                       children: [
                         CustomReceiverProfileOption(
                           optionText: option['optionText'],
-                          iconPath: option['iconPath'],
+                          iconPath: option['iconPath'] ?? '',
+                          fallbackIcon: option['fallbackIcon'],
                           trailingWidget: option['trailingWidget'],
                           onTap: option['onTap'],
                         ),

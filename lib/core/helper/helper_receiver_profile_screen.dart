@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:signtalk/app_constants.dart';
-import 'package:signtalk/screens/chat_screens/receiver_profile_screen.dart';
+import 'package:signtalk/widgets/chat/custom_receiver_profile_option.dart';
 
 bool isToggled = false; //TODO: fix
 
@@ -72,10 +72,60 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
       ),
     },
     {
-      'optionText': 'Notification',
-      'iconPath': AppConstants.receiver_notification_icon,
-      'onTap': () => print("Notifications tapped"),
+      'optionText': 'Mute Notification',
+      'iconPath': '',
+      'fallbackIcon': (context) {
+        return StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('chats')
+              .doc(chatId)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Icon(Icons.notifications, color: Colors.grey);
+            }
+
+            final chatData =
+                snapshot.data!.data() as Map<String, dynamic>? ?? {};
+            final muteMap = chatData['mute'] as Map<String, dynamic>? ?? {};
+            final isMuted = muteMap[loggedInUserId] ?? false;
+
+            return Icon(
+              isMuted ? Icons.notifications_off : Icons.notifications,
+              color: isMuted ? Colors.white : Colors.white,
+              size: 50,
+            );
+          },
+        );
+      },
+
+      'trailingWidget': StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('chats')
+            .doc(chatId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const SizedBox();
+
+          final chatData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+          final muteMap = chatData['mute'] as Map<String, dynamic>? ?? {};
+          final isMuted = muteMap[loggedInUserId] ?? false;
+
+          return Switch(
+            value: isMuted,
+            onChanged: (val) async {
+              await FirebaseFirestore.instance
+                  .collection('chats')
+                  .doc(chatId)
+                  .set({
+                    'mute': {loggedInUserId: val},
+                  }, SetOptions(merge: true));
+            },
+          );
+        },
+      ),
     },
+
     {
       'optionText': 'Block Contact',
       'iconPath': AppConstants.receiver_block_contact_icon,
