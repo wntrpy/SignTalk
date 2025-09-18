@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
@@ -207,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         }
 
                         //get the LIST of raw chat documents
-                        //id, users(array)m, last message, timestamp
+                        //id, users(array), last message, timestamp
                         final chatDocs = snapshot.data!.docs;
                         return FutureBuilder<List<Map<String, dynamic>>>(
                           future: Future.wait(
@@ -234,32 +235,151 @@ class _HomeScreenState extends State<HomeScreen> {
                               itemCount: chatDataList.length,
                               itemBuilder: (context, index) {
                                 final chatData = chatDataList[index];
-                                return CustomUserCardWidget(
-                                  userId: chatData['userData']['uid'],
-                                  userName:
-                                      chatData['userData']['name'] ?? 'Unknown',
-                                  nickname:
-                                      chatData['nickname'], // <<--- ADD THIS
-                                  lastMessage: chatData['lastMessage'],
-                                  lastMessageSenderId:
-                                      chatData['lastMessageSenderId'],
-                                  lastMessageTime: chatData['timeStamp'],
-                                  lastMessageStatus: messageStatusFromString(
-                                    chatData['lastMessageStatus'],
-                                  ),
-                                  currentUserId: loggedInUser!.uid,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => ChatScreen(
-                                          chatId: chatData['chatId'],
-                                          receiverId:
-                                              chatData['userData']['uid'],
-                                        ),
+                                return Slidable(
+                                  key: ValueKey(chatData['chatId']),
+                                  endActionPane: ActionPane(
+                                    motion: const DrawerMotion(),
+                                    children: [
+                                      // --- MUTE NOTIFICATION ---
+                                      StreamBuilder<DocumentSnapshot>(
+                                        stream: FirebaseFirestore.instance
+                                            .collection('chats')
+                                            .doc(chatData['chatId'])
+                                            .snapshots(),
+                                        builder: (context, snapshot) {
+                                          bool isMuted = false;
+                                          if (snapshot.hasData &&
+                                              snapshot.data!.data() != null) {
+                                            final chat =
+                                                snapshot.data!.data()
+                                                    as Map<String, dynamic>;
+                                            final muteMap =
+                                                Map<String, dynamic>.from(
+                                                  chat['mute'] ?? {},
+                                                );
+                                            isMuted =
+                                                muteMap[loggedInUser!.uid] ??
+                                                false;
+                                          }
+
+                                          return SlidableAction(
+                                            onPressed: (_) async {
+                                              final chatRef = FirebaseFirestore
+                                                  .instance
+                                                  .collection('chats')
+                                                  .doc(chatData['chatId']);
+
+                                              await chatRef.set({
+                                                'mute': {
+                                                  loggedInUser!.uid: !isMuted,
+                                                },
+                                              }, SetOptions(merge: true));
+
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    isMuted
+                                                        ? "Notifications unmuted"
+                                                        : "Notifications muted",
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            backgroundColor: Colors.orange,
+                                            foregroundColor: Colors.white,
+
+                                            // 🔔 dynamic icon + label
+                                            icon: isMuted
+                                                ? Icons.notifications_off
+                                                : Icons.notifications,
+                                            label: isMuted ? 'Unmute' : 'Mute',
+                                          );
+                                        },
                                       ),
-                                    );
-                                  },
+
+                                      // --- BLOCK CONTACT ---
+                                      SlidableAction(
+                                        onPressed: (_) async {
+                                          await FirebaseFirestore.instance
+                                              .collection('users')
+                                              .doc(loggedInUser!.uid)
+                                              .set({
+                                                'blocked': {
+                                                  chatData['userData']['uid']:
+                                                      true,
+                                                },
+                                              }, SetOptions(merge: true));
+
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text("Contact blocked"),
+                                            ),
+                                          );
+                                        },
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.block,
+                                        label: 'Block',
+                                      ),
+
+                                      // --- DELETE CONVERSATION ---
+                                      SlidableAction(
+                                        onPressed: (_) async {
+                                          await Provider.of<ChatProvider>(
+                                            context,
+                                            listen: false,
+                                          ).deleteConversation(
+                                            chatData['chatId'],
+                                          );
+
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                "Conversation deleted",
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        backgroundColor: Colors.grey,
+                                        foregroundColor: Colors.white,
+                                        icon: Icons.delete,
+                                        label: 'Delete',
+                                      ),
+                                    ],
+                                  ),
+                                  child: CustomUserCardWidget(
+                                    userId: chatData['userData']['uid'],
+                                    userName:
+                                        chatData['userData']['name'] ??
+                                        'Unknown',
+                                    nickname: chatData['nickname'],
+                                    lastMessage: chatData['lastMessage'],
+                                    lastMessageSenderId:
+                                        chatData['lastMessageSenderId'],
+                                    lastMessageTime: chatData['timeStamp'],
+                                    lastMessageStatus: messageStatusFromString(
+                                      chatData['lastMessageStatus'],
+                                    ),
+                                    currentUserId: loggedInUser!.uid,
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatScreen(
+                                            chatId: chatData['chatId'],
+                                            receiverId:
+                                                chatData['userData']['uid'],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 );
                               },
                             );

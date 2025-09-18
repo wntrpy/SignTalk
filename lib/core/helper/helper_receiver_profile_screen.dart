@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:signtalk/app_constants.dart';
-import 'package:signtalk/widgets/chat/custom_receiver_profile_option.dart';
 
 bool isToggled = false; //TODO: fix
 

@@ -21,7 +21,7 @@ exports.sendChatNotification = onDocumentCreated(
     if (!receiverId || !senderId) return null;
     console.log("Receiver:", receiverId, "Sender:", senderId);
 
-    // ✅ Check mute status in the chat doc
+    // check mute status in the chat doc
     const chatDoc = await admin
       .firestore()
       .collection("chats")
@@ -36,7 +36,7 @@ exports.sendChatNotification = onDocumentCreated(
       return null;
     }
 
-    // Get receiver’s FCM token
+    // get receiver’s FCM token
     const userDoc = await admin
       .firestore()
       .collection("users")
@@ -53,7 +53,7 @@ exports.sendChatNotification = onDocumentCreated(
       return null;
     }
 
-    // Get sender’s name
+    // get sender’s name
     const senderDoc = await admin
       .firestore()
       .collection("users")
