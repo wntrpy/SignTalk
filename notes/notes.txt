@@ -45,9 +45,30 @@ saan magagamit si riverpod?
  - API para makonek yung flutter sa python, and para magamit yung functionalities na gagawin natin
 
 FEATURES
+
+WEB - ADMIN
+- login
+- generate report
+- add datasets (create)
+- view feedback
+- change system status
+  - active or under maintenance
+  - this reflects also what is visible in the CLIENT  
+    - if active, then the mobile app just shows all the functionalities
+    - if under maintenance, then it shows the under maintenance screen instead
+- show number of users
+  - total no. of users
+  - hearing users
+  - non-hearing users
+  - inactive (offline) users
+  - active users
+
+
+MOBILE - CLIENT
 SIGNTALK features:
 - login
   - can login through gmail
+  - can login through username and a password
 - registration
   - signup 
 - forget password
@@ -80,9 +101,8 @@ SIGNTALK features:
   - can switch app language (eng, fil)
   - toggle dark mode
   - can send feedback to admins
-  - can adjust avatar translation speed
   - can view blocked list (users)
-  - ASL and FSL Alphabet Chart for educational purposes
+  - ASL Alphabet Chart for educational purposes
   - logout button
 
 

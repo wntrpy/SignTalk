@@ -8,16 +8,16 @@ class AppLifecycleReactor with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
     if (state == AppLifecycleState.resumed) {
       // App is back in foreground
       _presenceService.setUserOnline(true);
+      debugPrint("User is active");
     } else if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
       // App goes background or is closed
       _presenceService.setUserOnline(false);
+      debugPrint("User is inactive");
     }
   }
 }

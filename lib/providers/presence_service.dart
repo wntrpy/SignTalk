@@ -9,7 +9,7 @@ class PresenceService {
     final user = _auth.currentUser;
     if (user != null) {
       await _firestore.collection('users').doc(user.uid).update({
-        'isOnline': isOnline,
+        'isOnline': isOnline, // Always set to true when online
         'lastSeen': FieldValue.serverTimestamp(),
       });
     }

@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/dark_mode_provider.dart';
+import 'package:signtalk/screens/settings_screens/settings_blocked_list_screen.dart';
 import 'package:signtalk/screens/settings_screens/settings_feedback_screen.dart';
 
 // helper method for SVG icons
@@ -49,8 +50,14 @@ List<Map<String, dynamic>> getSettingsOptions(
     {
       'text': 'Blocked Lists',
       'icon': _settingsIcon(context, AppConstants.settings_blocked_list),
-      'onTap': null,
+      'onTap': () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SettingsBlockedListScreen()),
+        );
+      },
     },
+
     {
       'text': 'ASL Alphabet (Chart)',
       'icon': _settingsIcon(context, AppConstants.settings_alphabet_chart),

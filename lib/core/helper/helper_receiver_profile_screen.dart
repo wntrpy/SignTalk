@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
+import 'package:signtalk/providers/chat_provider.dart';
 
 bool isToggled = false; //TODO: fix
 
@@ -157,12 +160,63 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
     {
       'optionText': 'Block Contact',
       'iconPath': AppConstants.receiver_block_contact_icon,
-      'onTap': () => print("Block tapped"),
+      'onTap': () async {
+        final loggedInUser = FirebaseAuth.instance.currentUser;
+        if (loggedInUser == null) return;
+
+        final confirm = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text("Block Contact"),
+            content: const Text(
+              "Are you sure you want to block this user? You won’t be able to send or receive messages until you unblock.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text("Block"),
+              ),
+            ],
+          ),
+        );
+
+        if (confirm == true) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(loggedInUser.uid)
+              .set({
+                'blocked': {
+                  receiverId: {
+                    'blocked': true,
+                    'blockedAt': FieldValue.serverTimestamp(),
+                  },
+                },
+              }, SetOptions(merge: true));
+
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text("Contact blocked")));
+        }
+      },
     },
+
     {
-      'optionText': 'Delete',
+      'optionText': 'Delete Conversation',
       'iconPath': AppConstants.receiver_delete_icon,
-      'onTap': () => print("Delete tapped"),
+      'onTap': () async {
+        await Provider.of<ChatProvider>(
+          context,
+          listen: false,
+        ).deleteConversation(chatId);
+        Navigator.pop(context); // close profile
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Conversation deleted")));
+      },
     },
   ];
 }

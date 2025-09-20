@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/chat_provider.dart';
-import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/chat/custom_message_stream.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -93,6 +92,124 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Widget _buildBlockedUI({
+    required String displayName,
+    required bool isMeBlocking,
+  }) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(displayName),
+        backgroundColor: AppConstants.darkViolet,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.block, size: 80, color: Colors.red),
+            const SizedBox(height: 20),
+            Text(
+              isMeBlocking
+                  ? "You’ve blocked $displayName"
+                  : "$displayName has blocked you",
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            if (isMeBlocking)
+              ElevatedButton(
+                onPressed: () async {
+                  await _firestore
+                      .collection('users')
+                      .doc(loggedInUser!.uid)
+                      .set({
+                        'blocked': {widget.receiverId: false},
+                      }, SetOptions(merge: true));
+                },
+                child: const Text("Unblock"),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMessageInput(ChatProvider chatProvider) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: textController,
+                decoration: InputDecoration(
+                  hintText: "Type a message...",
+                  hintStyle: TextStyle(color: Colors.grey[500]),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                // TODO: camera action
+              },
+              icon: const Icon(
+                Icons.camera_alt,
+                color: AppConstants.lightViolet,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                // TODO: mic action
+              },
+              icon: const Icon(Icons.mic, color: AppConstants.lightViolet),
+            ),
+            Container(
+              decoration: const BoxDecoration(
+                color: AppConstants.darkViolet,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                onPressed: () async {
+                  if (textController.text.isNotEmpty) {
+                    if (chatId == null || chatId!.isEmpty) {
+                      chatId = await chatProvider.createChatRoom(
+                        widget.receiverId,
+                      );
+                    }
+                    if (chatId != null) {
+                      chatProvider.sendMessage(
+                        chatId!,
+                        textController.text,
+                        widget.receiverId,
+                      );
+                      textController.clear();
+                    }
+                  }
+                },
+                icon: const Icon(Icons.send, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
@@ -101,7 +218,6 @@ class _ChatScreenState extends State<ChatScreen> {
       return const Scaffold(body: Center(child: Text("No chat available")));
     }
 
-    // Combine both user and chat data
     return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.collection('users').doc(widget.receiverId).snapshots(),
       builder: (context, userSnapshot) {
@@ -154,145 +270,108 @@ class _ChatScreenState extends State<ChatScreen> {
               }
             }
 
-            return Scaffold(
-              appBar: AppBar(
-                title: Row(
-                  children: [
-                    InkWell(
-                      child: CircleAvatar(
-                        child: Text(displayName[0].toUpperCase()),
-                      ),
-                      onTap: () {
-                        context.push(
-                          '/receiver_profile_screen',
-                          extra: {
-                            'receiverData': receiverData, // Map<String,dynamic>
-                            'chatId': chatId, // String (chat doc id)
-                            'receiverId': widget.receiverId, // String
-                            'nickname':
-                                displayName, // String (may be real name if no nickname)
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            // Check blocking both ways
+            return StreamBuilder<DocumentSnapshot>(
+              stream: _firestore
+                  .collection('users')
+                  .doc(loggedInUser!.uid)
+                  .snapshots(),
+              builder: (context, meSnap) {
+                if (!meSnap.hasData) {
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                final meData =
+                    meSnap.data!.data() as Map<String, dynamic>? ?? {};
+                final myBlocked = Map<String, dynamic>.from(
+                  meData['blocked'] ?? {},
+                );
+                final receiverBlocked = Map<String, dynamic>.from(
+                  receiverData['blocked'] ?? {},
+                );
+
+                bool isBlocked(dynamic entry) {
+                  if (entry is bool) return entry; // old schema
+                  if (entry is Map<String, dynamic>)
+                    return entry['blocked'] == true;
+                  return false;
+                }
+
+                final isMeBlocking = isBlocked(myBlocked[widget.receiverId]);
+                final isBlockedByReceiver = isBlocked(
+                  receiverBlocked[loggedInUser!.uid],
+                );
+
+                if (isMeBlocking) {
+                  return _buildBlockedUI(
+                    displayName: displayName,
+                    isMeBlocking: true,
+                  );
+                } else if (isBlockedByReceiver) {
+                  return _buildBlockedUI(
+                    displayName: displayName,
+                    isMeBlocking: false,
+                  );
+                }
+
+                // ✅ Normal chat screen
+                return Scaffold(
+                  appBar: AppBar(
+                    title: Row(
                       children: [
-                        Text(
-                          displayName,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          statusText,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
+                        InkWell(
+                          child: CircleAvatar(
+                            child: Text(displayName[0].toUpperCase()),
                           ),
+                          onTap: () {
+                            context.push(
+                              '/receiver_profile_screen',
+                              extra: {
+                                'receiverData': receiverData,
+                                'chatId': chatId,
+                                'receiverId': widget.receiverId,
+                                'nickname': displayName,
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              displayName,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            Text(
+                              statusText,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-                backgroundColor: AppConstants.darkViolet,
-              ),
-              body: Column(
-                children: [
-                  Expanded(
-                    child: CustomMessageStream(
-                      chatId: chatId!,
-                      timestampToLocal: timestampToLocal,
-                    ),
+                    backgroundColor: AppConstants.darkViolet,
                   ),
-                  Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 15,
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
+                  body: Column(
+                    children: [
+                      Expanded(
+                        child: CustomMessageStream(
+                          chatId: chatId!,
+                          timestampToLocal: timestampToLocal,
+                        ),
                       ),
-                      margin: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: textController,
-                              decoration: InputDecoration(
-                                hintText: "Type a message...",
-                                hintStyle: TextStyle(color: Colors.grey[500]),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                ),
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              // TODO: camera action
-                            },
-                            icon: const Icon(
-                              Icons.camera_alt,
-                              color: AppConstants.lightViolet,
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              // TODO: mic action
-                            },
-                            icon: const Icon(
-                              Icons.mic,
-                              color: AppConstants.lightViolet,
-                            ),
-                          ),
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: AppConstants.darkViolet,
-                              shape: BoxShape.circle,
-                            ),
-                            child: IconButton(
-                              onPressed: () async {
-                                if (textController.text.isNotEmpty) {
-                                  if (chatId == null || chatId!.isEmpty) {
-                                    chatId = await chatProvider.createChatRoom(
-                                      widget.receiverId,
-                                    );
-                                  }
-                                  if (chatId != null) {
-                                    chatProvider.sendMessage(
-                                      chatId!,
-                                      textController.text,
-                                      widget.receiverId,
-                                    );
-                                    textController.clear();
-                                  }
-                                }
-                              },
-                              icon: const Icon(Icons.send, color: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                      _buildMessageInput(chatProvider),
+                    ],
                   ),
-                ],
-              ),
-              backgroundColor: Colors.white,
+                  backgroundColor: Colors.white,
+                );
+              },
             );
           },
         );

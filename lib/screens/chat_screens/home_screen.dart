@@ -14,8 +14,6 @@ import 'package:signtalk/widgets/chat/custom_user_card_widget.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/firstname_greeting.dart';
 
-//TODO: walang email_lowercase kapag mag reregister
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -302,52 +300,159 @@ class _HomeScreenState extends State<HomeScreen> {
                                         },
                                       ),
 
-                                      // --- BLOCK CONTACT ---
-                                      SlidableAction(
-                                        onPressed: (_) async {
-                                          await FirebaseFirestore.instance
-                                              .collection('users')
-                                              .doc(loggedInUser!.uid)
-                                              .set({
-                                                'blocked': {
-                                                  chatData['userData']['uid']:
-                                                      true,
-                                                },
-                                              }, SetOptions(merge: true));
+                                      // --- BLOCK CONTACT (dynamic) ---
+                                      StreamBuilder<DocumentSnapshot>(
+                                        stream: FirebaseFirestore.instance
+                                            .collection('users')
+                                            .doc(loggedInUser!.uid)
+                                            .snapshots(),
+                                        builder: (context, userSnap) {
+                                          bool isBlocked = false;
+                                          if (userSnap.hasData &&
+                                              userSnap.data!.data() != null) {
+                                            final userData =
+                                                userSnap.data!.data()
+                                                    as Map<String, dynamic>;
+                                            final blockedMap =
+                                                Map<String, dynamic>.from(
+                                                  userData['blocked'] ?? {},
+                                                );
+                                            final entry =
+                                                blockedMap[chatData['userData']['uid']];
 
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text("Contact blocked"),
-                                            ),
+                                            // normalize (can be bool or map depending on old schema)
+                                            if (entry is bool) {
+                                              isBlocked = entry;
+                                            } else if (entry
+                                                is Map<String, dynamic>) {
+                                              isBlocked =
+                                                  entry['blocked'] == true;
+                                            }
+                                          }
+
+                                          return SlidableAction(
+                                            onPressed: (_) async {
+                                              if (!isBlocked) {
+                                                final confirm = await showDialog<bool>(
+                                                  context: context,
+                                                  builder: (ctx) => AlertDialog(
+                                                    title: const Text(
+                                                      "Block Contact",
+                                                    ),
+                                                    content: const Text(
+                                                      "Are you sure you want to block this contact?",
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                              ctx,
+                                                              false,
+                                                            ),
+                                                        child: const Text(
+                                                          "Cancel",
+                                                        ),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () =>
+                                                            Navigator.pop(
+                                                              ctx,
+                                                              true,
+                                                            ),
+                                                        child: const Text(
+                                                          "Block",
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                                if (confirm != true) return;
+                                              }
+
+                                              await FirebaseFirestore.instance
+                                                  .collection('users')
+                                                  .doc(loggedInUser!.uid)
+                                                  .set({
+                                                    'blocked': {
+                                                      chatData['userData']['uid']: {
+                                                        'blocked': !isBlocked,
+                                                        'blockedAt': !isBlocked
+                                                            ? FieldValue.serverTimestamp()
+                                                            : null,
+                                                      },
+                                                    },
+                                                  }, SetOptions(merge: true));
+
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    isBlocked
+                                                        ? "Contact unblocked"
+                                                        : "Contact blocked",
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            backgroundColor: isBlocked
+                                                ? Colors.green
+                                                : Colors.red,
+                                            foregroundColor: Colors.white,
+                                            icon: isBlocked
+                                                ? Icons.lock_open
+                                                : Icons.block,
+                                            label: isBlocked
+                                                ? 'Unblock'
+                                                : 'Block',
                                           );
                                         },
-                                        backgroundColor: Colors.red,
-                                        foregroundColor: Colors.white,
-                                        icon: Icons.block,
-                                        label: 'Block',
                                       ),
 
-                                      // --- DELETE CONVERSATION ---
+                                      // --- DELETE (dynamic) --
                                       SlidableAction(
                                         onPressed: (_) async {
-                                          await Provider.of<ChatProvider>(
-                                            context,
-                                            listen: false,
-                                          ).deleteConversation(
-                                            chatData['chatId'],
-                                          );
-
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text(
-                                                "Conversation deleted",
+                                          final confirm = await showDialog<bool>(
+                                            context: context,
+                                            builder: (ctx) => AlertDialog(
+                                              title: const Text(
+                                                "Delete Conversation",
                                               ),
+                                              content: const Text(
+                                                "This will permanently delete your copy of the conversation.",
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx, false),
+                                                  child: const Text("Cancel"),
+                                                ),
+                                                ElevatedButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx, true),
+                                                  child: const Text("Delete"),
+                                                ),
+                                              ],
                                             ),
                                           );
+
+                                          if (confirm == true) {
+                                            await Provider.of<ChatProvider>(
+                                              context,
+                                              listen: false,
+                                            ).deleteConversation(
+                                              chatData['chatId'],
+                                            );
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Conversation deleted",
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         },
                                         backgroundColor: Colors.grey,
                                         foregroundColor: Colors.white,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:signtalk/core/firebase_api.dart';
 import 'package:signtalk/providers/auth_provider.dart';
+import 'package:signtalk/providers/presence_service.dart';
 import 'package:signtalk/providers/system_status_provider.dart';
 import 'package:signtalk/screens/auth_screens/login_screen.dart';
 import 'package:signtalk/screens/chat_screens/home_screen.dart';
@@ -14,27 +15,23 @@ class AuthenticationWrapper extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authProvider = ref.watch(authProviderProvider);
     final systemStatus = ref.watch(systemStatusProvider);
+    final presence = PresenceService();
 
     return systemStatus.when(
       data: (isActive) {
         if (!isActive) {
-          // system under maintenance
+          presence.setUserOnline(false);
+
           return const UnderMaintenanceScreen();
         }
 
-        // system is active = check if user is signed in
-        /*     if (authProvider.isSignedin) {
-          return const HomeScreen();
-        } else {
+        if (authProvider.isSignedin) {
+          // Save token
           FirebaseApi.saveFcmToken();
 
-          return const LoginScreen();
-        }*/
+          // Set presence online (fire-and-forget)
+          presence.setUserOnline(true);
 
-        // inside AuthenticationWrapper build(...)
-        if (authProvider.isSignedin) {
-          // Save token for signed-in user
-          FirebaseApi.saveFcmToken(); // fire-and-forget
           return const HomeScreen();
         } else {
           return const LoginScreen();

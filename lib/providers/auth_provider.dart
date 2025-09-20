@@ -247,12 +247,12 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    //final presence = PresenceService();
-    // await presence.setUserOnline(false);
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser!.uid)
-        .update({'isOnline': false, 'lastSeen': FieldValue.serverTimestamp()});
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+        {'isOnline': false, 'lastSeen': FieldValue.serverTimestamp()},
+      );
+    }
 
     await _auth.signOut();
     await _googleSignIn.signOut();
