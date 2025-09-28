@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:signtalk/providers/auth_provider.dart' as authprovider;
 import 'package:signtalk/widgets/buttons/custom_button.dart';
-import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/custom_app_bar.dart';
 import 'package:signtalk/widgets/textfields/custom_line_textfield.dart';
 import 'package:signtalk/app_constants.dart';
@@ -58,12 +56,26 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const CustomAppBar(appBarText: "Profile"),
-        CustomCirclePfpButton(
+
+        //--------------------PFP--------------------\\
+        /*  CustomCirclePfpButton(
           borderColor: AppConstants.white,
           userImage: user.photoUrl ?? AppConstants.default_user_pfp,
           width: 120,
           height: 120,
+        ),*/
+        CircleAvatar(
+          radius: 60,
+          backgroundColor: AppConstants.white,
+          child: Text(
+            user.name[0].toUpperCase(),
+            style: const TextStyle(
+              fontSize: 48,
+              color: AppConstants.darkViolet,
+            ),
+          ),
         ),
+
         const SizedBox(height: 7),
         Text(
           user.name,
@@ -249,20 +261,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
           label: 'Email',
           enabled: false,
         ),
-        const SizedBox(height: 30),
-        CustomButton(
-          buttonText: 'Log out',
-          colorCode: AppConstants.orange,
-          textColor: AppConstants.white,
-          buttonWidth: 150,
-          buttonHeight: 45,
-          textSize: AppConstants.fontSizeMedium,
-          borderRadiusValue: 10,
-          onPressed: () async {
-            await ref.read(authprovider.authProvider).signOut();
-            context.go('/login_screen');
-          },
-        ),
       ],
     );
   }
@@ -278,6 +276,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       canPop: false,
       onPopInvoked: (didPop) => !didPop ? context.pop() : null,
       child: Scaffold(
+        resizeToAvoidBottomInset: true,
         body: StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
               .collection('users')
@@ -306,36 +305,36 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               _userModel = user;
             }
 
-            return Column(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(40),
-                      bottomRight: Radius.circular(40),
-                    ),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.asset(
-                          AppConstants.signtalk_bg,
-                          fit: BoxFit.cover,
-                        ),
-                        _buildProfileHeader(user, context),
-                      ],
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.40,
+
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(40),
+                        bottomRight: Radius.circular(40),
+                      ),
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.asset(
+                            AppConstants.signtalk_bg,
+                            fit: BoxFit.cover,
+                          ),
+                          _buildProfileHeader(user, context),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: Container(
+                  Container(
                     padding: const EdgeInsets.only(top: 12),
                     color: AppConstants.white,
                     child: _buildProfileForm(user, isEditMode),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),

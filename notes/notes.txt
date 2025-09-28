@@ -98,7 +98,6 @@ SIGNTALK features:
     - can delete conversation
 
 -settings screen
-  - can switch app language (eng, fil)
   - toggle dark mode
   - can send feedback to admins
   - can view blocked list (users)

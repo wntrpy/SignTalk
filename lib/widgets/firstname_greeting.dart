@@ -20,10 +20,13 @@ class FirstNameGreeting extends StatelessWidget {
     }
 
     return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance.collection('users').doc(uid).snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(); // or a shimmer/loading
+          return const SizedBox();
         }
 
         final firstName = _extractFirstName(snapshot.data);

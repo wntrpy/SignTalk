@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:signtalk/app_constants.dart';
 
 class SettingsBlockedListScreen extends StatelessWidget {
   const SettingsBlockedListScreen({super.key});
@@ -16,8 +17,11 @@ class SettingsBlockedListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Blocked Users"),
-        backgroundColor: Colors.red,
+        title: const Text(
+          "Blocked Users",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: AppConstants.darkViolet,
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
@@ -84,7 +88,10 @@ class SettingsBlockedListScreen extends StatelessWidget {
                     title: Text(name),
                     subtitle: Text(blockedDateText),
                     trailing: IconButton(
-                      icon: const Icon(Icons.remove_circle, color: Colors.red),
+                      icon: const Icon(
+                        Icons.remove_circle,
+                        color: AppConstants.darkViolet,
+                      ),
                       onPressed: () async {
                         // Unblock user
                         await FirebaseFirestore.instance

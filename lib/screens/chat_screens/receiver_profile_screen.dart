@@ -7,7 +7,6 @@ import 'package:signtalk/widgets/buttons/custom_icon_button.dart';
 import 'package:signtalk/widgets/chat/custom_receiver_profile_option.dart';
 
 class ReceiverProfileScreen extends StatelessWidget {
-  // required constructor fields (pass sa GoRouter route builder)
   final Map<String, dynamic> receiverData;
   final String chatId;
   final String receiverId;
@@ -25,7 +24,6 @@ class ReceiverProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loggedInUserId = FirebaseAuth.instance.currentUser!.uid;
 
-    // if chatId is missing, show header using passed nickname/name,
     if (chatId.trim().isEmpty) {
       final display = (nickname.isNotEmpty)
           ? nickname
@@ -44,10 +42,13 @@ class ReceiverProfileScreen extends StatelessWidget {
           if (!didPop) Navigator.of(context).pop();
         },
         child: Scaffold(
+          resizeToAvoidBottomInset: false, // keeps background fixed
           body: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+              Positioned.fill(
+                child: Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+              ),
               // back button
               Padding(
                 padding: const EdgeInsets.only(top: 24, left: 16),
@@ -63,24 +64,27 @@ class ReceiverProfileScreen extends StatelessWidget {
               ),
               Container(
                 padding: const EdgeInsets.only(top: 100, right: 20, left: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildUserProfileHeader(receiverData, display),
-                    ...finalReceiverProfileOptions.map(
-                      (option) => Column(
-                        children: [
-                          CustomReceiverProfileOption(
-                            optionText: option['optionText'],
-                            iconPath: option['iconPath'] ?? '',
-                            fallbackIcon: option['fallbackIcon'],
-                            trailingWidget: option['trailingWidget'],
-                            onTap: option['onTap'],
-                          ),
-                        ],
+                child: SingleChildScrollView(
+                  // fix overflow
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildUserProfileHeader(receiverData, display),
+                      ...finalReceiverProfileOptions.map(
+                        (option) => Column(
+                          children: [
+                            CustomReceiverProfileOption(
+                              optionText: option['optionText'],
+                              iconPath: option['iconPath'] ?? '',
+                              fallbackIcon: option['fallbackIcon'],
+                              trailingWidget: option['trailingWidget'],
+                              onTap: option['onTap'],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -89,20 +93,17 @@ class ReceiverProfileScreen extends StatelessWidget {
       );
     }
 
-    // listen for live nickname changes
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
           .collection('chats')
           .doc(chatId)
           .snapshots(),
       builder: (context, chatSnap) {
-        // default fallback display name is the user name from users collection
         String displayName =
             (receiverData['name'] as String?) ?? 'Unknown User';
 
         if (chatSnap.hasData && chatSnap.data!.exists) {
           final chatData = chatSnap.data!.data() as Map<String, dynamic>? ?? {};
-
           final rawNickMap = chatData['nicknames'];
           if (rawNickMap != null) {
             try {
@@ -117,9 +118,7 @@ class ReceiverProfileScreen extends StatelessWidget {
                   displayName = nick.toString();
                 }
               }
-            } catch (e) {
-              // ignore parse errors and keep fallback displayName
-            }
+            } catch (_) {}
           }
         }
 
@@ -136,10 +135,16 @@ class ReceiverProfileScreen extends StatelessWidget {
             if (!didPop) Navigator.of(context).pop();
           },
           child: Scaffold(
+            resizeToAvoidBottomInset: false, // keeps bg image fixed
             body: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+                Positioned.fill(
+                  child: Image.asset(
+                    AppConstants.signtalk_bg,
+                    fit: BoxFit.cover,
+                  ),
+                ),
                 // back button
                 Padding(
                   padding: const EdgeInsets.only(top: 24, left: 16),
@@ -155,25 +160,27 @@ class ReceiverProfileScreen extends StatelessWidget {
                 ),
                 Container(
                   padding: const EdgeInsets.only(top: 100, right: 20, left: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _buildUserProfileHeader(receiverData, displayName),
-                      // options
-                      ...finalReceiverProfileOptions.map(
-                        (option) => Column(
-                          children: [
-                            CustomReceiverProfileOption(
-                              optionText: option['optionText'],
-                              iconPath: option['iconPath'] ?? '',
-                              fallbackIcon: option['fallbackIcon'],
-                              trailingWidget: option['trailingWidget'],
-                              onTap: option['onTap'],
-                            ),
-                          ],
+                  child: SingleChildScrollView(
+                    // fix overflow
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildUserProfileHeader(receiverData, displayName),
+                        ...finalReceiverProfileOptions.map(
+                          (option) => Column(
+                            children: [
+                              CustomReceiverProfileOption(
+                                optionText: option['optionText'],
+                                iconPath: option['iconPath'] ?? '',
+                                fallbackIcon: option['fallbackIcon'],
+                                trailingWidget: option['trailingWidget'],
+                                onTap: option['onTap'],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],

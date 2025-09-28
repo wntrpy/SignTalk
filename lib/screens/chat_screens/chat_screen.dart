@@ -150,61 +150,123 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                controller: textController,
-                decoration: InputDecoration(
-                  hintText: "Type a message...",
-                  hintStyle: TextStyle(color: Colors.grey[500]),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        child: StatefulBuilder(
+          builder: (context, setInnerState) {
+            String? errorText;
+
+            void validateInput(String value) {
+              if (value.length > 50) {
+                setInnerState(() {
+                  errorText = "Message cannot exceed 50 characters";
+                });
+              } else {
+                setInnerState(() {
+                  errorText = null;
+                });
+              }
+            }
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: textController,
+                        maxLength: 50,
+                        onChanged: validateInput,
+                        decoration: InputDecoration(
+                          hintText: "Type a message...",
+                          hintStyle: TextStyle(color: Colors.grey[500]),
+                          border: InputBorder.none,
+                          counterText: "", // hides counter
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: BorderSide(
+                              color: errorText != null
+                                  ? Colors.red
+                                  : Colors.transparent,
+                              width: 1.5,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(25),
+                            borderSide: BorderSide(
+                              color: errorText != null
+                                  ? Colors.red
+                                  : AppConstants.lightViolet,
+                              width: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // TODO: camera action
+                      },
+                      icon: const Icon(
+                        Icons.camera_alt,
+                        color: AppConstants.lightViolet,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // TODO: mic action
+                      },
+                      icon: const Icon(
+                        Icons.mic,
+                        color: AppConstants.lightViolet,
+                      ),
+                    ),
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: AppConstants.darkViolet,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () async {
+                          if (textController.text.isNotEmpty &&
+                              textController.text.length <= 50) {
+                            if (chatId == null || chatId!.isEmpty) {
+                              chatId = await chatProvider.createChatRoom(
+                                widget.receiverId,
+                              );
+                            }
+                            if (chatId != null) {
+                              chatProvider.sendMessage(
+                                chatId!,
+                                textController.text,
+                                widget.receiverId,
+                              );
+                              textController.clear();
+                              validateInput(""); // reset error
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.send, color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                // TODO: camera action
-              },
-              icon: const Icon(
-                Icons.camera_alt,
-                color: AppConstants.lightViolet,
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                // TODO: mic action
-              },
-              icon: const Icon(Icons.mic, color: AppConstants.lightViolet),
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                color: AppConstants.darkViolet,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                onPressed: () async {
-                  if (textController.text.isNotEmpty) {
-                    if (chatId == null || chatId!.isEmpty) {
-                      chatId = await chatProvider.createChatRoom(
-                        widget.receiverId,
-                      );
-                    }
-                    if (chatId != null) {
-                      chatProvider.sendMessage(
-                        chatId!,
-                        textController.text,
-                        widget.receiverId,
-                      );
-                      textController.clear();
-                    }
-                  }
-                },
-                icon: const Icon(Icons.send, color: Colors.white),
-              ),
-            ),
-          ],
+                if (errorText != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12, top: 4),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        errorText!,
+                        style: const TextStyle(color: Colors.red, fontSize: 12),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -316,7 +378,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 }
 
-                // ✅ Normal chat screen
+                // normal chat screen
                 return Scaffold(
                   appBar: AppBar(
                     title: Row(

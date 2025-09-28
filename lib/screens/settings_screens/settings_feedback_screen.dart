@@ -10,9 +10,7 @@ void showFeedbackDialog(BuildContext context) {
     barrierDismissible: false, // Prevent closing by tapping outside
     builder: (BuildContext context) {
       return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -22,9 +20,7 @@ void showFeedbackDialog(BuildContext context) {
               padding: const EdgeInsets.all(16),
               decoration: const BoxDecoration(
                 color: Colors.purple,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(16),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: const Text(
                 "Send us some feedback!",
@@ -38,7 +34,7 @@ void showFeedbackDialog(BuildContext context) {
               ),
             ),
 
-            // Content 
+            // Content
             Container(
               decoration: const BoxDecoration(
                 color: Colors.white,
@@ -91,78 +87,94 @@ void showFeedbackDialog(BuildContext context) {
                         ),
                         onPressed: () async {
                           String feedback = feedbackController.text.trim();
-                          if (feedback.isNotEmpty) {
-                             try {
-                              final user = FirebaseAuth.instance.currentUser;
 
-                              await FirebaseFirestore.instance
-                                  .collection('user feedback')
-                                  .add({
-                                'message': feedback,
-                                'timestamp': FieldValue.serverTimestamp(),
-                                'uid': user?.uid,
-                                'email': user?.email,
-                              });
+                          if (feedback.isEmpty) {
+                            // Show error if empty
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Feedback cannot be empty!",
+                                  style: TextStyle(
+                                    fontFamily: "Alata",
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return;
+                          }
 
-                              feedbackController.clear();
-                              Navigator.pop(context);
+                          try {
+                            final user = FirebaseAuth.instance.currentUser;
 
-                              showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) {
-                                  // Auto-close after 2 seconds
-                                  Future.delayed(const Duration(seconds: 2), () {
-                                    Navigator.of(context).pop(true);
-                                  });
+                            await FirebaseFirestore.instance
+                                .collection('user feedback')
+                                .add({
+                                  'message': feedback,
+                                  'timestamp': FieldValue.serverTimestamp(),
+                                  'uid': user?.uid,
+                                  'email': user?.email,
+                                });
 
-                                  return AlertDialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
+                            feedbackController.clear();
+                            Navigator.pop(context);
+
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) {
+                                // Auto-close after 2 seconds
+                                Future.delayed(const Duration(seconds: 2), () {
+                                  Navigator.of(context).pop(true);
+                                });
+
+                                return AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  content: const Text(
+                                    "Your feedback has been sent successfully!",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: "Alata",
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.purple,
                                     ),
-                      
-                                    content: const Text(
-                                      "Your feedback has been sent successfully!",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontFamily: "Alata",
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.purple
-                                      ),
-                                    ), 
-                                  );
-                                },
-                              );
-                            } catch (e) {
-                               showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                builder: (context) {
-                                  // Auto-close after 2 seconds
-                                  Future.delayed(const Duration(seconds: 2), () {
-                                    Navigator.of(context).pop(true);
-                                  });
+                                  ),
+                                );
+                              },
+                            );
+                          } catch (e) {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (context) {
+                                // Auto-close after 2 seconds
+                                Future.delayed(const Duration(seconds: 2), () {
+                                  Navigator.of(context).pop(true);
+                                });
 
-                                  return AlertDialog(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
+                                return AlertDialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  content: const Text(
+                                    "Something went wrong. Please try again later.",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: "Alata",
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
                                     ),
-                                    content: const Text(
-                                      "Something went wrong. Please try again later.",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontFamily: "Alata",
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.red
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }
-                         }
+                                  ),
+                                );
+                              },
+                            );
+                          }
                         },
                         child: const Text(
                           "Submit",

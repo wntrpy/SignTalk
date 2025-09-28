@@ -39,7 +39,6 @@ class AuthProvider with ChangeNotifier {
 
   String? get tempEmail => _tempEmail;
   String? get tempPassword => _tempPassword;
-
   Future<void> register(
     String email,
     String password,
@@ -48,22 +47,57 @@ class AuthProvider with ChangeNotifier {
     String userTypes,
   ) async {
     try {
+      // Create auth account
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      await _firestore.collection('users').doc(userCredential.user?.uid).set({
-        'uid': userCredential.user?.uid,
+      final authUid = userCredential.user?.uid;
+      if (authUid == null) {
+        throw Exception("Failed to get Firebase Auth UID");
+      }
+
+      // Get latest formatted_uid
+      final snapshot = await _firestore
+          .collection('users')
+          .orderBy('formatted_uid', descending: true)
+          .limit(1)
+          .get();
+
+      int newFormattedUid = 1000; // starting point
+      if (snapshot.docs.isNotEmpty) {
+        final latestDoc = snapshot.docs.first.data();
+        final latestFormattedUidField = latestDoc['formatted_uid'];
+
+        if (latestFormattedUidField is int) {
+          newFormattedUid = latestFormattedUidField + 1;
+        } else if (latestFormattedUidField is String) {
+          newFormattedUid = (int.tryParse(latestFormattedUidField) ?? 999) + 1;
+        }
+      }
+
+      // Save user in Firestore
+      await _firestore.collection('users').doc(authUid).set({
+        'uid': authUid,
+        'formatted_uid': newFormattedUid,
         'name': name,
-        'name_lowercase': name.toLowerCase(), // need to for search feature
+        'name_lowercase': name.toLowerCase(),
         'age': age,
         'userType': userTypes,
         'email': email,
         'email_lowercase': email.toLowerCase(),
+        'firebase_uid': authUid,
       });
 
       notifyListeners();
+    } on FirebaseAuthException catch (e) {
+      // Friendly error messages
+      if (e.code == 'email-already-in-use') {
+        throw Exception('This email is already registered');
+      } else {
+        throw Exception(e.message ?? 'Registration failed');
+      }
     } catch (e) {
-      rethrow; // Handle error appropriately
+      rethrow;
     }
   }
 

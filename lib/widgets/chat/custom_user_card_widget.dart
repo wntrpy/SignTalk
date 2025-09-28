@@ -72,7 +72,6 @@ class CustomUserCardWidget extends StatelessWidget {
     final isMe = lastMessageSenderId == currentUserId;
     final displayName = nickname?.isNotEmpty == true ? nickname! : userName;
 
-    // 🔹 Convert and format like in your bubble
     final localTime = _toAppLocal(lastMessageTime);
     final formattedTime = _formatTimeHM(localTime);
 

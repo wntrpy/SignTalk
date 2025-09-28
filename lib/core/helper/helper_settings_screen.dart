@@ -26,14 +26,6 @@ List<Map<String, dynamic>> getSettingsOptions(
 
   return [
     {
-      'text': 'Switch Language',
-      'icon': _settingsIcon(
-        context,
-        AppConstants.settings_switch_language_icon,
-      ),
-      'onTap': null,
-    },
-    {
       'text': 'Dark Mode',
       'icon': Switch(
         value: isDarkMode,

@@ -40,73 +40,56 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /*
-  Future<Map<String, dynamic>> _fetchChatData(String chatId) async {
-    //get the users, last message, and timestamp
-    final chatDoc = await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(chatId)
-        .get();
-    final chatData = chatDoc.data();
-    final users = chatData!['users'] as List<dynamic>;
+  Future<Map<String, dynamic>?> _fetchChatData(String chatId) async {
+    try {
+      final chatDoc = await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatId)
+          .get();
+      final chatData = chatDoc.data();
+      if (chatData == null || chatData['users'] == null) return null;
 
-    //get the receiver id
-    final receiverId = users.firstWhere((id) => id != loggedInUser!.uid);
+      final users = chatData['users'] as List<dynamic>;
+      final receiverId = users.firstWhere(
+        (id) => id != loggedInUser!.uid,
+        orElse: () => null,
+      );
+      if (receiverId == null) return null;
 
-    //get the receiver's user doc
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(receiverId)
-        .get();
-    final userData = userDoc.data()!;
-    return {
-      'chatId': chatId,
-      'lastMessage': chatData['lastMessage'] ?? '',
-      'timeStamp': chatData['timestamp']?.toDate() ?? DateTime.now(),
-      'userData': userData,
-    };
-  }
-*/
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(receiverId)
+          .get();
+      final userData = userDoc.data();
+      if (userData == null) return null;
 
-  Future<Map<String, dynamic>> _fetchChatData(String chatId) async {
-    final chatDoc = await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(chatId)
-        .get();
-    final chatData = chatDoc.data()!;
-    final users = chatData['users'] as List<dynamic>;
-
-    final receiverId = users.firstWhere((id) => id != loggedInUser!.uid);
-    final userDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(receiverId)
-        .get();
-    final userData = userDoc.data()!;
-
-    // --- check nickname ---
-    String? nickname;
-    if (chatData['nicknames'] != null) {
-      final nickMap = Map<String, dynamic>.from(chatData['nicknames']);
-      if (nickMap.containsKey(loggedInUser?.uid)) {
-        final userNicknames = Map<String, dynamic>.from(
-          nickMap[loggedInUser?.uid],
-        );
-        nickname = userNicknames[receiverId];
+      // --- check nickname ---
+      String? nickname;
+      if (chatData['nicknames'] != null) {
+        final nickMap = Map<String, dynamic>.from(chatData['nicknames']);
+        if (nickMap.containsKey(loggedInUser?.uid)) {
+          final userNicknames = Map<String, dynamic>.from(
+            nickMap[loggedInUser?.uid],
+          );
+          nickname = userNicknames[receiverId];
+        }
       }
+
+      return {
+        'chatId': chatId,
+        'lastMessage': chatData['lastMessage'] ?? '',
+        'lastMessageSenderId': chatData['lastMessageSenderId'] ?? '',
+        'lastMessageStatus': chatData['lastMessageStatus'] ?? 'sent',
+        'timeStamp': chatData['timestamp'] != null
+            ? (chatData['timestamp'] as Timestamp).toDate().toLocal()
+            : DateTime.now(),
+        'userData': userData,
+        'nickname': nickname,
+      };
+    } catch (e) {
+      // Optionally log error
+      return null;
     }
-
-    return {
-      'chatId': chatId,
-      'lastMessage': chatData['lastMessage'] ?? '',
-      'lastMessageSenderId': chatData['lastMessageSenderId'] ?? '',
-      'lastMessageStatus': chatData['lastMessageStatus'] ?? 'sent',
-      'timeStamp': chatData['timestamp'] != null
-          ? (chatData['timestamp'] as Timestamp).toDate().toLocal()
-          : DateTime.now(),
-
-      'userData': userData,
-      'nickname': nickname,
-    };
   }
 
   @override
@@ -126,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
             Column(
               children: [
-                //-----------------------------------------HEADER--------------------------------------------//
+                //-----------------------------------------HEADER--------------------------------------------\\
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
@@ -141,6 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               const FirstNameGreeting(),
                             ],
                           ),
+
+                          //-----------------------------------------PFP--------------------------------------------\\
                           CustomCirclePfpButton(
                             borderColor: AppConstants.white,
                             userImage: AppConstants.default_user_pfp,
@@ -150,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 30),
 
-                      //-----------------------------------------SEARCH BAR--------------------------------------------//
+                      //-----------------------------------------SEARCH BAR--------------------------------------------\\
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -211,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         //get the LIST of raw chat documents
                         //id, users(array), last message, timestamp
                         final chatDocs = snapshot.data!.docs;
-                        return FutureBuilder<List<Map<String, dynamic>>>(
+                        return FutureBuilder<List<Map<String, dynamic>?>>(
                           future: Future.wait(
                             chatDocs.map(
                               (chatDoc) => _fetchChatData(chatDoc.id),
@@ -223,13 +208,29 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: CircularProgressIndicator(),
                               );
                             }
-                            final chatDataList = snapshot.data!;
+                            // Filter out nulls (failed fetches)
+                            final chatDataList = snapshot.data!
+                                .where((chatData) => chatData != null)
+                                .cast<Map<String, dynamic>>()
+                                .toList();
 
                             // Sort newest to oldest
                             chatDataList.sort(
                               (a, b) =>
                                   b['timeStamp'].compareTo(a['timeStamp']),
                             );
+
+                            if (chatDataList.isEmpty) {
+                              return const Center(
+                                child: Text(
+                                  "No conversations yet.",
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              );
+                            }
 
                             return ListView.builder(
                               padding: const EdgeInsets.symmetric(vertical: 16),
