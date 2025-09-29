@@ -98,6 +98,7 @@ class CustomMessageStream extends StatelessWidget {
               timestamp: ts,
               timestampToLocal: timestampToLocal,
               status: status,
+              messageId: message.id,
             ),
           );
         }
