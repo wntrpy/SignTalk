@@ -36,7 +36,6 @@ class CustomMessageStream extends StatelessWidget {
         batch.update(d.reference, {'status': 'read'});
 
         // track newest incoming message
-        //set chat to reasd
         final ts = data['timestamp'];
         if (ts is Timestamp) {
           if (latestTs == null || ts.compareTo(latestTs) > 0) {
@@ -60,56 +59,69 @@ class CustomMessageStream extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    final currentUser = FirebaseAuth.instance.currentUser!.uid;
+
+    return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
           .collection('chats')
           .doc(chatId)
-          .collection('messages')
-          .orderBy('timestamp', descending: true)
           .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
+      builder: (context, chatSnapshot) {
+        // Get TTS setting from chat document
+        bool showAudio = false;
+        if (chatSnapshot.hasData && chatSnapshot.data != null) {
+          final chatData =
+              chatSnapshot.data!.data() as Map<String, dynamic>? ?? {};
+          final ttsMap = chatData['ttsEnabled'] as Map<String, dynamic>? ?? {};
+          showAudio = ttsMap[currentUser] ?? false;
         }
 
-        final docs = snapshot.data!.docs;
+        return StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('chats')
+              .doc(chatId)
+              .collection('messages')
+              .orderBy('timestamp', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-        // after building the list, mark incoming as READ
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _markIncomingAsRead(chatId, docs);
-        });
+            final docs = snapshot.data!.docs;
 
-        final currentUser = FirebaseAuth.instance.currentUser!.uid;
-        final bubbles = <CustomMessageBubble>[];
+            // after building the list, mark incoming as READ
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _markIncomingAsRead(chatId, docs);
+            });
 
-        for (final message in docs) {
-          final data = message.data() as Map<String, dynamic>;
-          final text = data['messageBody'] as String? ?? '';
-          final senderId = data['senderId'] as String? ?? '';
-          final ts = data['timestamp'];
-          final statusStr = (data['status'] as String?) ?? 'sent';
-          final status = messageStatusFromString(statusStr);
+            final bubbles = <CustomMessageBubble>[];
 
-          // Read ttsEnabled per user
-          final ttsMap = data['ttsEnabled'] as Map<String, dynamic>? ?? {};
-          final currentUser = FirebaseAuth.instance.currentUser!.uid;
-          final showAudio = ttsMap[currentUser] ?? false; // true = show audio
+            for (final message in docs) {
+              final data = message.data() as Map<String, dynamic>;
+              final text = data['messageBody'] as String? ?? '';
+              final senderId = data['senderId'] as String? ?? '';
+              final ts = data['timestamp'];
+              final statusStr = (data['status'] as String?) ?? 'sent';
+              final status = messageStatusFromString(statusStr);
 
-          bubbles.add(
-            CustomMessageBubble(
-              sender: senderId,
-              text: text,
-              isMe: currentUser == senderId,
-              timestamp: ts,
-              timestampToLocal: timestampToLocal,
-              status: status,
-              messageId: message.id,
-              showAudio: showAudio, // pass directly, no inversion
-            ),
-          );
-        }
+              bubbles.add(
+                CustomMessageBubble(
+                  sender: senderId,
+                  text: text,
+                  isMe: currentUser == senderId,
+                  timestamp: ts,
+                  timestampToLocal: timestampToLocal,
+                  status: status,
+                  messageId: message.id,
+                  showAudio: showAudio, // Use the setting from chat document
+                ),
+              );
+            }
 
-        return ListView(reverse: true, children: bubbles);
+            return ListView(reverse: true, children: bubbles);
+          },
+        );
       },
     );
   }
