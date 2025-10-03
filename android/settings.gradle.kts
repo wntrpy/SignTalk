@@ -18,10 +18,14 @@ pluginManagement {
 
 plugins {
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
-    id("com.android.application") version "8.7.3" apply false
-    // START: FlutterFire Configuration
-    id("com.google.gms.google-services") version("4.3.15") apply false
-    // END: FlutterFire Configuration
+
+    // ✅ Bump AGP to 8.9.1
+    id("com.android.application") version "8.9.1" apply false
+
+    // ✅ Keep Firebase / Google Services updated
+    id("com.google.gms.google-services") version "4.4.2" apply false
+
+    // ✅ Kotlin plugin (matches Flutter’s Kotlin compatibility)
     id("org.jetbrains.kotlin.android") version "2.1.0" apply false
 }
 

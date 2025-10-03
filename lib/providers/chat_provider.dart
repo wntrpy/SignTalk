@@ -1,11 +1,98 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:signtalk/models/message_status.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ChatProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  String lastWords = '';
+
+  Future<void> initSpeech() async {
+    bool available = await _speech.initialize(
+      onError: (e) => debugPrint('❌ Speech error: $e'),
+      onStatus: (s) => debugPrint('🎤 Status: $s'),
+    );
+
+    if (available) {
+      debugPrint("✅ Speech recognition available");
+    } else {
+      debugPrint("❌ Speech recognition not available on this device");
+    }
+  }
+
+  // New function: send audio file to Whisper/OpenAI or cloud function
+  Future<String> transcribeAudio(File audio) async {
+    try {
+      final url = Uri.parse('https://YOUR_CLOUD_FUNCTION_URL/transcribe');
+      final request = http.MultipartRequest('POST', url);
+      request.files.add(await http.MultipartFile.fromPath('file', audio.path));
+      final streamed = await request.send();
+      final response = await http.Response.fromStream(streamed);
+
+      if (response.statusCode == 200) {
+        return response.body; // plain text transcription
+      } else {
+        return "[Voice message]"; // fallback
+      }
+    } catch (e) {
+      print("Transcription failed: $e");
+      return "[Voice message]";
+    }
+  }
+
+  // Unified send voice message
+  Future<void> sendVoiceMessage(
+    String chatId,
+    String receiverId,
+    String messageText,
+    String audioUrl,
+    Duration duration,
+  ) async {
+    // Send to Firestore chats collection
+    await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .add({
+          'senderId': FirebaseAuth.instance.currentUser!.uid,
+          'receiverId': receiverId,
+          'messageBody': messageText,
+          'audioUrl': audioUrl,
+          'duration': duration.inSeconds,
+          'timestamp': FieldValue.serverTimestamp(),
+          'status': 'sent',
+        });
+  }
+
+  void startListening() async {
+    await _speech.listen(
+      onResult: (result) {
+        debugPrint("📋 Partial: ${result.recognizedWords}");
+        if (result.finalResult) {
+          lastWords = result.recognizedWords;
+          debugPrint("📋 Final transcribed: $lastWords");
+        }
+      },
+      listenFor: const Duration(seconds: 10),
+      pauseFor: const Duration(seconds: 3),
+      localeId: "en-US", // <-- match your phone language
+      cancelOnError: true,
+      partialResults: true,
+    );
+  }
+
+  void stopListening() async {
+    await _speech.stop();
+    debugPrint("🛑 Stopped listening. Final: $lastWords");
+  }
 
   Stream<QuerySnapshot> getChats(String userId) {
     return _firestore
@@ -21,6 +108,57 @@ class ChatProvider with ChangeNotifier {
         .where('name_lowercase', isGreaterThanOrEqualTo: lowercaseQuery)
         .where('name_lowercase', isLessThanOrEqualTo: '$lowercaseQuery\uf8ff')
         .snapshots();
+  }
+
+  Future<void> sendRecording(File audioFile) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final fileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+      final ref = FirebaseStorage.instance.ref().child(
+        'voice_messages/$fileName',
+      );
+
+      // Upload audio file
+      await ref.putFile(audioFile);
+      final audioUrl = await ref.getDownloadURL();
+
+      // Call cloud function to transcribe
+      final callable = FirebaseFunctions.instance.httpsCallable(
+        'transcribeAudio',
+      );
+      final result = await callable.call({'audioUrl': audioUrl});
+
+      final transcribedText = (result.data['text'] ?? '').toString();
+
+      // Always have fallback
+      final messageText = transcribedText.isNotEmpty
+          ? transcribedText
+          : "[Voice message]";
+
+      // Save to Firestore
+      await FirebaseFirestore.instance.collection('messages').add({
+        'senderId': user.uid,
+        'text': messageText,
+        'audioUrl': audioUrl,
+        'timestamp': FieldValue.serverTimestamp(),
+        'status': 'sent',
+      });
+
+      debugPrint("✅ Sent message with text='$messageText' and audio=$audioUrl");
+    } catch (e) {
+      debugPrint("❌ sendRecording error: $e");
+    }
+  }
+
+  Future<String> uploadAudioFile(File file) async {
+    final fileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
+    final ref = FirebaseStorage.instance.ref().child(
+      'voice_messages/$fileName',
+    );
+    await ref.putFile(file);
+    return await ref.getDownloadURL();
   }
 
   Future<void> sendMessage(

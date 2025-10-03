@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/widgets/chat/custom_message_stream.dart';
+import 'package:record/record.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ChatScreen extends StatefulWidget {
   final String? chatId;
@@ -22,23 +24,33 @@ class _ChatScreenState extends State<ChatScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   final TextEditingController textController = TextEditingController();
+  final AudioRecorder _audioRecorder = AudioRecorder();
+
+  String? recordedAudioPath; // path of current recording
+  String? sttText; // result of speech-to-text
+  bool isPlaying = false; // for replay in input
 
   User? loggedInUser;
   String? chatId;
-
-  // error state for message input
   String? inputError;
+
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _voiceText = '';
 
   @override
   void initState() {
     super.initState();
     chatId = widget.chatId;
     getCurrentUser();
+
+    _speech = stt.SpeechToText();
   }
 
   @override
   void dispose() {
     textController.dispose();
+    _audioRecorder.dispose();
     super.dispose();
   }
 
@@ -49,6 +61,68 @@ class _ChatScreenState extends State<ChatScreen> {
         loggedInUser = user;
       });
     }
+  }
+
+  Future<void> _startListening() async {
+    bool available = await _speech.initialize(
+      onStatus: (status) {
+        if (kDebugMode) print('🎤 Status: $status');
+        if (status == 'done') _stopListening();
+      },
+      onError: (err) {
+        if (kDebugMode) print('❌ Speech error: $err');
+        _stopListening();
+      },
+    );
+
+    if (!available) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Speech recognition unavailable')),
+        );
+      }
+      return;
+    }
+
+    setState(() {
+      _isListening = true;
+      _voiceText = '';
+    });
+
+    _speech.listen(
+      onResult: (result) {
+        setState(() {
+          _voiceText = result.recognizedWords;
+          textController.text = _voiceText;
+        });
+      },
+      localeId: 'en_US',
+      listenMode: stt.ListenMode.dictation,
+    );
+  }
+
+  Future<void> _stopListening() async {
+    await _speech.stop();
+    setState(() => _isListening = false);
+  }
+
+  Future<void> _sendTextMessage() async {
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    final text = textController.text.trim();
+    if (text.isEmpty) return;
+
+    if (chatId == null || chatId!.isEmpty) {
+      chatId = await chatProvider.createChatRoom(widget.receiverId);
+    }
+    if (chatId == null) return;
+
+    await chatProvider.sendMessage(chatId!, text, widget.receiverId);
+
+    textController.clear();
+    setState(() {
+      inputError = null;
+      _voiceText = '';
+    });
   }
 
   DateTime timestampToLocal(dynamic ts) {
@@ -112,7 +186,7 @@ class _ChatScreenState extends State<ChatScreen> {
             const SizedBox(height: 20),
             Text(
               isMeBlocking
-                  ? "You’ve blocked $displayName"
+                  ? "You've blocked $displayName"
                   : "$displayName has blocked you",
               style: const TextStyle(fontSize: 18),
             ),
@@ -136,128 +210,141 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildMessageInput(ChatProvider chatProvider) {
-    return Container(
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        margin: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 4,
-              offset: Offset(0, 2),
+    if (_isListening) {
+      // 🎤 Listening UI
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        child: Row(
+          children: [
+            const Icon(Icons.mic, color: Colors.red, size: 28),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                "Listening...",
+                style: TextStyle(fontSize: 16, color: Colors.black54),
+              ),
+            ),
+            IconButton(
+              onPressed: _stopListening,
+              icon: const Icon(Icons.stop, color: AppConstants.lightViolet),
             ),
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+      );
+    } else if (_voiceText.isNotEmpty) {
+      // 📝 Review transcribed text UI
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+        child: Row(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: textController,
-                    onChanged: (value) {
-                      setState(() {
-                        if (value.length > 50) {
-                          inputError = "Message cannot exceed 50 characters";
-                        } else {
-                          inputError = null;
-                        }
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: "Type a message...",
-                      hintStyle: TextStyle(color: Colors.grey[500]),
-                      counterText: "", // hides default counter
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(
-                          color: inputError != null
-                              ? Colors.red
-                              : Colors.transparent,
-                          width: 1.5,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(
-                          color: inputError != null
-                              ? Colors.red
-                              : AppConstants.lightViolet,
-                          width: 1.5,
-                        ),
-                      ),
+            Expanded(
+              child: TextFormField(
+                controller: textController..text = _voiceText,
+                maxLines: null,
+                decoration: InputDecoration(
+                  hintText: "Your speech...",
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: const BorderSide(color: Colors.grey),
+                  ),
+                ),
+                onChanged: (value) => _voiceText = value,
+              ),
+            ),
+            IconButton(
+              onPressed: () {
+                _voiceText = '';
+                textController.clear();
+                setState(() {});
+              },
+              icon: const Icon(Icons.delete, color: Colors.red),
+            ),
+            Container(
+              decoration: const BoxDecoration(
+                color: AppConstants.darkViolet,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                onPressed: _sendTextMessage,
+                icon: const Icon(Icons.send, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // ✏️ Normal typing UI
+      return Container(
+        color: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: textController,
+                onChanged: (value) {
+                  setState(() {
+                    inputError = value.length > 50
+                        ? "Message cannot exceed 50 characters"
+                        : null;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: "Type a message...",
+                  hintStyle: TextStyle(color: Colors.grey[500]),
+                  counterText: "",
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide(
+                      color: inputError != null
+                          ? Colors.red
+                          : Colors.transparent,
+                      width: 1.5,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide(
+                      color: inputError != null
+                          ? Colors.red
+                          : AppConstants.lightViolet,
+                      width: 1.5,
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    // TODO: camera action
-                  },
-                  icon: const Icon(
-                    Icons.camera_alt,
-                    color: AppConstants.lightViolet,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    // TODO: mic action
-                  },
-                  icon: const Icon(Icons.mic, color: AppConstants.lightViolet),
-                ),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: AppConstants.darkViolet,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    onPressed: () async {
-                      if (textController.text.isNotEmpty &&
-                          (inputError == null)) {
-                        if (chatId == null || chatId!.isEmpty) {
-                          chatId = await chatProvider.createChatRoom(
-                            widget.receiverId,
-                          );
-                        }
-                        if (chatId != null) {
-                          chatProvider.sendMessage(
-                            chatId!,
-                            textController.text,
-                            widget.receiverId,
-                          );
-                          textController.clear();
-                          setState(() => inputError = null); // reset error
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.send, color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            if (inputError != null)
-              Padding(
-                padding: const EdgeInsets.only(left: 12, top: 4),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    inputError!,
-                    style: const TextStyle(color: Colors.red, fontSize: 12),
-                  ),
-                ),
               ),
+            ),
+            IconButton(
+              onPressed: _isListening ? _stopListening : _startListening,
+              icon: Icon(
+                _isListening ? Icons.mic_off : Icons.mic,
+                color: AppConstants.lightViolet,
+              ),
+            ),
+            Container(
+              decoration: const BoxDecoration(
+                color: AppConstants.darkViolet,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                onPressed: inputError == null ? _sendTextMessage : null,
+                icon: const Icon(Icons.send, color: Colors.white),
+              ),
+            ),
           ],
         ),
-      ),
-    );
+      );
+    }
   }
 
   @override
@@ -305,7 +392,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 chatSnapshot.data!.data() as Map<String, dynamic>? ?? {};
             String displayName = realName;
 
-            // check for nickname
             if (chatData['nicknames'] != null && loggedInUser != null) {
               final nickMap = Map<String, dynamic>.from(
                 chatData['nicknames'] ?? {},
@@ -320,7 +406,6 @@ class _ChatScreenState extends State<ChatScreen> {
               }
             }
 
-            // Check blocking both ways
             return StreamBuilder<DocumentSnapshot>(
               stream: _firestore
                   .collection('users')
@@ -343,7 +428,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 );
 
                 bool isBlocked(dynamic entry) {
-                  if (entry is bool) return entry; // old schema
+                  if (entry is bool) return entry;
                   if (entry is Map<String, dynamic>) {
                     return entry['blocked'] == true;
                   }
@@ -367,7 +452,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   );
                 }
 
-                // normal chat screen
                 return Scaffold(
                   appBar: AppBar(
                     title: Row(
