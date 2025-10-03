@@ -51,6 +51,7 @@ class CustomMessageBubble extends StatefulWidget {
   final MessageStatus status;
   final String messageId;
   final String? audioUrl;
+  final bool showAudio;
 
   const CustomMessageBubble({
     super.key,
@@ -62,6 +63,7 @@ class CustomMessageBubble extends StatefulWidget {
     required this.status,
     required this.messageId,
     this.audioUrl,
+    required this.showAudio,
   });
 
   @override
@@ -121,9 +123,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
     });
 
     _player.positionStream.listen((p) {
-      if (mounted) {
-        setState(() => _position = p);
-      }
+      if (mounted) setState(() => _position = p);
     });
   }
 
@@ -148,15 +148,8 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
       final filePath = '${dir.path}/${_getCacheFileName()}';
       final file = File(filePath);
 
-      // Check cache
-      if (await file.exists()) {
-        if (kDebugMode) print('Using cached audio');
-        return filePath;
-      }
+      if (await file.exists()) return filePath;
 
-      if (kDebugMode) print('Generating TTS audio...');
-
-      // Using StreamElements TTS - 100% free, no API key needed
       final text = Uri.encodeComponent(widget.text);
       final url = Uri.parse(
         'https://api.streamelements.com/kappa/v2/speech?voice=Brian&text=$text',
@@ -166,11 +159,8 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
 
       if (response.statusCode == 200 && response.bodyBytes.length > 1000) {
         await file.writeAsBytes(response.bodyBytes);
-        if (kDebugMode) print('TTS generated successfully');
         return filePath;
       }
-
-      if (kDebugMode) print('TTS API failed');
       return null;
     } catch (e) {
       if (kDebugMode) print('TTS error: $e');
@@ -182,14 +172,11 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
     _simulationTimer?.cancel();
     final startTime = DateTime.now();
 
-    _simulationTimer = Timer.periodic(const Duration(milliseconds: 100), (
-      timer,
-    ) {
+    _simulationTimer = Timer.periodic(const Duration(milliseconds: 100), (t) {
       if (!mounted || _state != PlayState.playing) {
-        timer.cancel();
+        t.cancel();
         return;
       }
-
       final elapsed = DateTime.now().difference(startTime);
       setState(() {
         _position = elapsed;
@@ -197,7 +184,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
           _position = Duration.zero;
           _state = PlayState.ready;
           _waveAnim.stop();
-          timer.cancel();
+          t.cancel();
         }
       });
     });
@@ -209,7 +196,6 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
     setState(() => _state = PlayState.loading);
 
     try {
-      // Try remote URL
       if (widget.audioUrl != null && widget.audioUrl!.isNotEmpty) {
         await _player.setUrl(widget.audioUrl!);
         await Future.delayed(const Duration(milliseconds: 300));
@@ -223,12 +209,10 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
         }
       }
 
-      // Generate TTS
       final path = await _generateFreeTts();
       if (path != null) {
         await _player.setFilePath(path);
         await Future.delayed(const Duration(milliseconds: 500));
-
         if (_player.duration != null && _player.duration! > Duration.zero) {
           setState(() {
             _duration = _player.duration!;
@@ -239,23 +223,16 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
         }
       }
 
-      // Fallback: estimate and simulate
-      final words = widget.text.split(' ').length;
-      final charsPerSecond = 15; // Average speaking speed
-      final estimatedSec = math.max(2, widget.text.length ~/ charsPerSecond);
-
+      final estimatedSec = math.max(2, widget.text.length ~/ 15);
       setState(() {
         _duration = Duration(seconds: estimatedSec);
         _state = PlayState.ready;
       });
-
-      if (kDebugMode) print('Using estimated duration: $_duration');
-    } catch (e) {
-      if (kDebugMode) print('Prepare error: $e');
-
-      // Final fallback
-      final words = widget.text.split(' ').length;
-      final estimatedSec = math.max(2, (words / 2.5).ceil());
+    } catch (_) {
+      final estimatedSec = math.max(
+        2,
+        (widget.text.split(' ').length / 2.5).ceil(),
+      );
       setState(() {
         _duration = Duration(seconds: estimatedSec);
         _state = PlayState.ready;
@@ -264,25 +241,21 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
   }
 
   Future<void> _togglePlayPause() async {
+    if (!widget.showAudio) return; // skip if hidden
+
     switch (_state) {
       case PlayState.idle:
       case PlayState.ready:
-        if (_cachedPath == null) {
-          await _prepareAudio();
-          if (_state != PlayState.ready) return;
-        }
+        if (_cachedPath == null) await _prepareAudio();
+        if (_state != PlayState.ready) return;
 
-        // Try real playback first
         if (_cachedPath != null) {
           try {
             await _player.play();
             return;
-          } catch (e) {
-            if (kDebugMode) print('Playback failed, using simulation: $e');
-          }
+          } catch (_) {}
         }
 
-        // Fallback to simulated playback
         setState(() => _state = PlayState.playing);
         _waveAnim.repeat();
         _startSimulatedPlayback();
@@ -290,12 +263,9 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
 
       case PlayState.playing:
         _simulationTimer?.cancel();
-        if (_cachedPath != null) {
-          await _player.pause();
-        } else {
-          setState(() => _state = PlayState.paused);
-          _waveAnim.stop();
-        }
+        if (_cachedPath != null) await _player.pause();
+        setState(() => _state = PlayState.paused);
+        _waveAnim.stop();
         break;
 
       case PlayState.paused:
@@ -309,8 +279,6 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
         break;
 
       case PlayState.loading:
-        break;
-
       case PlayState.error:
         await _prepareAudio();
         break;
@@ -427,7 +395,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                           widget.text,
                           style: TextStyle(color: textColor, fontSize: 15),
                         ),
-                        if (_expanded) ...[
+                        if (_expanded && widget.showAudio) ...[
                           const SizedBox(height: 12),
                           Row(
                             children: [
@@ -443,8 +411,8 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                                         : AppConstants.darkViolet,
                                   ),
                                   child: _state == PlayState.loading
-                                      ? Padding(
-                                          padding: const EdgeInsets.all(8),
+                                      ? const Padding(
+                                          padding: EdgeInsets.all(8),
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
                                             valueColor: AlwaysStoppedAnimation(
@@ -481,7 +449,13 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                                                 ? '${formatDuration(_duration - _position)} / ${formatDuration(_duration)}'
                                                 : '--:--',
                                             style: TextStyle(
-                                              color: textColor.withOpacity(0.8),
+                                              color: widget.isMe
+                                                  ? Colors.white.withOpacity(
+                                                      0.8,
+                                                    )
+                                                  : Colors.black87.withOpacity(
+                                                      0.8,
+                                                    ),
                                               fontSize: 11,
                                             ),
                                           ),
@@ -489,46 +463,28 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                                       ],
                                     ),
                                     if (_duration > Duration.zero)
-                                      SliderTheme(
-                                        data: SliderThemeData(
-                                          trackHeight: 2,
-                                          thumbShape:
-                                              const RoundSliderThumbShape(
-                                                enabledThumbRadius: 5,
-                                              ),
-                                          overlayShape:
-                                              const RoundSliderOverlayShape(
-                                                overlayRadius: 10,
-                                              ),
+                                      Slider(
+                                        min: 0,
+                                        max: _duration.inMilliseconds
+                                            .toDouble(),
+                                        value: _position.inMilliseconds
+                                            .clamp(0, _duration.inMilliseconds)
+                                            .toDouble(),
+                                        activeColor: widget.isMe
+                                            ? Colors.white
+                                            : AppConstants.darkViolet,
+                                        inactiveColor: Colors.grey.withOpacity(
+                                          0.3,
                                         ),
-                                        child: Slider(
-                                          min: 0,
-                                          max: _duration.inMilliseconds
-                                              .toDouble(),
-                                          value: _position.inMilliseconds
-                                              .clamp(
-                                                0,
-                                                _duration.inMilliseconds,
-                                              )
-                                              .toDouble(),
-                                          activeColor: widget.isMe
-                                              ? Colors.white
-                                              : AppConstants.darkViolet,
-                                          inactiveColor:
-                                              (widget.isMe
-                                                      ? Colors.white
-                                                      : Colors.grey)
-                                                  .withOpacity(0.3),
-                                          onChanged: (v) async {
-                                            final seekPos = Duration(
-                                              milliseconds: v.toInt(),
-                                            );
-                                            setState(() => _position = seekPos);
-                                            if (_cachedPath != null) {
-                                              await _player.seek(seekPos);
-                                            }
-                                          },
-                                        ),
+                                        onChanged: (v) async {
+                                          final seekPos = Duration(
+                                            milliseconds: v.toInt(),
+                                          );
+                                          setState(() => _position = seekPos);
+                                          if (_cachedPath != null) {
+                                            await _player.seek(seekPos);
+                                          }
+                                        },
                                       ),
                                   ],
                                 ),

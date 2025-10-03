@@ -90,6 +90,11 @@ class CustomMessageStream extends StatelessWidget {
           final statusStr = (data['status'] as String?) ?? 'sent';
           final status = messageStatusFromString(statusStr);
 
+          // Read ttsEnabled per user
+          final ttsMap = data['ttsEnabled'] as Map<String, dynamic>? ?? {};
+          final currentUser = FirebaseAuth.instance.currentUser!.uid;
+          final showAudio = ttsMap[currentUser] ?? false; // true = show audio
+
           bubbles.add(
             CustomMessageBubble(
               sender: senderId,
@@ -99,6 +104,7 @@ class CustomMessageStream extends StatelessWidget {
               timestampToLocal: timestampToLocal,
               status: status,
               messageId: message.id,
+              showAudio: showAudio, // pass directly, no inversion
             ),
           );
         }

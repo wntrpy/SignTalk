@@ -93,15 +93,34 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
       ),
     },
     {
-      'optionText': 'Translated Voice Speech',
+      'optionText': "Translated Voice Speech",
       'iconPath': AppConstants.receiver_voice_speech_icon,
-      'trailingWidget': Switch(
-        value: isToggled,
-        onChanged: (val) {
-          isToggled = val;
+      'trailingWidget': StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('chats')
+            .doc(chatId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const SizedBox();
+          final chatData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+          final ttsMap = chatData['ttsEnabled'] as Map<String, dynamic>? ?? {};
+          final ttsForMe = ttsMap[loggedInUserId] ?? false;
+
+          return Switch(
+            value: ttsForMe,
+            onChanged: (val) async {
+              await FirebaseFirestore.instance
+                  .collection('chats')
+                  .doc(chatId)
+                  .set({
+                    'ttsEnabled': {loggedInUserId: val},
+                  }, SetOptions(merge: true));
+            },
+          );
         },
       ),
     },
+
     {
       'optionText': 'Mute Notification',
       'iconPath': '',
