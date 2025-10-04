@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    // Check if locked out before attempting login
+    // check if locked out before attempting login
     if (authProvider.isLockedOut(email)) {
       final remaining = authProvider.getRemainingLockoutTime(email);
       _startCountdown(remaining);
@@ -212,12 +212,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String? _getEmailError(String? value) {
-    // Priority 1: Show lockout message if locked out
+    // priority 1: Show lockout message if locked out
     if (_isLockedOut && _loginError == "locked_out") {
       return "Too many failed attempts. Please try again in ${_formatTime(_remainingSeconds)}";
     }
 
-    // Priority 2: Show other login errors (wrong password, etc)
+    // priority 2: Show other login errors (wrong password, etc)
     if (_loginError != null && _loginError != "locked_out") {
       return LoginscreenValidator.emailValidator(
         value,
@@ -225,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
 
-    // Priority 3: Show validation errors
+    // priority 3: Show validation errors
     return LoginscreenValidator.emailValidator(value, loginError: null);
   }
 

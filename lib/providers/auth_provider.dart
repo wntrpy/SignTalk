@@ -287,6 +287,7 @@ class AuthProvider with ChangeNotifier {
         'email_lowercase': email.toLowerCase(),
         'firebase_uid': authUid,
         'createdAt': FieldValue.serverTimestamp(),
+        'photoUrl': '',
       });
 
       print(

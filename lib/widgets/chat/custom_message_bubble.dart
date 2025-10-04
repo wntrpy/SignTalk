@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:signtalk/app_colors.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/models/message_status.dart';
 import 'dart:math' as math;
@@ -437,8 +438,9 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                                         _buildWave(
                                           widget.isMe
                                               ? Colors.white70
-                                              : AppConstants.darkViolet
-                                                    .withOpacity(0.6),
+                                              : AppColors.of(
+                                                  context,
+                                                ).surface.withOpacity(0.6),
                                         ),
                                         const SizedBox(width: 8),
                                         Expanded(

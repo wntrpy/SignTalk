@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -10,6 +8,7 @@ import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/widgets/chat/custom_message_stream.dart';
 import 'package:record/record.dart';
+import 'package:signtalk/widgets/custom_profile_avatar.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ChatScreen extends StatefulWidget {
@@ -268,7 +267,7 @@ class _ChatScreenState extends State<ChatScreen> {
               icon: const Icon(Icons.delete, color: Colors.red),
             ),
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppConstants.darkViolet,
                 shape: BoxShape.circle,
               ),
@@ -334,7 +333,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppConstants.darkViolet,
                 shape: BoxShape.circle,
               ),
@@ -458,10 +457,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   appBar: AppBar(
                     title: Row(
                       children: [
-                        InkWell(
-                          child: CircleAvatar(
-                            child: Text(displayName[0].toUpperCase()),
-                          ),
+                        CustomProfileAvatar(
+                          name: displayName,
+                          photoUrl: receiverData['photoUrl'],
                           onTap: () {
                             context.push(
                               '/receiver_profile_screen',
@@ -474,6 +472,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             );
                           },
                         ),
+
                         const SizedBox(width: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,

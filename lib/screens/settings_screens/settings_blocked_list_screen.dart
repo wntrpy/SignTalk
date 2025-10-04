@@ -88,7 +88,7 @@ class SettingsBlockedListScreen extends StatelessWidget {
                     title: Text(name),
                     subtitle: Text(blockedDateText),
                     trailing: IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.remove_circle,
                         color: AppConstants.darkViolet,
                       ),

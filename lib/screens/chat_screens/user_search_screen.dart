@@ -146,6 +146,7 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
                               userId: userData['uid'],
                               name: userData['name'],
                               email: userData['email'],
+                              photoUrl: userData['photoUrl'],
                             ),
                           );
                         },

@@ -68,7 +68,7 @@ FloatingActionButton( - YUNG USUALLY NASA LOWER RIGHT
 
 BORDER RADIUS
  decoration: BoxDecoration(
-                          color: AppConstants.darkViolet,
+                          color: AppConstant.darkViolet,
                           borderRadius: BorderRadius.circular(
                             20.0,
                           ), // Half 

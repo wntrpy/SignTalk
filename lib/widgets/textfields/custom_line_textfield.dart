@@ -12,13 +12,13 @@ class CustomLineTextfield extends StatelessWidget {
     required this.label,
     required this.defaultValue,
     this.enabled = false,
-    this.controller
+    this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
-   final usedController = controller ?? TextEditingController(text: defaultValue);
-
+    final usedController =
+        controller ?? TextEditingController(text: defaultValue);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),

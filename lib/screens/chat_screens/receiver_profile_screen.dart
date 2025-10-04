@@ -5,6 +5,7 @@ import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/core/helper/helper_receiver_profile_screen.dart';
 import 'package:signtalk/widgets/buttons/custom_icon_button.dart';
 import 'package:signtalk/widgets/chat/custom_receiver_profile_option.dart';
+import 'package:signtalk/widgets/custom_profile_avatar.dart';
 
 class ReceiverProfileScreen extends StatelessWidget {
   final Map<String, dynamic> receiverData;
@@ -210,13 +211,12 @@ Widget _buildUserProfileHeader(
         SizedBox(
           width: 120,
           height: 120,
-          child: CircleAvatar(
-            child: Text(
-              display[0].toUpperCase(),
-              style: const TextStyle(fontSize: 48),
-            ),
+          child: CustomProfileAvatar(
+            name: displayName,
+            photoUrl: receiverData['photoUrl'],
           ),
         ),
+
         const SizedBox(width: 20),
         Flexible(
           child: Text(

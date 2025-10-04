@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
+import 'package:signtalk/app_colors.dart';
 import 'package:signtalk/core/navigation.dart'; // contains router & navigatorKey
 import 'package:signtalk/core/notification_service.dart';
 import 'package:signtalk/providers/app_lifecylce.dart';
@@ -40,22 +42,40 @@ void main() async {
   NotificationService().init();
 }
 
+Future<void> addMissingPhotoUrlField() async {
+  final usersCollection = FirebaseFirestore.instance.collection('users');
+
+  final querySnapshot = await usersCollection.get();
+
+  for (var doc in querySnapshot.docs) {
+    final data = doc.data();
+
+    // If 'photoUrl' does not exist, add it as an empty string
+    if (!data.containsKey('photoUrl')) {
+      await usersCollection.doc(doc.id).update({'photoUrl': ''});
+      print('✅ Added photoUrl for user: ${doc.id}');
+    }
+  }
+
+  print('🎉 Migration completed: All users now have a photoUrl field.');
+}
+
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = ref.watch(darkModeProvider);
+    addMissingPhotoUrlField();
     return MaterialApp.router(
       routerConfig: router,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.light().copyWith(
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      darkTheme: ThemeData.dark().copyWith(
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+      theme: ThemeData(colorScheme: AppColors.lightScheme, useMaterial3: true),
+      darkTheme: ThemeData(
+        colorScheme: AppColors.darkScheme,
+        useMaterial3: true,
+      ),
     );
   }
 }

@@ -304,7 +304,7 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget>
                   children: [
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.chat_bubble_outline,
                           size: 16,
                           color: AppConstants.darkViolet,
@@ -368,7 +368,7 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget>
                             },
                           )
                         else
-                          const Icon(
+                          Icon(
                             Icons.mic,
                             color: AppConstants.darkViolet,
                             size: 20,
@@ -396,7 +396,7 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget>
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppConstants.darkViolet,
                     shape: BoxShape.circle,
                   ),

@@ -21,11 +21,18 @@ class UserProfileScreen extends ConsumerStatefulWidget {
 class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
-  final List<String> userTypes = ['Hearing', 'Non-Hearing']; //laman ng dropdown
-  UserModel? _userModel; //Keeps last loaded user data
+  final List<String> userTypes = ['Hearing', 'Non-Hearing'];
+  UserModel? _userModel;
   bool _isEditingName = false;
   bool _isEditingAge = false;
-  String? selectedUserType; //var na naghohold ng value ng dropdown
+  String? selectedUserType;
+
+  @override
+  void initState() {
+    super.initState();
+    print('Current User: ${FirebaseAuth.instance.currentUser?.uid}');
+    print('Is Authenticated: ${FirebaseAuth.instance.currentUser != null}');
+  }
 
   @override
   void dispose() {
@@ -57,23 +64,52 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
       children: [
         const CustomAppBar(appBarText: "Profile"),
 
-        //--------------------PFP--------------------\\
-        /*  CustomCirclePfpButton(
-          borderColor: AppConstants.white,
-          userImage: user.photoUrl ?? AppConstants.default_user_pfp,
-          width: 120,
-          height: 120,
-        ),*/
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: AppConstants.white,
-          child: Text(
-            user.name[0].toUpperCase(),
-            style: const TextStyle(
-              fontSize: 48,
-              color: AppConstants.darkViolet,
+        // -------------------- Profile Picture -------------------- \\
+        Stack(
+          children: [
+            CircleAvatar(
+              radius: 60,
+              backgroundColor: AppConstants.white,
+              backgroundImage:
+                  (user.photoUrl != null && user.photoUrl!.isNotEmpty)
+                  ? NetworkImage(user.photoUrl!)
+                  : null,
+              child: (user.photoUrl == null || user.photoUrl!.isEmpty)
+                  ? Text(
+                      user.name.isNotEmpty ? user.name[0].toUpperCase() : "?",
+                      style: const TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: AppConstants.darkViolet,
+                      ),
+                    )
+                  : null,
             ),
-          ),
+            // Edit icon button overlay (only in edit mode)
+            if (isEditMode)
+              Positioned(
+                bottom: 0,
+                right: 0,
+                child: GestureDetector(
+                  onTap: () async {
+                    await uploadProfilePicture(context);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppConstants.orange,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppConstants.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: AppConstants.white,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
 
         const SizedBox(height: 7),
@@ -93,10 +129,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               : Theme.of(context).colorScheme.surface,
           buttonWidth: 150,
           buttonHeight: 45,
-          onPressed: () async {
-            if (_toggleEditMode()) {
-              await uploadProfilePicture(context);
-            }
+          onPressed: () {
+            _toggleEditMode();
           },
           textSize: AppConstants.fontSizeMedium,
           textColor: isEditMode ? AppConstants.white : AppConstants.darkViolet,
@@ -207,9 +241,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           contentPadding: EdgeInsets.only(bottom: 8.0),
                           border: InputBorder.none,
                         ),
-                        style: const TextStyle(
-                          color: Colors.black,
-                        ), // selected text color
+                        style: const TextStyle(color: Colors.black),
                         dropdownColor: Colors.white,
                         items: userTypes
                             .map(
@@ -241,9 +273,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                       textSize: 14,
                       onPressed: () async {
                         await _saveField("userType", selectedUserType!);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("User type saved.")),
-                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("User type saved.")),
+                          );
+                        }
                       },
                     ),
                 ],
@@ -310,7 +344,6 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                 children: [
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.40,
-
                     child: ClipRRect(
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(40),

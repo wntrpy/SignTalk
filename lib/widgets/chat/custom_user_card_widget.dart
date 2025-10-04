@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:signtalk/models/message_status.dart';
+import 'package:signtalk/widgets/custom_profile_avatar.dart';
 
 // 🔹 Same offset logic as your CustomMessageBubble
 const Duration kAppTzOffset = Duration(hours: 8);
@@ -36,6 +37,7 @@ class CustomUserCardWidget extends StatelessWidget {
   final String userId;
   final String userName; // real display name
   final String? nickname; // optional nickname
+  final String? photoUrl;
   final String lastMessage;
   final String lastMessageSenderId;
   final DateTime lastMessageTime;
@@ -48,6 +50,7 @@ class CustomUserCardWidget extends StatelessWidget {
     required this.userId,
     required this.userName,
     this.nickname,
+    this.photoUrl, // ADD THIS
     required this.lastMessage,
     required this.lastMessageSenderId,
     required this.lastMessageTime,
@@ -77,7 +80,11 @@ class CustomUserCardWidget extends StatelessWidget {
 
     return ListTile(
       onTap: onTap,
-      leading: CircleAvatar(child: Text(displayName[0].toUpperCase())),
+      leading: CustomProfileAvatar(
+        photoUrl: photoUrl,
+        name: displayName,
+        radius: 25,
+      ),
       title: Text(displayName),
       subtitle: Row(
         children: [

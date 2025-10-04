@@ -9,8 +9,8 @@ import 'package:signtalk/models/message_status.dart';
 import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/screens/chat_screens/chat_screen.dart';
 import 'package:signtalk/screens/chat_screens/user_search_screen.dart';
-import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/chat/custom_user_card_widget.dart';
+import 'package:signtalk/widgets/custom_profile_avatar.dart';
 import 'package:signtalk/widgets/custom_signtalk_logo.dart';
 import 'package:signtalk/widgets/firstname_greeting.dart';
 
@@ -126,10 +126,31 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
 
                           //-----------------------------------------PFP--------------------------------------------\\
-                          CustomCirclePfpButton(
-                            borderColor: AppConstants.white,
-                            userImage: AppConstants.default_user_pfp,
-                            onPressed: () => context.push('/profile_screen'),
+                          // Profile Picture Button
+                          StreamBuilder<DocumentSnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(loggedInUser!.uid)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              String? photoUrl;
+                              String name = 'User';
+
+                              if (snapshot.hasData && snapshot.data!.exists) {
+                                final data =
+                                    snapshot.data!.data()
+                                        as Map<String, dynamic>?;
+                                photoUrl = data?['photoUrl'] as String?;
+                                name = data?['name'] as String? ?? 'User';
+                              }
+
+                              return CustomProfileAvatar(
+                                photoUrl: photoUrl,
+                                name: name,
+                                radius: 25,
+                                onTap: () => context.push('/profile_screen'),
+                              );
+                            },
                           ),
                         ],
                       ),
@@ -463,6 +484,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                   ),
                                   child: CustomUserCardWidget(
+                                    photoUrl:
+                                        chatData['userData']['photoUrl']
+                                            as String?,
                                     userId: chatData['userData']['uid'],
                                     userName:
                                         chatData['userData']['name'] ??
