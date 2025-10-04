@@ -212,7 +212,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildMessageInput(ChatProvider chatProvider) {
     if (_isListening) {
-      // 🎤 Listening UI
+      //listening UI
       return Container(
         color: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),

@@ -403,7 +403,7 @@ class AuthProvider with ChangeNotifier {
 
       await sendEmailDirectlyViaSendGrid(email, code);
       return null; // No error, proceed to 2FA screen
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       // Increment failed attempts
       await _incrementFailedAttempt(email);
 

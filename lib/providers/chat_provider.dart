@@ -5,7 +5,6 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:signtalk/models/message_status.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -17,21 +16,21 @@ class ChatProvider with ChangeNotifier {
 
   Future<void> initSpeech() async {
     bool available = await _speech.initialize(
-      onError: (e) => debugPrint('❌ Speech error: $e'),
-      onStatus: (s) => debugPrint('🎤 Status: $s'),
+      onError: (e) => debugPrint(' Speech error: $e'),
+      onStatus: (s) => debugPrint(' Status: $s'),
     );
 
     if (available) {
-      debugPrint("✅ Speech recognition available");
+      debugPrint(" Speech recognition available");
     } else {
-      debugPrint("❌ Speech recognition not available on this device");
+      debugPrint(" Speech recognition not available on this device");
     }
   }
 
-  // New function: send audio file to Whisper/OpenAI or cloud function
+  /*
   Future<String> transcribeAudio(File audio) async {
     try {
-      final url = Uri.parse('https://YOUR_CLOUD_FUNCTION_URL/transcribe');
+      final url = Uri.parse('');
       final request = http.MultipartRequest('POST', url);
       request.files.add(await http.MultipartFile.fromPath('file', audio.path));
       final streamed = await request.send();
@@ -46,9 +45,8 @@ class ChatProvider with ChangeNotifier {
       print("Transcription failed: $e");
       return "[Voice message]";
     }
-  }
+  }*/
 
-  // Unified send voice message
   Future<void> sendVoiceMessage(
     String chatId,
     String receiverId,
@@ -72,26 +70,28 @@ class ChatProvider with ChangeNotifier {
         });
   }
 
+  //tanggal
   void startListening() async {
     await _speech.listen(
       onResult: (result) {
-        debugPrint("📋 Partial: ${result.recognizedWords}");
+        debugPrint("Partial: ${result.recognizedWords}");
         if (result.finalResult) {
           lastWords = result.recognizedWords;
-          debugPrint("📋 Final transcribed: $lastWords");
+          debugPrint("Final transcribed: $lastWords");
         }
       },
       listenFor: const Duration(seconds: 10),
       pauseFor: const Duration(seconds: 3),
-      localeId: "en-US", // <-- match your phone language
+      localeId: "en-US",
       cancelOnError: true,
       partialResults: true,
     );
   }
 
+  //tanggal
   void stopListening() async {
     await _speech.stop();
-    debugPrint("🛑 Stopped listening. Final: $lastWords");
+    debugPrint(" Stopped listening. Final: $lastWords");
   }
 
   Stream<QuerySnapshot> getChats(String userId) {
@@ -110,6 +110,7 @@ class ChatProvider with ChangeNotifier {
         .snapshots();
   }
 
+  //tanggal
   Future<void> sendRecording(File audioFile) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -146,12 +147,13 @@ class ChatProvider with ChangeNotifier {
         'status': 'sent',
       });
 
-      debugPrint("✅ Sent message with text='$messageText' and audio=$audioUrl");
+      debugPrint("Sent message with text='$messageText' and audio=$audioUrl");
     } catch (e) {
-      debugPrint("❌ sendRecording error: $e");
+      debugPrint(" sendRecording error: $e");
     }
   }
 
+  //tanggal
   Future<String> uploadAudioFile(File file) async {
     final fileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
     final ref = FirebaseStorage.instance.ref().child(
@@ -169,7 +171,7 @@ class ChatProvider with ChangeNotifier {
     final currentUser = _auth.currentUser;
 
     if (currentUser != null) {
-      // Create message with initial status = sent
+      // create message with initial status = sent
       await _firestore
           .collection('chats')
           .doc(chatId)
@@ -182,7 +184,7 @@ class ChatProvider with ChangeNotifier {
             'status': 'sent', // sent status
           });
 
-      // Update chat summary (for the list view)
+      // update chat summary (for the list view)
       await _firestore.collection('chats').doc(chatId).set({
         'users': [currentUser.uid, receiverId],
         'lastMessage': message,
