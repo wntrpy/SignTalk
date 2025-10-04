@@ -89,7 +89,6 @@ void showFeedbackDialog(BuildContext context) {
                           String feedback = feedbackController.text.trim();
 
                           if (feedback.isEmpty) {
-                            // Show error if empty
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
@@ -108,28 +107,45 @@ void showFeedbackDialog(BuildContext context) {
 
                           try {
                             final user = FirebaseAuth.instance.currentUser;
+                            if (user == null)
+                              throw Exception("User not logged in");
 
+                            // Fetch the formatted_uid from the users collection
+                            final userQuery = await FirebaseFirestore.instance
+                                .collection('users')
+                                .where('uid', isEqualTo: user.uid)
+                                .limit(1)
+                                .get();
+
+                            String? formattedUid;
+                            if (userQuery.docs.isNotEmpty) {
+                              formattedUid = userQuery.docs.first.get(
+                                'formatted_uid',
+                              );
+                            }
+
+                            // Add the feedback document
                             await FirebaseFirestore.instance
                                 .collection('user feedback')
                                 .add({
                                   'message': feedback,
                                   'timestamp': FieldValue.serverTimestamp(),
-                                  'uid': user?.uid,
-                                  'email': user?.email,
+                                  'uid': user.uid,
+                                  'email': user.email,
+                                  'formatted_uid': formattedUid,
                                 });
 
                             feedbackController.clear();
                             Navigator.pop(context);
 
+                            // Show success dialog
                             showDialog(
                               context: context,
                               barrierDismissible: false,
                               builder: (context) {
-                                // Auto-close after 2 seconds
                                 Future.delayed(const Duration(seconds: 2), () {
                                   Navigator.of(context).pop(true);
                                 });
-
                                 return AlertDialog(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
@@ -152,11 +168,9 @@ void showFeedbackDialog(BuildContext context) {
                               context: context,
                               barrierDismissible: false,
                               builder: (context) {
-                                // Auto-close after 2 seconds
                                 Future.delayed(const Duration(seconds: 2), () {
                                   Navigator.of(context).pop(true);
                                 });
-
                                 return AlertDialog(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
@@ -176,6 +190,7 @@ void showFeedbackDialog(BuildContext context) {
                             );
                           }
                         },
+
                         child: const Text(
                           "Submit",
                           style: TextStyle(

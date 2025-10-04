@@ -482,12 +482,27 @@ class _ChatScreenState extends State<ChatScreen> {
                               displayName,
                               style: const TextStyle(color: Colors.white),
                             ),
-                            Text(
-                              statusText,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 12,
-                              ),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  margin: const EdgeInsets.only(right: 4),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isOnline
+                                        ? Colors.green
+                                        : Colors.grey,
+                                  ),
+                                ),
+                                Text(
+                                  statusText,
+                                  style: const TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
