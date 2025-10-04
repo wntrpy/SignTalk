@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:signtalk/core/password_validator.dart';
@@ -12,7 +13,6 @@ import 'package:signtalk/widgets/textfields/custom_textfield_dropdown.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/auth_provider.dart' as authentication;
 
-//TODO: linisin mo frontend neto buset
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
 
@@ -28,19 +28,99 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
 
-  final List<String> userTypes = [
-    'Hearing',
-    'Non-Hearing',
-  ]; // laman ng dropdown
+  final List<String> userTypes = ['Hearing', 'Non-Hearing'];
 
-  String? _passwordError; // var na naghohold ng lalamanin ng error
+  String? _passwordError;
   String? _nameError;
   String? _emailError;
   String? _ageError;
 
-  String? selectedUserType; // var na naghohold ng value ng dropdown
+  String? selectedUserType;
+  bool _isLoading = false;
 
-  // Wrap validateNameEmailAge in a Future so we can await it reliably
+  bool _isValidEmail(String email) {
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    );
+    return emailRegex.hasMatch(email);
+  }
+
+  bool _validateEmptyFields() {
+    bool hasError = false;
+
+    if (_nameController.text.trim().isEmpty) {
+      setState(() => _nameError = "Name cannot be empty");
+      hasError = true;
+    }
+
+    if (_ageController.text.trim().isEmpty) {
+      setState(() => _ageError = "Age cannot be empty");
+      hasError = true;
+    }
+
+    if (_emailController.text.trim().isEmpty) {
+      setState(() => _emailError = "Email cannot be empty");
+      hasError = true;
+    }
+
+    if (_passwordController.text.trim().isEmpty) {
+      setState(() => _passwordError = "Password cannot be empty");
+      hasError = true;
+    }
+
+    if (_confirmPasswordController.text.trim().isEmpty) {
+      setState(() => _passwordError = "Confirm password cannot be empty");
+      hasError = true;
+    }
+
+    if (selectedUserType == null || selectedUserType!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select a user type")),
+      );
+      hasError = true;
+    }
+
+    return !hasError;
+  }
+
+  bool _validateAge() {
+    final ageText = _ageController.text.trim();
+
+    if (ageText.isEmpty) {
+      setState(() => _ageError = "Age cannot be empty");
+      return false;
+    }
+
+    final age = int.tryParse(ageText);
+    if (age == null) {
+      setState(() => _ageError = "Age must be a valid number");
+      return false;
+    }
+
+    if (age < 1 || age > 150) {
+      setState(() => _ageError = "Please enter a valid age");
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _validateEmailFormat() {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty) {
+      setState(() => _emailError = "Email cannot be empty");
+      return false;
+    }
+
+    if (!_isValidEmail(email)) {
+      setState(() => _emailError = "Please enter a valid email address");
+      return false;
+    }
+
+    return true;
+  }
+
   Future<bool> _validateNameEmailAge() async {
     final completer = Completer<Map<String, String?>>();
 
@@ -74,7 +154,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   Future<bool> _validatePasswords() async {
-    // Check if empty
     if (_passwordController.text.trim().isEmpty ||
         _confirmPasswordController.text.trim().isEmpty) {
       setState(() {
@@ -103,30 +182,46 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   Future<bool> _handleSubmit() async {
-    final nameEmailAgeValid = await _validateNameEmailAge();
-    if (!nameEmailAgeValid) return false;
+    if (_isLoading) return false;
 
-    final passwordsValid = await _validatePasswords();
-    if (!passwordsValid) return false;
-
-    if (selectedUserType == null || selectedUserType!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select a user type")),
-      );
-      return false;
-    }
-
-    int? parsedAge;
-    try {
-      parsedAge = int.parse(_ageController.text.trim());
-    } catch (_) {
-      setState(() {
-        _ageError = "Age must be a valid number";
-      });
-      return false;
-    }
+    setState(() {
+      _isLoading = true;
+      _nameError = null;
+      _emailError = null;
+      _ageError = null;
+      _passwordError = null;
+    });
 
     try {
+      if (!_validateEmptyFields()) {
+        setState(() => _isLoading = false);
+        return false;
+      }
+
+      if (!_validateAge()) {
+        setState(() => _isLoading = false);
+        return false;
+      }
+
+      if (!_validateEmailFormat()) {
+        setState(() => _isLoading = false);
+        return false;
+      }
+
+      final nameEmailAgeValid = await _validateNameEmailAge();
+      if (!nameEmailAgeValid) {
+        setState(() => _isLoading = false);
+        return false;
+      }
+
+      final passwordsValid = await _validatePasswords();
+      if (!passwordsValid) {
+        setState(() => _isLoading = false);
+        return false;
+      }
+
+      int parsedAge = int.parse(_ageController.text.trim());
+
       final authentication.AuthProvider authProvider =
           Provider.of<authentication.AuthProvider>(context, listen: false);
 
@@ -138,12 +233,36 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         selectedUserType ?? '',
       );
 
-      return true; // only success here
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Registration successful!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+
+      setState(() => _isLoading = false);
+      return true;
     } catch (e) {
+      String errorMessage = e.toString().replaceFirst('Exception: ', '');
+
       setState(() {
-        _emailError = e.toString().replaceFirst('Exception: ', '');
+        _emailError = errorMessage;
+        _isLoading = false;
       });
-      return false; // stop redirect
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
+      return false;
     }
   }
 
@@ -157,14 +276,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     super.dispose();
   }
 
-  //TODO: lagyan mo ng isempty validation kada field ---OK NA
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
         if (!didPop) {
-          context.pop(); // go back to previous page in the stack
+          context.pop();
         }
       },
       child: Scaffold(
@@ -172,17 +290,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // signtalk bg
             Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
-
-            // back button
             SingleChildScrollView(
               padding: const EdgeInsets.symmetric(
                 horizontal: 40.0,
                 vertical: 50,
               ),
               child: Column(
-                // main column parent
                 children: [
                   SafeArea(
                     child: SingleChildScrollView(
@@ -191,35 +305,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           Center(
                             child: CustomSigntalkLogo(width: 150, height: 150),
                           ),
-                          //------------------------------------INPUT-FIELDS-------------------------------------------------//
-                          // name
                           CustomTextfieldAuth(
                             labelText: "Name",
                             controller: _nameController,
                             errorText: _nameError,
                             onChanged: (value) {
-                              setState(() {
-                                _nameError =
-                                    null; // Clear error when user types
-                              });
+                              setState(() => _nameError = null);
                             },
                           ),
                           SizedBox(height: 20),
-
-                          // age
                           CustomTextfieldAuth(
                             labelText: "Age",
                             controller: _ageController,
                             errorText: _ageError,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             onChanged: (value) {
-                              setState(() {
-                                _ageError = null; // Clear error when user types
-                              });
+                              setState(() => _ageError = null);
                             },
                           ),
                           SizedBox(height: 20),
-
-                          // user type
                           CustomTextfieldDropdown(
                             hint: "User Type",
                             value: selectedUserType,
@@ -228,51 +335,75 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 setState(() => selectedUserType = value),
                           ),
                           SizedBox(height: 20),
-
-                          // email
                           CustomTextfieldAuth(
                             labelText: "Email",
                             controller: _emailController,
                             errorText: _emailError,
+                            keyboardType: TextInputType.emailAddress,
                             onChanged: (value) {
-                              setState(() {
-                                _emailError =
-                                    null; // Clear error when user types
-                              });
+                              setState(() => _emailError = null);
                             },
                           ),
                           SizedBox(height: 20),
-
-                          // password
                           CustomPasswordField(
                             controller: _passwordController,
                             labelText: 'Password',
                             errorText: _passwordError,
+                            onChanged: (value) {
+                              setState(() => _passwordError = null);
+                            },
                           ),
                           SizedBox(height: 20),
-
-                          // confirm
                           CustomPasswordField(
                             controller: _confirmPasswordController,
                             labelText: 'Confirm Password',
                             errorText: _passwordError,
+                            onChanged: (value) {
+                              setState(() => _passwordError = null);
+                            },
                           ),
-
                           SizedBox(height: 30),
                           Container(
                             margin: EdgeInsets.only(left: 170),
                             child: CustomButton(
-                              buttonText: "Register",
+                              buttonText: _isLoading
+                                  ? "Registering..."
+                                  : "Register",
                               colorCode: AppConstants.orange,
                               buttonWidth: 200,
                               buttonHeight: 50,
-                              onPressed: () async {
-                                final success = await _handleSubmit();
-                                if (success) {
-                                  context.push('/login_screen');
-                                }
-                              },
-
+                              onPressed: _isLoading
+                                  ? null
+                                  : () {
+                                      print('Button pressed'); // Debug
+                                      _handleSubmit().then(
+                                        (success) {
+                                          print(
+                                            'Registration result: $success',
+                                          ); // Debug
+                                          if (success == true) {
+                                            print(
+                                              'Success is TRUE, checking mounted',
+                                            ); // Debug
+                                            if (mounted) {
+                                              print(
+                                                'Navigating to login screen',
+                                              ); // Debug
+                                              context.push('/login_screen');
+                                            }
+                                          } else {
+                                            print(
+                                              'Not navigating - success: $success',
+                                            ); // Debug
+                                          }
+                                        },
+                                        onError: (error) {
+                                          print(
+                                            'Error caught: $error',
+                                          ); // Debug
+                                        },
+                                      );
+                                    },
                               textSize: 24,
                               borderRadiusValue: 10,
                             ),
@@ -284,6 +415,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 ],
               ),
             ),
+            if (_isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.3),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppConstants.orange),
+                ),
+              ),
           ],
         ),
       ),

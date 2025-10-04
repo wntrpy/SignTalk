@@ -3,13 +3,13 @@ import 'package:signtalk/app_constants.dart';
 
 class CustomButton extends StatelessWidget {
   final String buttonText;
-  final Color colorCode; // background color
+  final Color colorCode;
   final double? buttonWidth;
   final double? buttonHeight;
-  final void Function() onPressed;
-  final Widget? icon; // optional
-  final Color? textColor; // optional
-  final double? textSize; //optional
+  final void Function()? onPressed; // Made nullable with ?
+  final Widget? icon;
+  final Color? textColor;
+  final double? textSize;
   final double? borderRadiusValue;
 
   const CustomButton({
@@ -27,16 +27,17 @@ class CustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final text color
     Color effectiveTextColor = textColor ?? AppConstants.white;
 
     return SizedBox(
       width: buttonWidth,
       height: buttonHeight,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: onPressed, // Will be null when disabled
         style: ElevatedButton.styleFrom(
-          backgroundColor: colorCode,
+          backgroundColor: onPressed != null
+              ? colorCode
+              : Colors.grey, // Grey when disabled
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadiusValue ?? 30),

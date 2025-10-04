@@ -6,6 +6,7 @@ class CustomPasswordField extends StatefulWidget {
   final String labelText;
   final String? errorText;
   final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
 
   const CustomPasswordField({
     super.key,
@@ -13,6 +14,7 @@ class CustomPasswordField extends StatefulWidget {
     required this.labelText,
     this.errorText,
     this.validator,
+    this.onChanged,
   });
 
   @override
@@ -22,13 +24,11 @@ class CustomPasswordField extends StatefulWidget {
 class _CustomPasswordFieldState extends State<CustomPasswordField> {
   bool _obscureText = true;
 
-
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // text label
         Text(
           widget.labelText,
           style: TextStyle(
@@ -37,11 +37,10 @@ class _CustomPasswordFieldState extends State<CustomPasswordField> {
           ),
         ),
         const SizedBox(height: 5),
-
-        // textfield with mata icon
         TextFormField(
           controller: widget.controller,
           validator: widget.validator,
+          onChanged: widget.onChanged,
           obscureText: _obscureText,
           keyboardType: TextInputType.visiblePassword,
           decoration: InputDecoration(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:signtalk/app_constants.dart';
 
 class CustomTextfieldAuth extends StatelessWidget {
@@ -8,6 +9,7 @@ class CustomTextfieldAuth extends StatelessWidget {
   final void Function(String)? onChanged;
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextfieldAuth({
     super.key,
@@ -16,7 +18,8 @@ class CustomTextfieldAuth extends StatelessWidget {
     this.errorText,
     this.onChanged,
     this.validator,
-    this.keyboardType = TextInputType.text, // default value
+    this.keyboardType = TextInputType.text,
+    this.inputFormatters,
   });
 
   @override
@@ -30,15 +33,14 @@ class CustomTextfieldAuth extends StatelessWidget {
             fontSize: AppConstants.fontSizeMedium,
             color: Colors.white,
           ),
-        ), //label text na nasa taas ng textfield
+        ),
         SizedBox(height: 5),
-
         TextFormField(
           controller: controller,
           onChanged: onChanged,
           validator: validator,
           keyboardType: keyboardType,
-
+          inputFormatters: inputFormatters,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,

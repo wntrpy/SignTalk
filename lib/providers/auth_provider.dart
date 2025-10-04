@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:convert'; // Importing dart:convert for JSON encoding of the email payload
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:http/http.dart'
-    as http; // Importing http package for making HTTP requests
+import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:signtalk/providers/presence_service.dart';
 
@@ -39,6 +38,7 @@ class AuthProvider with ChangeNotifier {
 
   String? get tempEmail => _tempEmail;
   String? get tempPassword => _tempPassword;
+
   Future<void> register(
     String email,
     String password,
@@ -46,10 +46,29 @@ class AuthProvider with ChangeNotifier {
     int age,
     String userTypes,
   ) async {
+    print('=== REGISTER START ===');
+
     try {
+      // CHECK FIRESTORE FIRST
+      print('Checking Firestore for existing email...');
+      final emailQuery = await _firestore
+          .collection('users')
+          .where('email_lowercase', isEqualTo: email.toLowerCase())
+          .limit(1)
+          .get();
+
+      if (emailQuery.docs.isNotEmpty) {
+        print('Email already exists in Firestore - throwing exception');
+        throw Exception('This email is already registered');
+      }
+
+      print('Email not found in Firestore, proceeding with auth...');
+
       // Create auth account
       UserCredential userCredential = await _auth
           .createUserWithEmailAndPassword(email: email, password: password);
+
+      print('Auth account created successfully');
 
       final authUid = userCredential.user?.uid;
       if (authUid == null) {
@@ -63,7 +82,7 @@ class AuthProvider with ChangeNotifier {
           .limit(1)
           .get();
 
-      int newFormattedUid = 1000; // starting point
+      int newFormattedUid = 1000;
       if (snapshot.docs.isNotEmpty) {
         final latestDoc = snapshot.docs.first.data();
         final latestFormattedUidField = latestDoc['formatted_uid'];
@@ -86,26 +105,40 @@ class AuthProvider with ChangeNotifier {
         'email': email,
         'email_lowercase': email.toLowerCase(),
         'firebase_uid': authUid,
+        'createdAt': FieldValue.serverTimestamp(),
       });
 
+      print('User saved to Firestore successfully');
+      print('=== REGISTER SUCCESS ===');
       notifyListeners();
     } on FirebaseAuthException catch (e) {
-      // Friendly error messages
+      print('FirebaseAuthException caught: ${e.code}');
+
       if (e.code == 'email-already-in-use') {
         throw Exception('This email is already registered');
+      } else if (e.code == 'weak-password') {
+        throw Exception('Password is too weak');
+      } else if (e.code == 'invalid-email') {
+        throw Exception('Invalid email format');
       } else {
         throw Exception(e.message ?? 'Registration failed');
       }
     } catch (e) {
-      rethrow;
+      print('General exception caught: $e');
+      print('=== REGISTER FAILED ===');
+
+      if (e.toString().contains('Exception:')) {
+        rethrow;
+      }
+      throw Exception('Registration failed: ${e.toString()}');
     }
   }
 
-  //Directly send email using SendGrid API ---direct call from flutter to SendGrid w/o using intermediary Firebase Function
+  //Directly send email using SendGrid API
   Future<void> sendEmailDirectlyViaSendGrid(String email, String code) async {
-    final String? sendGridApiKey =
-        dotenv.env['SENDGRID_API_KEY']; //Shouldn't be hardcoded -- NOT SECURE
-    const String senderEmail = '<signtalk625@icloud.com>';
+    final String? sendGridApiKey = dotenv.env['SENDGRID_API_KEY'];
+    const String senderEmail = 'signtalk625@icloud.com';
+
     if (sendGridApiKey == null) {
       throw Exception('SendGrid API key not found in environment variables');
     }
@@ -165,7 +198,6 @@ class AuthProvider with ChangeNotifier {
       // Generate code and store in Firestore
       final code = (100000 + DateTime.now().millisecondsSinceEpoch % 900000)
           .toString();
-      //_generatedCode = code;
       _userIdFor2FA = uid;
 
       await _firestore.collection('verification').doc(uid).set({
@@ -239,31 +271,50 @@ class AuthProvider with ChangeNotifier {
       if (googleUser == null)
         return "cancelled"; // User closed the sign-in dialog
 
-      final googleAuth = await googleUser
-          .authentication; // Get the authentication details from the Google sign-in process
+      final googleAuth = await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
-        // Create a credential using the Google authentication details
         idToken: googleAuth.idToken,
         accessToken: googleAuth.accessToken,
       );
 
-      final userCredential = await _auth.signInWithCredential(
-        credential,
-      ); // Sign in to Firebase using the Google credential
+      final userCredential = await _auth.signInWithCredential(credential);
 
-      final user = userCredential.user; // Check if the user is not null
+      final user = userCredential.user;
       if (user != null) {
         final doc = await _firestore.collection('users').doc(user.uid).get();
         if (!doc.exists) {
-          // If the user document does not exist, create it
+          // Get latest formatted_uid for Google sign-in users too
+          final snapshot = await _firestore
+              .collection('users')
+              .orderBy('formatted_uid', descending: true)
+              .limit(1)
+              .get();
+
+          int newFormattedUid = 1000;
+          if (snapshot.docs.isNotEmpty) {
+            final latestDoc = snapshot.docs.first.data();
+            final latestFormattedUidField = latestDoc['formatted_uid'];
+
+            if (latestFormattedUidField is int) {
+              newFormattedUid = latestFormattedUidField + 1;
+            } else if (latestFormattedUidField is String) {
+              newFormattedUid =
+                  (int.tryParse(latestFormattedUidField) ?? 999) + 1;
+            }
+          }
+
           await _firestore.collection('users').doc(user.uid).set({
             'uid': user.uid,
+            'formatted_uid': newFormattedUid,
             'name': user.displayName ?? '',
+            'name_lowercase': (user.displayName ?? '').toLowerCase(),
             'email': user.email,
+            'email_lowercase': (user.email ?? '').toLowerCase(),
             'userType': '',
             'age': '',
-            'photoUrl': user.photoURL, //move this to storage firebase
+            'photoUrl': user.photoURL,
+            'createdAt': FieldValue.serverTimestamp(),
           });
         }
 
@@ -310,54 +361,4 @@ class AuthProvider with ChangeNotifier {
       rethrow;
     }
   }
-
-  //   Future<void> signInWith2FA(String email, String password) async {
-  //   try {
-  //     final userCred = await _auth.signInWithEmailAndPassword(email: email, password: password);
-  //     final uid = userCred.user?.uid;
-  //     if (uid == null) throw Exception("User ID is null");
-
-  //     // Generate 6-digit code
-  //     final code = (100000 + (DateTime.now().millisecondsSinceEpoch % 900000)).toString();
-  //     _generatedCode = code;
-  //     _userIdFor2FA = uid;
-
-  //     // Store in Firestore temporarily
-  //     await _firestore.collection('verification').doc(uid).set({
-  //       'code': code,
-  //       'expiresAt': Timestamp.fromDate(DateTime.now().add(Duration(minutes: 5))),
-  //     });
-
-  //     // Call Firebase Function to send email
-  //     await sendEmailCode(email, code);
-  //   } catch (e) {
-  //     rethrow;
-  //   }
-
-  // }
-
-  // Future<void> sendEmailCode(String email, String code) async {
-  //   final callable = FirebaseFunctions.instance.httpsCallable('send2FACode');
-  //   await callable.call({'email': email, 'code': code});
-  // }
-
-  // Future<bool> verify2FACode(String inputCode) async {
-  //   if (_userIdFor2FA == null) return false;
-
-  //   final doc = await _firestore.collection('verification').doc(_userIdFor2FA).get();
-  //   if (!doc.exists) return false;
-
-  //   final data = doc.data();
-  //   final savedCode = data?['code'];
-  //   final expiresAt = (data?['expiresAt'] as Timestamp).toDate();
-
-  //   if (DateTime.now().isAfter(expiresAt)) return false;
-
-  //   if (inputCode == savedCode) {
-  //     await _firestore.collection('verification').doc(_userIdFor2FA!).delete();
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // }
 }
