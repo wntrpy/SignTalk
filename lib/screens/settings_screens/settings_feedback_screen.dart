@@ -110,7 +110,7 @@ void showFeedbackDialog(BuildContext context) {
                             if (user == null)
                               throw Exception("User not logged in");
 
-                            // Fetch the formatted_uid from the users collection
+                            // Fetch the formatted_uid safely
                             final userQuery = await FirebaseFirestore.instance
                                 .collection('users')
                                 .where('uid', isEqualTo: user.uid)
@@ -119,9 +119,11 @@ void showFeedbackDialog(BuildContext context) {
 
                             String? formattedUid;
                             if (userQuery.docs.isNotEmpty) {
-                              formattedUid = userQuery.docs.first.get(
-                                'formatted_uid',
-                              );
+                              final doc = userQuery.docs.first;
+                              if (doc.data().containsKey('formatted_uid')) {
+                                final uidValue = doc.get('formatted_uid');
+                                formattedUid = uidValue?.toString();
+                              }
                             }
 
                             // Add the feedback document
@@ -163,7 +165,9 @@ void showFeedbackDialog(BuildContext context) {
                                 );
                               },
                             );
-                          } catch (e) {
+                          } catch (e, stack) {
+                            print("Feedback error: $e\n$stack");
+
                             showDialog(
                               context: context,
                               barrierDismissible: false,
@@ -190,7 +194,6 @@ void showFeedbackDialog(BuildContext context) {
                             );
                           }
                         },
-
                         child: const Text(
                           "Submit",
                           style: TextStyle(
