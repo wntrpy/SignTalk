@@ -10,6 +10,7 @@ class CustomTextfieldAuth extends StatelessWidget {
   final String? Function(String?)? validator;
   final TextInputType keyboardType;
   final List<TextInputFormatter>? inputFormatters;
+  final bool enabled; // Added enabled parameter
 
   const CustomTextfieldAuth({
     super.key,
@@ -20,6 +21,7 @@ class CustomTextfieldAuth extends StatelessWidget {
     this.validator,
     this.keyboardType = TextInputType.text,
     this.inputFormatters,
+    this.enabled = true, // Default to true
   });
 
   @override
@@ -41,9 +43,12 @@ class CustomTextfieldAuth extends StatelessWidget {
           validator: validator,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
+          enabled: enabled, // Added enabled property
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white,
+            fillColor: enabled
+                ? Colors.white
+                : Colors.grey.shade300, // Visual feedback when disabled
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
               borderSide: BorderSide.none,

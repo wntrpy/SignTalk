@@ -39,6 +39,143 @@ class AuthProvider with ChangeNotifier {
   String? get tempEmail => _tempEmail;
   String? get tempPassword => _tempPassword;
 
+  // Login attempt tracking (in-memory cache)
+  final Map<String, int> _loginAttempts = {};
+  final Map<String, DateTime> _lockoutUntil = {};
+
+  // Constructor - load lockout data when provider is created
+  AuthProvider() {
+    _initializeLockoutData();
+  }
+
+  // Initialize and load lockout data
+  Future<void> _initializeLockoutData() async {
+    await loadLockoutData();
+  }
+
+  // Load lockout data from Firestore
+  Future<void> loadLockoutData() async {
+    try {
+      final snapshot = await _firestore.collection('login_lockouts').get();
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final email = doc.id;
+        final lockoutUntil = (data['lockoutUntil'] as Timestamp?)?.toDate();
+        final attempts = data['attempts'] as int?;
+
+        if (lockoutUntil != null && attempts != null) {
+          // Only restore if lockout hasn't expired
+          if (DateTime.now().isBefore(lockoutUntil)) {
+            _lockoutUntil[email] = lockoutUntil;
+            _loginAttempts[email] = attempts;
+          } else {
+            // Clean up expired lockout
+            await _firestore.collection('login_lockouts').doc(email).delete();
+          }
+        }
+      }
+
+      notifyListeners();
+    } catch (e) {
+      print('Error loading lockout data: $e');
+    }
+  }
+
+  // Save lockout data to Firestore
+  Future<void> _saveLockoutData(String email) async {
+    try {
+      final emailKey = email.toLowerCase();
+      final lockoutTime = _lockoutUntil[emailKey];
+      final attempts = _loginAttempts[emailKey];
+
+      if (lockoutTime != null && attempts != null) {
+        await _firestore.collection('login_lockouts').doc(emailKey).set({
+          'email': emailKey,
+          'lockoutUntil': Timestamp.fromDate(lockoutTime),
+          'attempts': attempts,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (e) {
+      print('Error saving lockout data: $e');
+    }
+  }
+
+  // Clear lockout data from Firestore
+  Future<void> _clearLockoutData(String email) async {
+    try {
+      await _firestore
+          .collection('login_lockouts')
+          .doc(email.toLowerCase())
+          .delete();
+    } catch (e) {
+      print('Error clearing lockout data: $e');
+    }
+  }
+
+  // Get any currently locked out email (for UI restoration)
+  String? getAnyLockedOutEmail() {
+    for (var email in _lockoutUntil.keys) {
+      if (isLockedOut(email)) {
+        return email;
+      }
+    }
+    return null;
+  }
+
+  // Check if email is locked out
+  bool isLockedOut(String email) {
+    final lockoutTime = _lockoutUntil[email.toLowerCase()];
+    if (lockoutTime == null) return false;
+
+    if (DateTime.now().isBefore(lockoutTime)) {
+      return true;
+    } else {
+      // Lockout expired, reset
+      _lockoutUntil.remove(email.toLowerCase());
+      _loginAttempts.remove(email.toLowerCase());
+      _clearLockoutData(email.toLowerCase());
+      notifyListeners();
+      return false;
+    }
+  }
+
+  // Get remaining lockout time in seconds
+  int getRemainingLockoutTime(String email) {
+    final lockoutTime = _lockoutUntil[email.toLowerCase()];
+    if (lockoutTime == null) return 0;
+
+    final remaining = lockoutTime.difference(DateTime.now()).inSeconds;
+    return remaining > 0 ? remaining : 0;
+  }
+
+  // Get current attempt count
+  int getAttemptCount(String email) {
+    return _loginAttempts[email.toLowerCase()] ?? 0;
+  }
+
+  // Reset login attempts (called on successful login)
+  Future<void> _resetLoginAttempts(String email) async {
+    _loginAttempts.remove(email.toLowerCase());
+    _lockoutUntil.remove(email.toLowerCase());
+    await _clearLockoutData(email.toLowerCase());
+    notifyListeners();
+  }
+
+  // Increment failed login attempts
+  Future<void> _incrementFailedAttempt(String email) async {
+    final emailKey = email.toLowerCase();
+    _loginAttempts[emailKey] = (_loginAttempts[emailKey] ?? 0) + 1;
+
+    if (_loginAttempts[emailKey]! >= 3) {
+      _lockoutUntil[emailKey] = DateTime.now().add(Duration(minutes: 5));
+      await _saveLockoutData(email);
+    }
+
+    notifyListeners();
+  }
+
   Future<void> register(
     String email,
     String password,
@@ -228,6 +365,13 @@ class AuthProvider with ChangeNotifier {
 
   Future<String?> signInWith2FA(String email, String password) async {
     try {
+      // Check if account is locked out
+      if (isLockedOut(email)) {
+        final remainingTime = getRemainingLockoutTime(email);
+        final minutes = (remainingTime / 60).ceil();
+        return "Too many failed attempts. Please try again in $minutes minute${minutes > 1 ? 's' : ''}.";
+      }
+
       // Sign in to validate (then sign out)
       final userCred = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -237,6 +381,9 @@ class AuthProvider with ChangeNotifier {
       await _auth.signOut(); // Sign out immediately to prevent session
 
       if (uid == null) throw Exception("User ID is null");
+
+      // Reset attempts on successful login
+      await _resetLoginAttempts(email);
 
       _tempEmail = email;
       _tempPassword = password;
@@ -255,8 +402,27 @@ class AuthProvider with ChangeNotifier {
 
       await sendEmailDirectlyViaSendGrid(email, code);
       return null; // No error, proceed to 2FA screen
-    } catch (_) {
-      return "An error occured. Please try again.";
+    } on FirebaseAuthException catch (e) {
+      // Increment failed attempts
+      await _incrementFailedAttempt(email);
+
+      final attempts = getAttemptCount(email);
+      if (attempts >= 3) {
+        return "Too many failed attempts. Your account has been locked for 5 minutes.";
+      } else {
+        final remaining = 3 - attempts;
+        return "Email or password is incorrect. $remaining attempt${remaining > 1 ? 's' : ''} remaining.";
+      }
+    } catch (e) {
+      // Increment failed attempts for general errors too
+      await _incrementFailedAttempt(email);
+
+      final attempts = getAttemptCount(email);
+      if (attempts >= 3) {
+        return "Too many failed attempts. Your account has been locked for 5 minutes.";
+      } else {
+        return "An error occurred. Please try again.";
+      }
     }
   }
 
@@ -277,6 +443,11 @@ class AuthProvider with ChangeNotifier {
 
     if (inputCode == savedCode) {
       await _firestore.collection('verification').doc(_userIdFor2FA!).delete();
+
+      // Reset login attempts on successful 2FA verification
+      if (_tempEmail != null) {
+        await _resetLoginAttempts(_tempEmail!);
+      }
 
       //set user as online
       final presence = PresenceService();

@@ -7,6 +7,7 @@ class CustomPasswordField extends StatefulWidget {
   final String? errorText;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
+  final bool? enabled;
 
   const CustomPasswordField({
     super.key,
@@ -15,6 +16,7 @@ class CustomPasswordField extends StatefulWidget {
     this.errorText,
     this.validator,
     this.onChanged,
+    this.enabled,
   });
 
   @override
