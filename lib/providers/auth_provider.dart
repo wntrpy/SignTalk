@@ -76,39 +76,85 @@ class AuthProvider with ChangeNotifier {
       }
 
       // Get latest formatted_uid
+      print('Fetching latest formatted_uid...');
       final snapshot = await _firestore
           .collection('users')
           .orderBy('formatted_uid', descending: true)
           .limit(1)
           .get();
 
-      int newFormattedUid = 1000;
+      print('Query returned ${snapshot.docs.length} documents');
+
+      int newFormattedUid = 1000; // Default starting value
       if (snapshot.docs.isNotEmpty) {
         final latestDoc = snapshot.docs.first.data();
+        print('Latest document data: $latestDoc');
+
         final latestFormattedUidField = latestDoc['formatted_uid'];
+        print(
+          'Latest formatted_uid field value: $latestFormattedUidField (type: ${latestFormattedUidField.runtimeType})',
+        );
 
         if (latestFormattedUidField is int) {
           newFormattedUid = latestFormattedUidField + 1;
+          print('Calculated new formatted_uid (from int): $newFormattedUid');
         } else if (latestFormattedUidField is String) {
-          newFormattedUid = (int.tryParse(latestFormattedUidField) ?? 999) + 1;
+          // Extract numeric part from string like "ADMIN_004" or just parse the number
+          String numericPart = latestFormattedUidField.replaceAll(
+            RegExp(r'[^0-9]'),
+            '',
+          );
+          if (numericPart.isNotEmpty) {
+            newFormattedUid = int.parse(numericPart);
+          }
+
+          // If it's an admin formatted UID, keep the format
+          if (latestFormattedUidField.startsWith('ADMIN_')) {
+            // Skip admin formatted UIDs and find the next numeric one
+            final numericSnapshot = await _firestore
+                .collection('users')
+                .where('formatted_uid', isGreaterThanOrEqualTo: 1000)
+                .orderBy('formatted_uid', descending: true)
+                .limit(1)
+                .get();
+
+            if (numericSnapshot.docs.isNotEmpty) {
+              final numericDoc = numericSnapshot.docs.first.data();
+              final numericUid = numericDoc['formatted_uid'];
+              if (numericUid is int) {
+                newFormattedUid = numericUid + 1;
+              }
+            }
+          } else {
+            // For numeric formatted_uid strings
+            newFormattedUid =
+                (int.tryParse(latestFormattedUidField) ?? 999) + 1;
+          }
+          print('Calculated new formatted_uid (from string): $newFormattedUid');
         }
       }
+
+      print('Final formatted_uid to be assigned: $newFormattedUid');
 
       // Save user in Firestore
       await _firestore.collection('users').doc(authUid).set({
         'uid': authUid,
-        'formatted_uid': newFormattedUid,
+        'formatted_uid':
+            newFormattedUid, // This will now be a proper incremented number
         'name': name,
         'name_lowercase': name.toLowerCase(),
         'age': age,
         'userType': userTypes,
+        'isOnline': false,
         'email': email,
         'email_lowercase': email.toLowerCase(),
         'firebase_uid': authUid,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      print('User saved to Firestore successfully');
+      print(
+        'User saved to Firestore successfully with formatted_uid: $newFormattedUid',
+      );
       print('=== REGISTER SUCCESS ===');
       notifyListeners();
     } on FirebaseAuthException catch (e) {
