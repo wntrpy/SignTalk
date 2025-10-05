@@ -234,7 +234,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
     } else if (_voiceText.isNotEmpty) {
-      // 📝 Review transcribed text UI
+      // Review transcribed text UI
       return Container(
         color: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
@@ -280,7 +280,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
       );
     } else {
-      // ✏️ Normal typing UI
+      //Normal typing UI
       return Container(
         color: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),

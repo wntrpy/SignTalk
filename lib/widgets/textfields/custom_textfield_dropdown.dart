@@ -50,7 +50,7 @@ class CustomTextfieldDropdown extends StatelessWidget {
                       DropdownMenuItem<String>(value: item, child: Text(item)),
                 )
                 .toList(),
-            onChanged: enabled ? onChanged: null,
+            onChanged: enabled ? onChanged : null,
           ),
         ),
       ],

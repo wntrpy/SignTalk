@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:signtalk/app_colors.dart';
 
 void showFeedbackDialog(BuildContext context) {
   final TextEditingController feedbackController = TextEditingController();
@@ -22,13 +23,13 @@ void showFeedbackDialog(BuildContext context) {
                 color: Colors.purple,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
-              child: const Text(
+              child: Text(
                 "Send us some feedback!",
                 style: TextStyle(
                   fontSize: 18,
                   fontFamily: "Alata",
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: AppColors.of(context).surface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -36,8 +37,8 @@ void showFeedbackDialog(BuildContext context) {
 
             // Content
             Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: AppColors.of(context).surface,
                 borderRadius: BorderRadius.vertical(
                   bottom: Radius.circular(16),
                 ),
@@ -194,12 +195,12 @@ void showFeedbackDialog(BuildContext context) {
                             );
                           }
                         },
-                        child: const Text(
+                        child: Text(
                           "Submit",
                           style: TextStyle(
                             fontSize: 18,
                             fontFamily: "Alata",
-                            color: Colors.white,
+                            color: AppColors.of(context).surface,
                           ),
                         ),
                       ),

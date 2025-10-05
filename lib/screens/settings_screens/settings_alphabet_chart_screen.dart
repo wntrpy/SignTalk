@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:signtalk/app_colors.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/custom_app_bar.dart';
@@ -11,40 +12,40 @@ class SettingsAlphabetChart extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userProvider);
-    return userAsync.when (
+    return userAsync.when(
       data: (user) => Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+        fit: StackFit.expand,
+        children: [
+          Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
-        Column(
-          children: [
-            // ------------------------parang app bar----------------------------
-            CustomAppBar(
-              appBarText: "ASL and FSL Alphabet (Chart)",
-              rightWidget: CustomCirclePfpButton(
-                borderColor: AppConstants.white,
-                userImage: user.photoUrl ?? AppConstants.default_user_pfp,
-                width: 40,
-                height: 40,
+          Column(
+            children: [
+              // ------------------------parang app bar----------------------------
+              CustomAppBar(
+                appBarText: "ASL and FSL Alphabet (Chart)",
+                rightWidget: CustomCirclePfpButton(
+                  borderColor: AppColors.of(context).surface,
+                  userImage: user.photoUrl ?? AppConstants.default_user_pfp,
+                  width: 40,
+                  height: 40,
+                ),
               ),
-            ),
 
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20.0,
-                vertical: 20,
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20.0,
+                  vertical: 20,
+                ),
+                child: Column(
+                  children: [
+                    //TODO: palitan mo to ng learning mats for ASL and FSL
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  //TODO: palitan mo to ng learning mats for ASL and FSL
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
+            ],
+          ),
+        ],
+      ),
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('Error: $e')),
     );

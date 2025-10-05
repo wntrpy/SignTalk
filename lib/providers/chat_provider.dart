@@ -5,6 +5,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:signtalk/models/message_status.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
@@ -27,7 +28,6 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  /*
   Future<String> transcribeAudio(File audio) async {
     try {
       final url = Uri.parse('');
@@ -45,7 +45,7 @@ class ChatProvider with ChangeNotifier {
       print("Transcription failed: $e");
       return "[Voice message]";
     }
-  }*/
+  }
 
   Future<void> sendVoiceMessage(
     String chatId,
