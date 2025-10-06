@@ -190,7 +190,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (error == null) {
       // Success - proceed to 2FA
-      context.push('/2FA_screen');
+      // Use pushReplacement or go instead of push to ensure navigation happens
+      await context.push('/2FA_screen');
+
+      // Alternative option if push doesn't work:
+      // context.go('/2FA_screen');
     } else {
       // Check if now locked out after this attempt
       if (authProvider.isLockedOut(email)) {

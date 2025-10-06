@@ -140,24 +140,85 @@ signtalk/ - MAIN FOLDER
 
 
 SCREENS
-Splash screen
-login screen
-registration screen / sign up screen
-forget password screen 1 (enter email of the account)
-forget password screen 2 (verification)
-forget password screen 3 (new and confirm password)
-new user welcome screen
+- this is the mobile/client side, only used by users/clients
 
-home screen(message tab active) (with message(if existing user and has messaged anyone before) or none (new user))
-home screen(contacts tab active) (show list of contacts)
-home screen (search screen?)
-conversation screen
+Splash screen
+- does nothing in backend, just show like the logo/branding of the app for 3 seconds
+
+login screen
+- authentication
+- login with email and password
+- can also log in with google 
+- if user failed to get the credentials right after 3 attempts, the user won't be able to attempt to try again after 5 mins, after 5 mins, the user can try again
+- if all conditions are true, and the credentials are right, proceed/navigate to home screen
+
+
+registration screen / sign up screen
+- users can create new account in order to use enter/use the mobile application
+- fields: name, age, user type (hearing, non-hearing), email, password, confirm password
+- after creating an account, it will automatically navigate the user to the login screen
+
+forget password screen 
+- enter the email account of the user that wants their password to be reset.
+- after clicking the submit button, there will be a password reset link to be sent to that email
+  - after that, the user can now enter their new password
+  - and after that, use their new password in login screen
+
+home screen
+- this screen contains the:
+  - search button, that when clicked, the user will be redirected to the search screen
+  - the appbar in which it contains the logo of the app, name("Hello, {Name}!") of the user, and their profile picture
+  - it also contains the list of the users that the current logged in user is chatting  
+    - if the user is not chatting anyone, or its empty, it will show nothing, and there will only be a text("No conversations yet.")
+    - else, show the users the user is chatting
+      - if the users has a users in the list, the user can tap that user in order to be redirected to the chat screen, and start chatting
+
+search screen
+- this screen lets the current logged in user search other users that are registered in the mobile application
+- the searched users here is in a form of card, which is clickable, when clicked, will be redirected to the chat screen, with the correct user data
+
+
+chat screen
+- this screen lets two user(current logged in user and the receiver) to communicate
+- send and receive chats from users
+- can send/receive signlanguage, text, audio messages
+   - the message bubble/format for all chat is text, and when that is clicked, it will reveal an audio & sign language translation
+- this screen also contains a circle avatar that contains the receiver's data (name, active status, pfp)
+   - when the receiver's pfp is clicked, it wil redirect the current logged in user to the receiver profile screen
+
+
+Receiver profile screen (the one the user is talking to)
+- this screen shows some options/configs, and the name of the receiver
+  - can change/reset nickname
+  - can enable and disable:
+    - 3d avatar sign language - hide the 3d sign language translation
+    - translated voice speech - hide the audio translation
+  - mute notification
+  - can block the user
+  - can delete conversation
 
 User profile screen
-Settings screen
-feedback screen
-blocked list screen
-ASL and FSL alphabet chart screen
+- this screen display the basic information of the current logged in user
+   - user profile picture
+   - name
+   - age
+   - user type
+   - email
+- the current logged in user can change their pfp, name, and age
+- this screen also contains the settings icon/button, that when clicked, the current logged in user will be redirected to the settings screen
 
-Other end(user profile settings screen) the one the user is talking to
+Settings screen
+- this screen contains some options/configurations for the application?
+- contains feedback dialog/screen?
+  - when the feedback option is clicked, it will show an alert dialog in which it contains a text area for user to input some feedbacks and a submit & cancel button 
+  - send feedback for the application
+- Blocked list option/screen
+   - when the blocked list option is clicked, it will redirect the current logged in user to the blocked users/list screen
+   - the blocked list screen contains the list of users that the current logged in user has blocked
+   - the current logged in user can also unblock the users the user has blocked
+   - contains the infos of the blocked users (pfp, name, blocked date and time (timestamp))
+- ASL alphabet chart screen
+  - when the ASL alphabet chart option from settings is clicked, it will redirect the current logged in user to the ASL alphabert chart screen
+  - this screen just contains an image of ASL alphabet chart(A-Z), in which the current logged in user can learn some ASL Sign Language
+
 

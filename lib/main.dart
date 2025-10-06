@@ -42,31 +42,12 @@ void main() async {
   NotificationService().init();
 }
 
-Future<void> addMissingPhotoUrlField() async {
-  final usersCollection = FirebaseFirestore.instance.collection('users');
-
-  final querySnapshot = await usersCollection.get();
-
-  for (var doc in querySnapshot.docs) {
-    final data = doc.data();
-
-    // If 'photoUrl' does not exist, add it as an empty string
-    if (!data.containsKey('photoUrl')) {
-      await usersCollection.doc(doc.id).update({'photoUrl': ''});
-      print('✅ Added photoUrl for user: ${doc.id}');
-    }
-  }
-
-  print('🎉 Migration completed: All users now have a photoUrl field.');
-}
-
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDarkMode = ref.watch(darkModeProvider);
-    addMissingPhotoUrlField();
     return MaterialApp.router(
       routerConfig: router,
       debugShowCheckedModeBanner: false,
