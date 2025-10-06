@@ -276,8 +276,7 @@ class AuthProvider with ChangeNotifier {
       // Save user in Firestore
       await _firestore.collection('users').doc(authUid).set({
         'uid': authUid,
-        'formatted_uid':
-            newFormattedUid, // This will now be a proper incremented number
+        'formatted_uid': newFormattedUid,
         'name': name,
         'name_lowercase': name.toLowerCase(),
         'age': age,
@@ -482,69 +481,184 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  //Sign in using Google
+  // Helper function to get next formatted_uid
+  Future<int> _getNextFormattedUid() async {
+    final snapshot = await _firestore
+        .collection('users')
+        .orderBy('formatted_uid', descending: true)
+        .limit(1)
+        .get();
+
+    int newFormattedUid = 1000;
+    if (snapshot.docs.isNotEmpty) {
+      final latestDoc = snapshot.docs.first.data();
+      final latestFormattedUidField = latestDoc['formatted_uid'];
+
+      if (latestFormattedUidField is int) {
+        newFormattedUid = latestFormattedUidField + 1;
+      } else if (latestFormattedUidField is String) {
+        if (latestFormattedUidField.startsWith('ADMIN_')) {
+          final numericSnapshot = await _firestore
+              .collection('users')
+              .where('formatted_uid', isGreaterThanOrEqualTo: 1000)
+              .orderBy('formatted_uid', descending: true)
+              .limit(1)
+              .get();
+
+          if (numericSnapshot.docs.isNotEmpty) {
+            final numericUid = numericSnapshot.docs.first
+                .data()['formatted_uid'];
+            if (numericUid is int) {
+              newFormattedUid = numericUid + 1;
+            }
+          }
+        } else {
+          newFormattedUid = (int.tryParse(latestFormattedUidField) ?? 999) + 1;
+        }
+      }
+    }
+    return newFormattedUid;
+  }
+
+  //Sign in using Google - ENHANCED VERSION
   Future<String> signInWithGoogle() async {
     try {
+      print('=== GOOGLE SIGN-IN START ===');
+
       final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null)
-        return "cancelled"; // User closed the sign-in dialog
+      if (googleUser == null) {
+        print('User cancelled Google sign-in');
+        return "cancelled";
+      }
 
       final googleAuth = await googleUser.authentication;
-
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
         accessToken: googleAuth.accessToken,
       );
 
       final userCredential = await _auth.signInWithCredential(credential);
-
       final user = userCredential.user;
-      if (user != null) {
-        final doc = await _firestore.collection('users').doc(user.uid).get();
-        if (!doc.exists) {
-          // Get latest formatted_uid for Google sign-in users too
-          final snapshot = await _firestore
-              .collection('users')
-              .orderBy('formatted_uid', descending: true)
-              .limit(1)
-              .get();
 
-          int newFormattedUid = 1000;
-          if (snapshot.docs.isNotEmpty) {
-            final latestDoc = snapshot.docs.first.data();
-            final latestFormattedUidField = latestDoc['formatted_uid'];
+      if (user == null) {
+        print('Failed to get user from credential');
+        return "error";
+      }
 
-            if (latestFormattedUidField is int) {
-              newFormattedUid = latestFormattedUidField + 1;
-            } else if (latestFormattedUidField is String) {
-              newFormattedUid =
-                  (int.tryParse(latestFormattedUidField) ?? 999) + 1;
+      final email = user.email?.toLowerCase() ?? '';
+      print('Google user email: $email');
+
+      // Check if user exists in Firestore by email (not just by auth UID)
+      final emailQuery = await _firestore
+          .collection('users')
+          .where('email_lowercase', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      if (emailQuery.docs.isNotEmpty) {
+        // EXISTING USER - Check if we need to link accounts
+        print('Found existing user with this email');
+        final existingDoc = emailQuery.docs.first;
+        final existingData = existingDoc.data();
+        final existingUid = existingDoc.id;
+        final existingFirebaseUid = existingData['firebase_uid'] as String?;
+        final existingPhotoUrl = existingData['photoUrl'] as String? ?? '';
+
+        // Determine which photo to use:
+        // 1. If user has a custom photo (not empty and not a Google photo), keep it
+        // 2. If user has no photo or has a Google photo, update with new Google photo
+        String photoToUse = existingPhotoUrl;
+
+        // Only update photo if current photo is empty OR if it's a Google photo being refreshed
+        if (existingPhotoUrl.isEmpty ||
+            existingPhotoUrl.contains('googleusercontent.com') ||
+            existingPhotoUrl.contains('ggpht.com')) {
+          photoToUse = user.photoURL ?? existingPhotoUrl;
+          print('Updating photo URL from Google');
+        } else {
+          print('Keeping existing custom photo URL');
+        }
+
+        // If the firebase_uid is different, we need to update it
+        if (existingFirebaseUid != user.uid) {
+          print('Linking Google account to existing email/password account');
+
+          // Update the existing document with new firebase_uid
+          await _firestore.collection('users').doc(existingUid).update({
+            'firebase_uid': user.uid,
+            'photoUrl': photoToUse,
+            'lastLoginMethod': 'google',
+            'lastLoginAt': FieldValue.serverTimestamp(),
+          });
+
+          // If there's a separate document with the Google UID, delete it to avoid duplicates
+          if (existingUid != user.uid) {
+            final googleUidDoc = await _firestore
+                .collection('users')
+                .doc(user.uid)
+                .get();
+            if (googleUidDoc.exists) {
+              await _firestore.collection('users').doc(user.uid).delete();
+              print('Deleted duplicate Google UID document');
             }
           }
-
-          await _firestore.collection('users').doc(user.uid).set({
-            'uid': user.uid,
-            'formatted_uid': newFormattedUid,
-            'name': user.displayName ?? '',
-            'name_lowercase': (user.displayName ?? '').toLowerCase(),
-            'email': user.email,
-            'email_lowercase': (user.email ?? '').toLowerCase(),
-            'userType': '',
-            'age': '',
-            'photoUrl': user.photoURL,
-            'createdAt': FieldValue.serverTimestamp(),
+        } else {
+          // Just update last login info and photo if appropriate
+          await _firestore.collection('users').doc(existingUid).update({
+            'lastLoginMethod': 'google',
+            'lastLoginAt': FieldValue.serverTimestamp(),
+            'photoUrl': photoToUse,
           });
         }
 
-        //mark online sa chat
-        final presence = PresenceService();
-        await presence.setUserOnline(true);
-        notifyListeners();
-        return "success";
+        print('Existing user signed in successfully');
+      } else {
+        // NEW USER - Create new account
+        print('Creating new user account from Google sign-in');
+
+        final newFormattedUid = await _getNextFormattedUid();
+
+        // Note: Google Sign-In API does not provide birthdate/age information
+        // Age defaults to 0 and must be set by user later
+        // Google only provides: name, email, profile picture, and locale
+
+        await _firestore.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'formatted_uid': newFormattedUid,
+          'name': user.displayName ?? 'Google User',
+          'name_lowercase': (user.displayName ?? 'Google User').toLowerCase(),
+          'email': user.email ?? '',
+          'email_lowercase': email,
+          'userType':
+              '', // Will be empty for Google sign-in, user can update later in profile
+          'age': 0, // Google doesn't provide age - user must update in profile
+          'photoUrl': user.photoURL ?? '',
+          'firebase_uid': user.uid,
+          'isOnline': false,
+          'createdAt': FieldValue.serverTimestamp(),
+          'lastLoginMethod': 'google',
+          'lastLoginAt': FieldValue.serverTimestamp(),
+        });
+
+        print('New user created with formatted_uid: $newFormattedUid');
+        print(
+          'Note: Age and userType set to defaults - user should update in profile',
+        );
       }
-      return "error";
+
+      // Mark user as online
+      final presence = PresenceService();
+      await presence.setUserOnline(true);
+
+      // Reset any login attempts for this email
+      await _resetLoginAttempts(email);
+
+      notifyListeners();
+      print('=== GOOGLE SIGN-IN SUCCESS ===');
+      return "success";
     } catch (e) {
       print("Google Sign-In Error: $e");
+      print('=== GOOGLE SIGN-IN FAILED ===');
       return "error";
     }
   }

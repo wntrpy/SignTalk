@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "1618713415-e0bq8iu27k6h1vpemd1i7fotvcr2b4sd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.signtalk",
+            "certificate_hash": "5f61843f610e9b775b35e1d03abcdc1eb0009e84"
+          }
+        },
+        {
           "client_id": "1618713415-h9qa4ccnbvoq8om9qlove18chcd0bqma.apps.googleusercontent.com",
           "client_type": 3
         }
