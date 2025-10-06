@@ -222,3 +222,10 @@ Settings screen
   - this screen just contains an image of ASL alphabet chart(A-Z), in which the current logged in user can learn some ASL Sign Language
 
 
+ChatGPT said:
+
+ChatScreen:
+The ChatScreen is the main messaging interface where users can send and receive messages in real time. It displays the receiver’s name, profile, and online status, allows text and voice-to-text input, and handles blocking between users.
+
+CustomMessageStream:
+The CustomMessageStream displays all chat messages for a specific conversation, updating live from Firestore. It also marks incoming messages as read and shows them in chat bubbles for both sender and receiver.
