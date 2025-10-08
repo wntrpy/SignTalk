@@ -60,4 +60,6 @@ class AppConstants {
       'assets/icons/receiver_profile_icons/notification_icon.svg';
   static const receiver_voice_speech_icon =
       'assets/icons/receiver_profile_icons/voice_speech_icon.svg';
+
+  
 }

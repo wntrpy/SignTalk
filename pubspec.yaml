@@ -43,6 +43,7 @@ dependencies:
   google_mlkit_pose_detection: ^0.14.0
   video_player: ^2.10.0
   shared_preferences: ^2.5.3
+  dio: ^5.9.0
 
 dev_dependencies:
   flutter_test:

@@ -168,6 +168,8 @@ class ChatProvider with ChangeNotifier {
     String message,
     String receiverId,
   ) async {
+    
+
     final currentUser = _auth.currentUser;
 
     if (currentUser != null) {

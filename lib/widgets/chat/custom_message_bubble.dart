@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
@@ -38,6 +39,8 @@ DateTime _toAppLocal(dynamic ts) {
 String _formatTimeHM(DateTime dt) => DateFormat('h:mm a').format(dt);
 
 String formatDuration(Duration d) {
+
+  
   final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
   final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
   return "$minutes:$seconds";
@@ -64,7 +67,7 @@ class CustomMessageBubble extends StatefulWidget {
     required this.status,
     required this.messageId,
     this.audioUrl,
-    required this.showAudio,
+    required this.showAudio
   });
 
   @override
@@ -83,6 +86,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
   String? _cachedPath;
   late AnimationController _waveAnim;
   Timer? _simulationTimer;
+  String gifUrl = "";
 
   @override
   void initState() {
@@ -93,25 +97,55 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
       duration: const Duration(milliseconds: 1200),
     );
     _setupListeners();
+    _checkGIF().then((v){
+      setState(() {
+        gifUrl = v;
+      }); 
+      
+    });
+  }
+
+  Future <String> _checkGIF() async{
+    print("MESSAGES : " + widget.text);
+
+    DocumentReference docRef = FirebaseFirestore.instance.
+    collection('triggers').doc(widget.text);
+
+    DocumentSnapshot docSnapshot = await docRef.get();
+
+    if (docSnapshot.exists) {
+
+      var imageData = docSnapshot.data() as Map<String, dynamic>? ?? {};
+      return imageData['gifUrl'];
+
+    } else {
+      return '';
+    }
+    
   }
 
   void _setupListeners() {
     _player.playerStateStream.listen((state) {
       if (!mounted) return;
-      if (state.playing) {
-        setState(() => _state = PlayState.playing);
-        _waveAnim.repeat();
-      } else if (state.processingState == ProcessingState.completed) {
-        _simulationTimer?.cancel();
-        setState(() {
-          _state = PlayState.ready;
-          _position = Duration.zero;
-        });
-        _waveAnim.stop();
-      } else if (_state == PlayState.playing) {
+      
+      
+      // if (state.playing) {
+      //   setState(() => _state = PlayState.playing);
+      //   _waveAnim.repeat();
+      // }
+      
+      if (state.processingState == ProcessingState.completed) {
+        
+        _player.stop();
+        _player.seek(Duration(milliseconds:0));
         setState(() => _state = PlayState.paused);
         _waveAnim.stop();
-      }
+      } 
+      
+      // -- if (_state == PlayState.playing) {
+      //   setState(() => _state = PlayState.paused);
+      //   _waveAnim.stop();
+      // }
     });
 
     _player.durationStream.listen((d) {
@@ -244,9 +278,14 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
   Future<void> _togglePlayPause() async {
     if (!widget.showAudio) return; // skip if hidden
 
+    if (kDebugMode) {
+      print('STATUS ITO! : $_state');
+    }
+
     switch (_state) {
       case PlayState.idle:
       case PlayState.ready:
+
         if (_cachedPath == null) await _prepareAudio();
         if (_state != PlayState.ready) return;
 
@@ -270,10 +309,12 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
         break;
 
       case PlayState.paused:
+      
+      setState(() => _state = PlayState.playing);
+
         if (_cachedPath != null) {
           await _player.play();
         } else {
-          setState(() => _state = PlayState.playing);
           _waveAnim.repeat();
           _startSimulatedPlayback();
         }
@@ -287,6 +328,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
   }
 
   IconData _getIcon() {
+    
     switch (_state) {
       case PlayState.playing:
         return Icons.pause;
@@ -337,7 +379,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
     final textColor = widget.isMe ? Colors.white : Colors.black87;
 
     return Padding(
-      padding: const EdgeInsets.all(10),
+      padding: widget.isMe?EdgeInsets.fromLTRB(0,5,10,5):EdgeInsets.fromLTRB(10,5,0,5),
       child: Column(
         crossAxisAlignment: widget.isMe
             ? CrossAxisAlignment.end
@@ -349,7 +391,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                 : MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              if (widget.isMe)
+              if (widget.isMe && !_expanded)
                 Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: Row(
@@ -392,6 +434,17 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if(gifUrl != '')
+                        Container(
+                          margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                          child:Image.network(
+                          gifUrl,
+                          width: 300,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        ) ,
+                        )
+                        ,
                         Text(
                           widget.text,
                           style: TextStyle(color: textColor, fontSize: 15),
@@ -479,6 +532,13 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                                           0.3,
                                         ),
                                         onChanged: (v) async {
+                                          if(kDebugMode){
+                                            var x = Duration(milliseconds: v.toInt());
+                                            var y = _player.duration;
+                                            print("STATUS ITO! : $_state");
+                                            print("DURATION : $x - $y");
+                                          }
+
                                           final seekPos = Duration(
                                             milliseconds: v.toInt(),
                                           );
@@ -486,6 +546,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                                           if (_cachedPath != null) {
                                             await _player.seek(seekPos);
                                           }
+
                                         },
                                       ),
                                   ],
@@ -500,16 +561,18 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                 ),
               ),
               if (!widget.isMe)
-                Padding(
-                  padding: const EdgeInsets.only(left: 6),
-                  child: Text(
+                Column(
+                  children:[
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(5,0,0,0),
+                    child:Text(
                     formatted,
                     style: const TextStyle(
                       fontSize: 12,
                       color: Colors.black54,
                       fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                    ),)
+                  ),]
                 ),
             ],
           ),

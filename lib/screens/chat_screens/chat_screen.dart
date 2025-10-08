@@ -3,12 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/widgets/chat/custom_message_stream.dart';
 import 'package:record/record.dart';
 import 'package:signtalk/widgets/custom_profile_avatar.dart';
+import 'package:signtalk/screens/camera_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ChatScreen extends StatefulWidget {
@@ -19,6 +21,7 @@ class ChatScreen extends StatefulWidget {
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
+  
 }
 
 class _ChatScreenState extends State<ChatScreen> {
@@ -44,7 +47,6 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     chatId = widget.chatId;
     getCurrentUser();
-
     _speech = stt.SpeechToText();
   }
 
@@ -78,7 +80,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (!available) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context as BuildContext).showSnackBar(
           const SnackBar(content: Text('Speech recognition unavailable')),
         );
       }
@@ -107,7 +109,9 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() => _isListening = false);
   }
 
-  Future<void> _sendTextMessage() async {
+  Future<void> _sendTextMessage(BuildContext context) async {
+
+    
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     final text = textController.text.trim();
     if (text.isEmpty) return;
@@ -210,7 +214,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildMessageInput(ChatProvider chatProvider) {
+  Widget _buildMessageInput(ChatProvider chatProvider,BuildContext context) {
     if (_isListening) {
       //listening UI
       return Container(
@@ -272,7 +276,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                onPressed: _sendTextMessage,
+                onPressed: () { 
+                  _sendTextMessage(context);
+                },
+                
                 icon: const Icon(Icons.send, color: Colors.white),
               ),
             ),
@@ -332,13 +339,26 @@ class _ChatScreenState extends State<ChatScreen> {
                 color: AppConstants.lightViolet,
               ),
             ),
+            FloatingActionButton(
+                onPressed: ()=> context.push("/camera_screen",
+                extra: {
+                  'chatId': chatId,
+                  'receiverId': widget.receiverId,
+                }),
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                foregroundColor: AppConstants.darkViolet,
+                child: Icon(Icons.videocam),
+              ),
             Container(
               decoration: BoxDecoration(
                 color: AppConstants.darkViolet,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                onPressed: inputError == null ? _sendTextMessage : null,
+                onPressed: (){
+                  if(inputError == null)_sendTextMessage(context);
+                },
                 icon: const Icon(Icons.send, color: Colors.white),
               ),
             ),
@@ -517,7 +537,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           timestampToLocal: timestampToLocal,
                         ),
                       ),
-                      _buildMessageInput(chatProvider),
+                      _buildMessageInput(chatProvider,context),
                     ],
                   ),
                   backgroundColor: Colors.white,

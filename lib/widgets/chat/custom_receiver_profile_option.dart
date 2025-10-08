@@ -28,8 +28,8 @@ class CustomReceiverProfileOption extends StatelessWidget {
     if (iconPath.isNotEmpty) {
       leadingIcon = SvgPicture.asset(
         iconPath,
-        width: 50,
-        height: 50,
+        width: 32,
+        height: 32,
         color: color,
       );
     } else if (fallbackIcon is IconData) {

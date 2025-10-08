@@ -7,6 +7,7 @@ import 'package:signtalk/screens/auth_screens/forget_password_verification.dart'
 import 'package:signtalk/screens/auth_screens/login_screen.dart';
 import 'package:signtalk/screens/auth_screens/registration_screen.dart';
 import 'package:signtalk/screens/auth_screens/welcome_screen.dart';
+import 'package:signtalk/screens/camera_screen.dart';
 import 'package:signtalk/screens/chat_screens/chat_screen.dart';
 import 'package:signtalk/screens/chat_screens/home_screen.dart';
 import 'package:signtalk/screens/chat_screens/receiver_profile_screen.dart';
@@ -45,6 +46,21 @@ final GoRouter router = GoRouter(
     // ------------------------ CHATS ----------------------------
     goRouteWithSlide('/home_screen', HomeScreen()),
     goRouteWithSlide('/profile_screen', UserProfileScreen()),
+
+    GoRoute(
+      path:'/camera_screen',
+      builder: (context,state){
+        final args = state.extra as Map<String, dynamic>? ?? {};
+        final chatId = args['chatId'] as String? ?? '';
+        final receiverId = args['receiverId'] as String? ?? '';
+
+        return RecordVideoScreen(
+          chatId: chatId,
+          receiverId: receiverId,
+        );
+
+      }
+    ),
 
     GoRoute(
       path: '/receiver_profile_screen',

@@ -85,10 +85,28 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
     {
       'optionText': "3D Avatar Sign Language",
       'iconPath': AppConstants.receiver_avatar_icon,
-      'trailingWidget': Switch(
-        value: isToggled,
-        onChanged: (val) {
-          isToggled = val;
+      'trailingWidget': StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('chats')
+            .doc(chatId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return const SizedBox();
+          final chatData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
+          final aslMap = chatData['3DASLEnabled'] as Map<String, dynamic>? ?? {};
+          final aslForMe = aslMap[loggedInUserId] ?? false;
+
+          return Switch(
+            value: aslForMe,
+            onChanged: (val) async {
+              await FirebaseFirestore.instance
+                  .collection('chats')
+                  .doc(chatId)
+                  .set({
+                    '3DASLEnabled': {loggedInUserId: val},
+                  }, SetOptions(merge: true));
+            },
+          );
         },
       ),
     },
@@ -123,7 +141,7 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
 
     {
       'optionText': 'Mute Notification',
-      'iconPath': '',
+      'iconPath': AppConstants.receiver_notification_icon,
       'fallbackIcon': (context) {
         return StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
@@ -143,7 +161,7 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
             return Icon(
               isMuted ? Icons.notifications_off : Icons.notifications,
               color: isMuted ? Colors.white : Colors.white,
-              size: 50,
+              size: 36,
             );
           },
         );
