@@ -93,7 +93,8 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
         builder: (context, snapshot) {
           if (!snapshot.hasData) return const SizedBox();
           final chatData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
-          final aslMap = chatData['3DASLEnabled'] as Map<String, dynamic>? ?? {};
+          final aslMap =
+              chatData['3DASLEnabled'] as Map<String, dynamic>? ?? {};
           final aslForMe = aslMap[loggedInUserId] ?? false;
 
           return Switch(
@@ -245,14 +246,41 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
       'optionText': 'Delete Conversation',
       'iconPath': AppConstants.receiver_delete_icon,
       'onTap': () async {
-        await Provider.of<ChatProvider>(
-          context,
-          listen: false,
-        ).deleteConversation(chatId);
-        Navigator.pop(context); // close profile
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text("Conversation deleted")));
+        // Show confirmation dialog
+        final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext dialogContext) {
+            return AlertDialog(
+              title: const Text('Delete Conversation'),
+              content: const Text(
+                'Are you sure you want to delete this conversation? This action cannot be undone.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: const Text('Delete'),
+                ),
+              ],
+            );
+          },
+        );
+
+        // If user confirmed, proceed with deletion
+        if (confirmed == true) {
+          await Provider.of<ChatProvider>(
+            context,
+            listen: false,
+          ).deleteConversation(chatId);
+          Navigator.pop(context); // close profile
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text("Conversation deleted")));
+        }
       },
     },
   ];

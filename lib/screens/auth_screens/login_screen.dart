@@ -274,24 +274,37 @@ class _LoginScreenState extends State<LoginScreen> {
                     margin: EdgeInsets.only(bottom: 20),
                     padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.15),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.red.shade400, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.error_outline,
-                          color: Colors.red.shade700,
-                          size: 28,
+                        Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.lock_outline,
+                            color: Colors.red.shade700,
+                            size: 24,
+                          ),
                         ),
-                        SizedBox(width: 12),
+                        SizedBox(width: 16),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Account Locked",
+                                "Account Temporarily Locked",
                                 style: TextStyle(
                                   color: Colors.red.shade700,
                                   fontWeight: FontWeight.bold,
@@ -300,9 +313,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               SizedBox(height: 4),
                               Text(
-                                "Too many failed attempts.\nPlease come back after ${_formatTime(_remainingSeconds)}",
+                                "Too many login attempts. Try again in:\n${_formatTime(_remainingSeconds)}",
                                 style: TextStyle(
-                                  color: Colors.red.shade900,
+                                  color: Colors.grey.shade800,
                                   fontSize: 14,
                                 ),
                               ),

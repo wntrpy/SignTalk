@@ -11,34 +11,50 @@ class SettingsAlphabetChart extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userProvider);
+
     return userAsync.when(
       data: (user) => Stack(
         fit: StackFit.expand,
         children: [
+          // Background image
           Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
 
           Column(
             children: [
-              // ------------------------parang app bar----------------------------
-              CustomAppBar(
-                appBarText: "ASL and FSL Alphabet (Chart)",
-                rightWidget: CustomCirclePfpButton(
-                  borderColor: AppConstants.white,
-                  userImage: user.photoUrl ?? AppConstants.default_user_pfp,
-                  width: 40,
-                  height: 40,
+              // Custom app bar
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: CustomAppBar(
+                  // ignore: avoid_hardcoded_text
+                  appBarText: "ASL Alphabet",
+                  rightWidget: CustomCirclePfpButton(
+                    borderColor: AppConstants.white,
+                    userImage: user.photoUrl ?? AppConstants.default_user_pfp,
+                    width: 40,
+                    height: 40,
+                  ),
                 ),
               ),
 
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20.0,
-                  vertical: 20,
-                ),
-                child: Column(
-                  children: [
-                    //TODO: palitan mo to ng learning mats for ASL and FSL
-                  ],
+              // Scrollable content with chart
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20.0,
+                      vertical: 20.0,
+                    ),
+                    child: Column(
+                      children: [
+                        // ASL chart image
+                        Image.asset(
+                          AppConstants.asl_chart,
+                          fit: BoxFit.contain,
+                          width: double.infinity,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],

@@ -27,6 +27,7 @@ class AppConstants {
       'assets/images/welcome_screen_text.png';
   static const String welcome_screen_bg = 'assets/images/welcome_screen_bg.png';
   static const String karina_pic = 'assets/images/karina.jpg';
+  static const String asl_chart = 'assets/images/asl_chart.png';
 
   //ICON PATHS
   static const String signtalk_logo = 'assets/icons/signtalk_logo.png';
@@ -60,6 +61,4 @@ class AppConstants {
       'assets/icons/receiver_profile_icons/notification_icon.svg';
   static const receiver_voice_speech_icon =
       'assets/icons/receiver_profile_icons/voice_speech_icon.svg';
-
-  
 }

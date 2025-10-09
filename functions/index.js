@@ -2,7 +2,6 @@ const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { onObjectFinalized } = require("firebase-functions/v2/storage");
 const { setGlobalOptions } = require("firebase-functions/v2");
 const admin = require("firebase-admin");
-const speech = require("@google-cloud/speech").v1p1beta1;
 
 setGlobalOptions({ region: "us-central1" });
 admin.initializeApp();
@@ -80,59 +79,3 @@ exports.sendChatNotification = onDocumentCreated(
     return null;
   }
 );
-
-/**
- * 🎤 Transcribe uploaded audio to text using Google Speech-to-Text
- */
-exports.transcribeAudio = onObjectFinalized(async (event) => {
-  const object = event.data;
-  if (!object || !object.contentType.startsWith("audio/")) return;
-
-  const bucketName = object.bucket;
-  const filePath = object.name;
-  const gcsUri = `gs://${bucketName}/${filePath}`;
-  const audioUrl = `https://storage.googleapis.com/${bucketName}/${filePath}`;
-
-  const client = new speech.SpeechClient();
-
-  const request = {
-    audio: { uri: gcsUri },
-    config: {
-      encoding: "MPEG4", // Fixed encoding for .m4a AAC
-      sampleRateHertz: 44100, // match your recording
-      languageCode: "en-US",
-      audioChannelCount: 1,
-      enableAutomaticPunctuation: true,
-    },
-  };
-
-  try {
-    const [response] = await client.recognize(request);
-    const transcription = response.results
-      .map((r) => r.alternatives[0].transcript)
-      .join(" ")
-      .trim();
-
-    console.log(`📝 Transcription: ${transcription || "[no speech detected]"}`);
-
-    // Update all messages that reference this audio URL
-    const snapshot = await db
-      .collectionGroup("messages")
-      .where("audioUrl", "==", audioUrl)
-      .get();
-
-    if (snapshot.empty) {
-      console.log("⚠️ No messages found for this audioUrl");
-      return;
-    }
-
-    snapshot.forEach((doc) => {
-      doc.ref.update({
-        messageBody: transcription || "[no speech detected]",
-        status: "sent",
-      });
-    });
-  } catch (err) {
-    console.error("❌ Speech-to-Text error:", err);
-  }
-});

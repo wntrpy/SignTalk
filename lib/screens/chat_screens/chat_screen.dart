@@ -10,7 +10,6 @@ import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/widgets/chat/custom_message_stream.dart';
 import 'package:record/record.dart';
 import 'package:signtalk/widgets/custom_profile_avatar.dart';
-import 'package:signtalk/screens/camera_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class ChatScreen extends StatefulWidget {
@@ -21,7 +20,6 @@ class ChatScreen extends StatefulWidget {
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
-  
 }
 
 class _ChatScreenState extends State<ChatScreen> {
@@ -110,8 +108,6 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _sendTextMessage(BuildContext context) async {
-
-    
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     final text = textController.text.trim();
     if (text.isEmpty) return;
@@ -174,13 +170,14 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  //block screen
   Widget _buildBlockedUI({
     required String displayName,
     required bool isMeBlocking,
   }) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(displayName),
+        title: Text(displayName, style: TextStyle(color: AppConstants.white)),
         backgroundColor: AppConstants.darkViolet,
       ),
       body: Center(
@@ -214,7 +211,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildMessageInput(ChatProvider chatProvider,BuildContext context) {
+  Widget _buildMessageInput(ChatProvider chatProvider, BuildContext context) {
     if (_isListening) {
       //listening UI
       return Container(
@@ -276,10 +273,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                onPressed: () { 
+                onPressed: () {
                   _sendTextMessage(context);
                 },
-                
+
                 icon: const Icon(Icons.send, color: Colors.white),
               ),
             ),
@@ -340,24 +337,23 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
             FloatingActionButton(
-                onPressed: ()=> context.push("/camera_screen",
-                extra: {
-                  'chatId': chatId,
-                  'receiverId': widget.receiverId,
-                }),
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                foregroundColor: AppConstants.darkViolet,
-                child: Icon(Icons.videocam),
+              onPressed: () => context.push(
+                "/camera_screen",
+                extra: {'chatId': chatId, 'receiverId': widget.receiverId},
               ),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              foregroundColor: AppConstants.darkViolet,
+              child: Icon(Icons.videocam),
+            ),
             Container(
               decoration: BoxDecoration(
                 color: AppConstants.darkViolet,
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                onPressed: (){
-                  if(inputError == null)_sendTextMessage(context);
+                onPressed: () {
+                  if (inputError == null) _sendTextMessage(context);
                 },
                 icon: const Icon(Icons.send, color: Colors.white),
               ),
@@ -537,7 +533,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           timestampToLocal: timestampToLocal,
                         ),
                       ),
-                      _buildMessageInput(chatProvider,context),
+                      _buildMessageInput(chatProvider, context),
                     ],
                   ),
                   backgroundColor: Colors.white,

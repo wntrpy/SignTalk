@@ -168,8 +168,6 @@ class ChatProvider with ChangeNotifier {
     String message,
     String receiverId,
   ) async {
-    
-
     final currentUser = _auth.currentUser;
 
     if (currentUser != null) {
@@ -277,20 +275,48 @@ class ChatProvider with ChangeNotifier {
   //delete convo
   Future<void> deleteConversation(String chatId) async {
     final fs = FirebaseFirestore.instance;
-    final batch = fs.batch();
+    final uid = FirebaseAuth.instance.currentUser!.uid;
 
-    final messages = await fs
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .get();
+    // Get chat document to check participants
+    final chatDoc = await fs.collection('chats').doc(chatId).get();
 
-    for (var doc in messages.docs) {
-      batch.delete(doc.reference);
+    if (!chatDoc.exists) return;
+
+    final chatData = chatDoc.data() as Map<String, dynamic>;
+    final participants = List<String>.from(chatData['participants'] ?? []);
+
+    // Initialize deletedFor map if it doesn't exist
+    Map<String, dynamic> deletedFor = Map<String, dynamic>.from(
+      chatData['deletedFor'] ?? {},
+    );
+
+    // Mark as deleted for current user
+    deletedFor[uid] = true;
+
+    // Check if both users have deleted
+    bool bothDeleted = participants.every((id) => deletedFor[id] == true);
+
+    if (bothDeleted) {
+      // If both users deleted, actually delete everything
+      final batch = fs.batch();
+
+      final messages = await fs
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .get();
+
+      for (var doc in messages.docs) {
+        batch.delete(doc.reference);
+      }
+
+      batch.delete(fs.collection('chats').doc(chatId));
+      await batch.commit();
+    } else {
+      // Only one user deleted, just mark it
+      await fs.collection('chats').doc(chatId).update({
+        'deletedFor': deletedFor,
+      });
     }
-
-    batch.delete(fs.collection('chats').doc(chatId));
-
-    await batch.commit();
   }
 }

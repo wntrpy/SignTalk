@@ -51,8 +51,8 @@ Widget _appBarText(BuildContext context, String appBarText) {
   return Container(
     width: MediaQuery.of(context).size.width * 0.5, // 50% of screen width
     constraints: const BoxConstraints(
-      maxWidth: 200, // max w
-      minHeight: 40, // min h
+      maxWidth: 250, // max w
+      minHeight: 20, // min h
     ),
     child: Text(
       appBarText,
