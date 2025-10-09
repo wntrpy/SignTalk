@@ -10,9 +10,9 @@ import 'package:signtalk/screens/settings_screens/settings_feedback_screen.dart'
 Widget _settingsIcon(BuildContext context, String assetPath) {
   return SvgPicture.asset(
     assetPath,
-    color: Theme.of(context).iconTheme.color,
-    width: 24,
-    height: 24,
+    color: AppConstants.white,
+    width: 28,
+    height: 28,
   );
 }
 

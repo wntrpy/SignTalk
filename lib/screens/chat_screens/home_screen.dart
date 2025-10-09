@@ -117,12 +117,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              CustomSigntalkLogo(width: 60, height: 60),
-                              const SizedBox(width: 10),
-                              const FirstNameGreeting(),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.only(top: 30),
+                            child: Row(
+                              children: [
+                                CustomSigntalkLogo(width: 60, height: 60),
+                                const SizedBox(width: 10),
+                                const FirstNameGreeting(),
+                              ],
+                            ),
                           ),
 
                           //-----------------------------------------PFP--------------------------------------------\\
@@ -144,11 +147,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 name = data?['name'] as String? ?? 'User';
                               }
 
-                              return CustomProfileAvatar(
-                                photoUrl: photoUrl,
-                                name: name,
-                                radius: 25,
-                                onTap: () => context.push('/profile_screen'),
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 30),
+                                child: CustomProfileAvatar(
+                                  photoUrl: photoUrl,
+                                  name: name,
+                                  radius: 25,
+                                  onTap: () => context.push('/profile_screen'),
+                                ),
                               );
                             },
                           ),

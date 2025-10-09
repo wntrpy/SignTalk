@@ -1,8 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:signtalk/core/navigation.dart'; // contains router & navigatorKey
+import 'package:signtalk/core/navigation.dart';
 import 'package:signtalk/core/notification_service.dart';
 import 'package:signtalk/providers/app_lifecylce.dart';
 import 'package:signtalk/providers/chat_provider.dart';

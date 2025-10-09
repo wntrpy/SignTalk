@@ -12,12 +12,16 @@ import 'package:signtalk/providers/chat_provider.dart';
 class RecordVideoScreen extends StatefulWidget {
   final String chatId;
   final String receiverId;
-  
 
-  const RecordVideoScreen({super.key, required this.chatId, required this.receiverId});
+  const RecordVideoScreen({
+    super.key,
+    required this.chatId,
+    required this.receiverId,
+  });
 
   @override
-  State<RecordVideoScreen> createState() => _RecordVideoScreenState(chatId, receiverId);
+  State<RecordVideoScreen> createState() =>
+      _RecordVideoScreenState(chatId, receiverId);
 }
 
 class _RecordVideoScreenState extends State<RecordVideoScreen> {
@@ -198,7 +202,7 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
       print('Checking API health...');
       setState(() => _processingStatus = 'Connecting.....');
       final isHealthy = await apiService.checkHealth();
-      
+
       if (!isHealthy) {
         throw Exception('Cannot connect to API. Make sure Colab is running.');
       }
@@ -231,12 +235,10 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
 
       // Success!
       if (mounted) {
-        
         final chatProvider = Provider.of<ChatProvider>(context, listen: false);
         var message = result['translation'];
 
         await chatProvider.sendMessage(chatId, message, receiverId);
-      
       }
     } catch (e) {
       print('Processing error: $e');
@@ -248,7 +250,7 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
     }
   }
 
-    Future<void> _cancelRecording()async {
+  Future<void> _cancelRecording() async {
     if (_isRecording) {
       _stopRecording();
     }
@@ -423,8 +425,8 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
             ),
 
           //  if (!_isProcessing) ...[
-          //   SizedBox(width: 20), 
-                
+          //   SizedBox(width: 20),
+
           //       child: Center(
           //       child: Container(
           //         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -438,11 +440,11 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
           //           color: Colors.white,
           //           fontWeight: FontWeight.bold,
           //           fontSize: 15,
-          //             ),   
+          //             ),
           //           ),
           //         ),
           //       ),
-              
+
           //   ),
           // ],
         ],

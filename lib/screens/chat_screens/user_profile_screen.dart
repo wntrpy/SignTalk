@@ -140,162 +140,168 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   }
 
   Widget _buildProfileForm(UserModel user, bool isEditMode) {
-    return Column(
-      children: [
-        // --- NAME FIELD WITH EDIT/SAVE BUTTON ---
-        Row(
-          children: [
-            Expanded(
-              child: CustomLineTextfield(
-                defaultValue: _nameController.text,
-                label: 'Name',
-                enabled: _isEditingName,
-                controller: _nameController,
-              ),
-            ),
-            const SizedBox(width: 8),
-            CustomButton(
-              buttonText: _isEditingName ? "Save" : "Edit",
-              colorCode: _isEditingName
-                  ? AppConstants.orange
-                  : Theme.of(context).colorScheme.surface,
-              textColor: _isEditingName
-                  ? AppConstants.white
-                  : AppConstants.darkViolet,
-              buttonWidth: 70,
-              buttonHeight: 38,
-              textSize: 14,
-              onPressed: () async {
-                if (_isEditingName) {
-                  await _saveField("name", _nameController.text);
-                }
-                setState(() {
-                  _isEditingName = !_isEditingName;
-                });
-              },
-            ),
-          ],
-        ),
-
-        // --- AGE FIELD WITH EDIT/SAVE BUTTON ---
-        Row(
-          children: [
-            Expanded(
-              child: CustomLineTextfield(
-                defaultValue: _ageController.text,
-                label: 'Age',
-                enabled: _isEditingAge,
-                controller: _ageController,
-              ),
-            ),
-            const SizedBox(width: 8),
-            CustomButton(
-              buttonText: _isEditingAge ? "Save" : "Edit",
-              colorCode: _isEditingAge
-                  ? AppConstants.orange
-                  : Theme.of(context).colorScheme.surface,
-              textColor: _isEditingAge
-                  ? AppConstants.white
-                  : AppConstants.darkViolet,
-              buttonWidth: 70,
-              buttonHeight: 38,
-              textSize: 14,
-              onPressed: () async {
-                if (_isEditingAge) {
-                  await _saveField("age", _ageController.text);
-                }
-                setState(() {
-                  _isEditingAge = !_isEditingAge;
-                });
-              },
-            ),
-          ],
-        ),
-
-        // --- USER TYPE LABEL + DROPDOWN FIELD WITH SAVE BUTTON ONLY IF NULL ---
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+      padding: const EdgeInsets.only(right: 20),
+      child: Column(
+        children: [
+          // --- NAME FIELD WITH EDIT/SAVE BUTTON ---
+          Row(
             children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 16.0),
-                child: Text(
-                  'User Type',
-                  style: TextStyle(
-                    fontSize: AppConstants.fontSizeSmall,
-                    color: AppConstants.darkViolet,
-                  ),
+              Expanded(
+                child: CustomLineTextfield(
+                  defaultValue: _nameController.text,
+                  label: 'Name',
+                  enabled: _isEditingName,
+                  controller: _nameController,
                 ),
               ),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: DropdownButtonFormField<String>(
-                        value: selectedUserType,
-                        isExpanded: true,
-                        icon: const Icon(Icons.arrow_drop_down),
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.only(bottom: 8.0),
-                          border: InputBorder.none,
-                        ),
-                        style: const TextStyle(color: Colors.black),
-                        dropdownColor: AppConstants.white,
-                        items: userTypes
-                            .map(
-                              (String item) => DropdownMenuItem<String>(
-                                value: item,
-                                child: Text(item),
-                              ),
-                            )
-                            .toList(),
-                        onChanged:
-                            (_userModel?.userType == null ||
-                                _userModel!.userType.isEmpty)
-                            ? (value) =>
-                                  setState(() => selectedUserType = value)
-                            : null,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if ((_userModel?.userType == null ||
-                          _userModel!.userType.isEmpty) &&
-                      selectedUserType != null)
-                    CustomButton(
-                      buttonText: "Save",
-                      colorCode: AppConstants.orange,
-                      textColor: AppConstants.white,
-                      buttonWidth: 70,
-                      buttonHeight: 38,
-                      textSize: 14,
-                      onPressed: () async {
-                        await _saveField("userType", selectedUserType!);
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("User type saved.")),
-                          );
-                        }
-                      },
-                    ),
-                ],
-              ),
-              const Padding(
-                padding: EdgeInsets.only(left: 16.0),
-                child: Divider(thickness: 1, color: Colors.black, height: 1),
+              const SizedBox(width: 8),
+              CustomButton(
+                buttonText: _isEditingName ? "Save" : "Edit",
+                colorCode: _isEditingName
+                    ? AppConstants.orange
+                    : Theme.of(context).colorScheme.surface,
+                textColor: _isEditingName
+                    ? AppConstants.white
+                    : AppConstants.darkViolet,
+                buttonWidth: 70,
+                buttonHeight: 38,
+                textSize: 14,
+                onPressed: () async {
+                  if (_isEditingName) {
+                    await _saveField("name", _nameController.text);
+                  }
+                  setState(() {
+                    _isEditingName = !_isEditingName;
+                  });
+                },
               ),
             ],
           ),
-        ),
 
-        CustomLineTextfield(
-          defaultValue: user.email,
-          label: 'Email',
-          enabled: false,
-        ),
-      ],
+          // --- AGE FIELD WITH EDIT/SAVE BUTTON ---
+          Row(
+            children: [
+              Expanded(
+                child: CustomLineTextfield(
+                  defaultValue: _ageController.text,
+                  label: 'Age',
+                  enabled: _isEditingAge,
+                  controller: _ageController,
+                ),
+              ),
+              const SizedBox(width: 8),
+              CustomButton(
+                buttonText: _isEditingAge ? "Save" : "Edit",
+                colorCode: _isEditingAge
+                    ? AppConstants.orange
+                    : Theme.of(context).colorScheme.surface,
+                textColor: _isEditingAge
+                    ? AppConstants.white
+                    : AppConstants.darkViolet,
+                buttonWidth: 70,
+                buttonHeight: 38,
+                textSize: 14,
+                onPressed: () async {
+                  if (_isEditingAge) {
+                    await _saveField("age", _ageController.text);
+                  }
+                  setState(() {
+                    _isEditingAge = !_isEditingAge;
+                  });
+                },
+              ),
+            ],
+          ),
+
+          // --- USER TYPE LABEL + DROPDOWN FIELD WITH SAVE BUTTON ONLY IF NULL ---
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 12.0,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(left: 16.0),
+                  child: Text(
+                    'User Type',
+                    style: TextStyle(
+                      fontSize: AppConstants.fontSizeSmall,
+                      color: AppConstants.darkViolet,
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: DropdownButtonFormField<String>(
+                          value: selectedUserType,
+                          isExpanded: true,
+                          icon: const Icon(Icons.arrow_drop_down),
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.only(bottom: 8.0),
+                            border: InputBorder.none,
+                          ),
+                          style: const TextStyle(color: Colors.black),
+                          dropdownColor: AppConstants.white,
+                          items: userTypes
+                              .map(
+                                (String item) => DropdownMenuItem<String>(
+                                  value: item,
+                                  child: Text(item),
+                                ),
+                              )
+                              .toList(),
+                          onChanged:
+                              (_userModel?.userType == null ||
+                                  _userModel!.userType.isEmpty)
+                              ? (value) =>
+                                    setState(() => selectedUserType = value)
+                              : null,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    if ((_userModel?.userType == null ||
+                            _userModel!.userType.isEmpty) &&
+                        selectedUserType != null)
+                      CustomButton(
+                        buttonText: "Save",
+                        colorCode: AppConstants.orange,
+                        textColor: AppConstants.white,
+                        buttonWidth: 70,
+                        buttonHeight: 38,
+                        textSize: 14,
+                        onPressed: () async {
+                          await _saveField("userType", selectedUserType!);
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("User type saved.")),
+                            );
+                          }
+                        },
+                      ),
+                  ],
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(left: 16.0),
+                  child: Divider(thickness: 1, color: Colors.black, height: 1),
+                ),
+              ],
+            ),
+          ),
+
+          CustomLineTextfield(
+            defaultValue: user.email,
+            label: 'Email',
+            enabled: false,
+          ),
+        ],
+      ),
     );
   }
 
