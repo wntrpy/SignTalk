@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:signtalk/app_colors.dart';
 import 'package:signtalk/widgets/buttons/custom_button.dart';
 import 'package:signtalk/widgets/custom_app_bar.dart';
 import 'package:signtalk/widgets/textfields/custom_line_textfield.dart';
@@ -70,7 +69,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
           children: [
             CircleAvatar(
               radius: 60,
-              backgroundColor: AppColors.of(context).surface,
+              backgroundColor: AppConstants.white,
               backgroundImage:
                   (user.photoUrl != null && user.photoUrl!.isNotEmpty)
                   ? NetworkImage(user.photoUrl!)
@@ -100,14 +99,11 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     decoration: BoxDecoration(
                       color: AppConstants.orange,
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.of(context).surface,
-                        width: 2,
-                      ),
+                      border: Border.all(color: AppConstants.white, width: 2),
                     ),
                     child: Icon(
                       Icons.camera_alt,
-                      color: AppColors.of(context).surface,
+                      color: AppConstants.white,
                       size: 20,
                     ),
                   ),
@@ -121,7 +117,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
           user.name,
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: AppColors.of(context).surface,
+            color: AppConstants.white,
             fontSize: AppConstants.fontSizeExtraLarge,
           ),
         ),
@@ -137,9 +133,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
             _toggleEditMode();
           },
           textSize: AppConstants.fontSizeMedium,
-          textColor: isEditMode
-              ? AppColors.of(context).surface
-              : AppConstants.darkViolet,
+          textColor: isEditMode ? AppConstants.white : AppConstants.darkViolet,
         ),
       ],
     );
@@ -166,7 +160,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                   ? AppConstants.orange
                   : Theme.of(context).colorScheme.surface,
               textColor: _isEditingName
-                  ? AppColors.of(context).surface
+                  ? AppConstants.white
                   : AppConstants.darkViolet,
               buttonWidth: 70,
               buttonHeight: 38,
@@ -201,7 +195,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                   ? AppConstants.orange
                   : Theme.of(context).colorScheme.surface,
               textColor: _isEditingAge
-                  ? AppColors.of(context).surface
+                  ? AppConstants.white
                   : AppConstants.darkViolet,
               buttonWidth: 70,
               buttonHeight: 38,
@@ -248,7 +242,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                           border: InputBorder.none,
                         ),
                         style: const TextStyle(color: Colors.black),
-                        dropdownColor: AppColors.of(context).background,
+                        dropdownColor: AppConstants.white,
                         items: userTypes
                             .map(
                               (String item) => DropdownMenuItem<String>(
@@ -273,7 +267,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                     CustomButton(
                       buttonText: "Save",
                       colorCode: AppConstants.orange,
-                      textColor: AppColors.of(context).surface,
+                      textColor: AppConstants.white,
                       buttonWidth: 70,
                       buttonHeight: 38,
                       textSize: 14,
@@ -369,7 +363,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                   ),
                   Container(
                     padding: const EdgeInsets.only(top: 12),
-                    color: AppColors.of(context).surface,
+                    color: AppConstants.white,
                     child: _buildProfileForm(user, isEditMode),
                   ),
                 ],

@@ -2,12 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
-import 'package:signtalk/app_colors.dart';
 import 'package:signtalk/core/navigation.dart'; // contains router & navigatorKey
 import 'package:signtalk/core/notification_service.dart';
 import 'package:signtalk/providers/app_lifecylce.dart';
 import 'package:signtalk/providers/chat_provider.dart';
-import 'package:signtalk/providers/dark_mode_provider.dart';
 import 'package:signtalk/providers/auth_provider.dart';
 import 'package:signtalk/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -47,16 +45,9 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDarkMode = ref.watch(darkModeProvider);
     return MaterialApp.router(
       routerConfig: router,
       debugShowCheckedModeBanner: false,
-      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      theme: ThemeData(colorScheme: AppColors.lightScheme, useMaterial3: true),
-      darkTheme: ThemeData(
-        colorScheme: AppColors.darkScheme,
-        useMaterial3: true,
-      ),
     );
   }
 }

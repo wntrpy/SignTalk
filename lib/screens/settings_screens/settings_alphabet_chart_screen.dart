@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:signtalk/app_colors.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/widgets/buttons/custom_circle_pfp_button.dart';
 import 'package:signtalk/widgets/custom_app_bar.dart';
@@ -24,7 +23,7 @@ class SettingsAlphabetChart extends ConsumerWidget {
               CustomAppBar(
                 appBarText: "ASL and FSL Alphabet (Chart)",
                 rightWidget: CustomCirclePfpButton(
-                  borderColor: AppColors.of(context).surface,
+                  borderColor: AppConstants.white,
                   userImage: user.photoUrl ?? AppConstants.default_user_pfp,
                   width: 40,
                   height: 40,

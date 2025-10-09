@@ -22,7 +22,8 @@ android {
 
     defaultConfig {
         applicationId = "com.example.signtalk"
-        minSdk = flutter.minSdkVersion // ✅ required for Firebase Messaging
+        //minSdk = flutter.minSdkVersion // ✅ required for Firebase Messaging
+        minSdk = 23
         targetSdk = 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:signtalk/app_colors.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/widgets/chat/search_user_card_widget.dart';
@@ -70,17 +69,14 @@ class _UserSearchScreenState extends State<UserSearchScreen> {
             child: Row(
               children: [
                 IconButton(
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: AppColors.of(context).surface,
-                  ),
+                  icon: Icon(Icons.arrow_back, color: AppConstants.white),
                   onPressed: () => Navigator.pop(context),
                 ),
                 const SizedBox(width: 10),
                 Text(
                   "Search Users",
                   style: TextStyle(
-                    color: AppColors.of(context).surface,
+                    color: AppConstants.white,
                     fontSize: AppConstants.fontSizeLarge,
                     fontWeight: FontWeight.bold,
                   ),

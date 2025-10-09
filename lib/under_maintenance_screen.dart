@@ -21,8 +21,8 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen> {
   Future<void> _checkSystemStatus() async {
     try {
       final doc = await FirebaseFirestore.instance
-          .collection('system status') // 👈 use your actual collection name
-          .doc('04N5OCS28bovQuovDRIS') // 👈 your actual document ID
+          .collection('system status')
+          .doc('04N5OCS28bovQuovDRIS')
           .get();
 
       if (doc.exists) {
@@ -33,14 +33,12 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen> {
       }
 
       if (isActive && mounted) {
-        // ✅ If system active, go directly to home
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.of(context).pushReplacementNamed('/home');
         });
       }
     } catch (e) {
       debugPrint("Error checking maintenance status: $e");
-      // Optional: show a message for debugging
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -69,7 +67,6 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // SignTalk logo only (no circular background)
                   Image.asset(
                     AppConstants.signtalk_logo,
                     height: 120,

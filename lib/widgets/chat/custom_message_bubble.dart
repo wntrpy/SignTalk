@@ -7,7 +7,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
-import 'package:signtalk/app_colors.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/models/message_status.dart';
 import 'dart:math' as math;
@@ -39,8 +38,6 @@ DateTime _toAppLocal(dynamic ts) {
 String _formatTimeHM(DateTime dt) => DateFormat('h:mm a').format(dt);
 
 String formatDuration(Duration d) {
-
-  
   final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
   final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
   return "$minutes:$seconds";
@@ -67,7 +64,7 @@ class CustomMessageBubble extends StatefulWidget {
     required this.status,
     required this.messageId,
     this.audioUrl,
-    required this.showAudio
+    required this.showAudio,
   });
 
   @override
@@ -97,51 +94,46 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
       duration: const Duration(milliseconds: 1200),
     );
     _setupListeners();
-    _checkGIF().then((v){
+    _checkGIF().then((v) {
       setState(() {
         gifUrl = v;
-      }); 
-      
+      });
     });
   }
 
-  Future <String> _checkGIF() async{
-    print("MESSAGES : " + widget.text);
+  Future<String> _checkGIF() async {
+    print("MESSAGES : ${widget.text}");
 
-    DocumentReference docRef = FirebaseFirestore.instance.
-    collection('triggers').doc(widget.text);
+    DocumentReference docRef = FirebaseFirestore.instance
+        .collection('triggers')
+        .doc(widget.text);
 
     DocumentSnapshot docSnapshot = await docRef.get();
 
     if (docSnapshot.exists) {
-
       var imageData = docSnapshot.data() as Map<String, dynamic>? ?? {};
       return imageData['gifUrl'];
-
     } else {
       return '';
     }
-    
   }
 
   void _setupListeners() {
     _player.playerStateStream.listen((state) {
       if (!mounted) return;
-      
-      
+
       // if (state.playing) {
       //   setState(() => _state = PlayState.playing);
       //   _waveAnim.repeat();
       // }
-      
+
       if (state.processingState == ProcessingState.completed) {
-        
         _player.stop();
-        _player.seek(Duration(milliseconds:0));
+        _player.seek(Duration(milliseconds: 0));
         setState(() => _state = PlayState.paused);
         _waveAnim.stop();
-      } 
-      
+      }
+
       // -- if (_state == PlayState.playing) {
       //   setState(() => _state = PlayState.paused);
       //   _waveAnim.stop();
@@ -285,7 +277,6 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
     switch (_state) {
       case PlayState.idle:
       case PlayState.ready:
-
         if (_cachedPath == null) await _prepareAudio();
         if (_state != PlayState.ready) return;
 
@@ -309,8 +300,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
         break;
 
       case PlayState.paused:
-      
-      setState(() => _state = PlayState.playing);
+        setState(() => _state = PlayState.playing);
 
         if (_cachedPath != null) {
           await _player.play();
@@ -328,7 +318,6 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
   }
 
   IconData _getIcon() {
-    
     switch (_state) {
       case PlayState.playing:
         return Icons.pause;
@@ -379,7 +368,9 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
     final textColor = widget.isMe ? Colors.white : Colors.black87;
 
     return Padding(
-      padding: widget.isMe?EdgeInsets.fromLTRB(0,5,10,5):EdgeInsets.fromLTRB(10,5,0,5),
+      padding: widget.isMe
+          ? EdgeInsets.fromLTRB(0, 5, 10, 5)
+          : EdgeInsets.fromLTRB(10, 5, 0, 5),
       child: Column(
         crossAxisAlignment: widget.isMe
             ? CrossAxisAlignment.end
@@ -434,17 +425,16 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if(gifUrl != '')
-                        Container(
-                          margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                          child:Image.network(
-                          gifUrl,
-                          width: 300,
-                          height: 200,
-                          fit: BoxFit.cover,
-                        ) ,
-                        )
-                        ,
+                        if (gifUrl != '')
+                          Container(
+                            margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                            child: Image.network(
+                              gifUrl,
+                              width: 300,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         Text(
                           widget.text,
                           style: TextStyle(color: textColor, fontSize: 15),
@@ -491,9 +481,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                                         _buildWave(
                                           widget.isMe
                                               ? Colors.white70
-                                              : AppColors.of(
-                                                  context,
-                                                ).surface.withOpacity(0.6),
+                                              : AppConstants.darkViolet,
                                         ),
                                         const SizedBox(width: 8),
                                         Expanded(
@@ -532,8 +520,10 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                                           0.3,
                                         ),
                                         onChanged: (v) async {
-                                          if(kDebugMode){
-                                            var x = Duration(milliseconds: v.toInt());
+                                          if (kDebugMode) {
+                                            var x = Duration(
+                                              milliseconds: v.toInt(),
+                                            );
                                             var y = _player.duration;
                                             print("STATUS ITO! : $_state");
                                             print("DURATION : $x - $y");
@@ -546,7 +536,6 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                                           if (_cachedPath != null) {
                                             await _player.seek(seekPos);
                                           }
-
                                         },
                                       ),
                                   ],
@@ -562,17 +551,19 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
               ),
               if (!widget.isMe)
                 Column(
-                  children:[
+                  children: [
                     Padding(
-                      padding: EdgeInsets.fromLTRB(5,0,0,0),
-                    child:Text(
-                    formatted,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.black54,
-                      fontWeight: FontWeight.bold,
-                    ),)
-                  ),]
+                      padding: EdgeInsets.fromLTRB(5, 0, 0, 0),
+                      child: Text(
+                        formatted,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
             ],
           ),

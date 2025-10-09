@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:signtalk/app_constants.dart';
-import 'package:signtalk/providers/dark_mode_provider.dart';
 import 'package:signtalk/screens/settings_screens/settings_blocked_list_screen.dart';
 import 'package:signtalk/screens/settings_screens/settings_feedback_screen.dart';
 
@@ -22,17 +21,7 @@ List<Map<String, dynamic>> getSettingsOptions(
   BuildContext context,
   WidgetRef ref,
 ) {
-  final isDarkMode = ref.watch(darkModeProvider);
-
   return [
-    {
-      'text': 'Dark Mode',
-      'icon': Switch(
-        value: isDarkMode,
-        onChanged: (value) => ref.read(darkModeProvider.notifier).state = value,
-      ),
-      'onTap': null,
-    },
     {
       'text': 'Feedback',
       'icon': _settingsIcon(context, AppConstants.settings_feedback_icon),

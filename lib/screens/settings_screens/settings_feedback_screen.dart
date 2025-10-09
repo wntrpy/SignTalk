@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:signtalk/app_colors.dart';
+import 'package:signtalk/app_constants.dart';
 
 void showFeedbackDialog(BuildContext context) {
   final TextEditingController feedbackController = TextEditingController();
@@ -29,7 +29,7 @@ void showFeedbackDialog(BuildContext context) {
                   fontSize: 18,
                   fontFamily: "Alata",
                   fontWeight: FontWeight.bold,
-                  color: AppColors.of(context).surface,
+                  color: AppConstants.white,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -38,7 +38,7 @@ void showFeedbackDialog(BuildContext context) {
             // Content
             Container(
               decoration: BoxDecoration(
-                color: AppColors.of(context).surface,
+                color: AppConstants.white,
                 borderRadius: BorderRadius.vertical(
                   bottom: Radius.circular(16),
                 ),
@@ -200,7 +200,7 @@ void showFeedbackDialog(BuildContext context) {
                           style: TextStyle(
                             fontSize: 18,
                             fontFamily: "Alata",
-                            color: AppColors.of(context).surface,
+                            color: AppConstants.white,
                           ),
                         ),
                       ),
