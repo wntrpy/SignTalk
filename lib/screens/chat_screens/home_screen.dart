@@ -46,9 +46,21 @@ class _HomeScreenState extends State<HomeScreen> {
           .collection('chats')
           .doc(chatId)
           .get();
+
+      if (!chatDoc.exists) return null;
+
       final chatData = chatDoc.data();
       if (chatData == null || chatData['users'] == null) return null;
 
+      // ✅ Hide chat card if deleted by current user
+      final deletedFor = Map<String, dynamic>.from(
+        chatData['deletedFor'] ?? {},
+      );
+      if (deletedFor[loggedInUser!.uid] == true) {
+        return null; // Hide from list
+      }
+
+      // ... rest of your existing code
       final users = chatData['users'] as List<dynamic>;
       final receiverId = users.firstWhere(
         (id) => id != loggedInUser!.uid,
@@ -63,7 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
       final userData = userDoc.data();
       if (userData == null) return null;
 
-      // --- check nickname ---
       String? nickname;
       if (chatData['nicknames'] != null) {
         final nickMap = Map<String, dynamic>.from(chatData['nicknames']);
@@ -87,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'nickname': nickname,
       };
     } catch (e) {
-      // Optionally log error
+      debugPrint('Error fetching chat data: $e');
       return null;
     }
   }

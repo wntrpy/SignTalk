@@ -356,34 +356,26 @@ class ChatProvider with ChangeNotifier {
     });
   }
 
-  //delete convo
   Future<void> deleteConversation(String chatId) async {
     final fs = FirebaseFirestore.instance;
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
-    // Get chat document to check participants
     final chatDoc = await fs.collection('chats').doc(chatId).get();
-
     if (!chatDoc.exists) return;
 
     final chatData = chatDoc.data() as Map<String, dynamic>;
-    final participants = List<String>.from(chatData['participants'] ?? []);
+    final participants = List<String>.from(chatData['users'] ?? []);
 
-    // Initialize deletedFor map if it doesn't exist
     Map<String, dynamic> deletedFor = Map<String, dynamic>.from(
       chatData['deletedFor'] ?? {},
     );
 
-    // Mark as deleted for current user
     deletedFor[uid] = true;
-
-    // Check if both users have deleted
     bool bothDeleted = participants.every((id) => deletedFor[id] == true);
 
     if (bothDeleted) {
-      // If both users deleted, actually delete everything
+      // both deleted - permanently delete everything
       final batch = fs.batch();
-
       final messages = await fs
           .collection('chats')
           .doc(chatId)
@@ -393,14 +385,28 @@ class ChatProvider with ChangeNotifier {
       for (var doc in messages.docs) {
         batch.delete(doc.reference);
       }
-
       batch.delete(fs.collection('chats').doc(chatId));
       await batch.commit();
+      debugPrint("✅ Both users deleted - permanently removed");
     } else {
-      // Only one user deleted, just mark it
-      await fs.collection('chats').doc(chatId).update({
+      // only one user deleted - mark messages as deleted for this user
+      final batch = fs.batch();
+      final messagesSnapshot = await fs
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .get();
+
+      for (var doc in messagesSnapshot.docs) {
+        batch.update(doc.reference, {'deletedFor.$uid': true});
+      }
+
+      batch.update(fs.collection('chats').doc(chatId), {
         'deletedFor': deletedFor,
       });
+
+      await batch.commit();
+      debugPrint("✅ Messages deleted for user $uid");
     }
   }
 }

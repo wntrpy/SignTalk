@@ -99,6 +99,15 @@ class CustomMessageStream extends StatelessWidget {
 
             for (final message in docs) {
               final data = message.data() as Map<String, dynamic>;
+
+              // ✅ CHECK IF MESSAGE IS DELETED FOR CURRENT USER
+              final deletedFor = Map<String, dynamic>.from(
+                data['deletedFor'] ?? {},
+              );
+              if (deletedFor[currentUser] == true) {
+                continue; // Skip this message - don't show it
+              }
+
               final text = data['messageBody'] as String? ?? '';
               final senderId = data['senderId'] as String? ?? '';
               final ts = data['timestamp'];
