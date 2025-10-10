@@ -2,19 +2,22 @@ import 'package:dio/dio.dart';
 
 class ModelApiService {
   final Dio _dio = Dio();
- 
-  String baseUrl = 'https://barriers-inclusion-dated-vids.trycloudflare.com';
- 
+
+  String baseUrl =
+      'https://redhead-midnight-tremendous-expert.trycloudflare.com';
+
   ModelApiService() {
     _dio.options.connectTimeout = Duration(minutes: 3);
     _dio.options.receiveTimeout = Duration(minutes: 3);
   }
- 
+
   void updateBaseUrl(String newUrl) {
-    baseUrl = newUrl.endsWith('/') ? newUrl.substring(0, newUrl.length - 1) : newUrl;
+    baseUrl = newUrl.endsWith('/')
+        ? newUrl.substring(0, newUrl.length - 1)
+        : newUrl;
     print('API URL updated: $baseUrl');
   }
- 
+
   Future<bool> checkHealth() async {
     try {
       final response = await _dio.get('$baseUrl/health');
@@ -28,7 +31,7 @@ class ModelApiService {
       return false;
     }
   }
- 
+
   Future<Map<String, dynamic>> recognizeVideo({
     required String videoUrl,
     required String userId,
@@ -37,26 +40,21 @@ class ModelApiService {
     try {
       print('Sending video to API...');
       print('Video URL: $videoUrl');
-     
+
       final response = await _dio.post(
         '$baseUrl/recognize',
-        data: {
-          'video_url': videoUrl,
-          'userId': userId,
-          'chatId': chatId,
-        },
+        data: {'video_url': videoUrl, 'userId': userId, 'chatId': chatId},
       );
-     
+
       if (response.statusCode == 200) {
         print('Recognition successful: ${response.data}');
         return response.data;
       } else {
         throw Exception('API error: ${response.statusCode}');
       }
-     
     } on DioException catch (e) {
       print('Network error: ${e.message}');
-     
+
       if (e.type == DioExceptionType.connectionTimeout) {
         throw Exception('Connection timeout.');
       } else if (e.type == DioExceptionType.receiveTimeout) {

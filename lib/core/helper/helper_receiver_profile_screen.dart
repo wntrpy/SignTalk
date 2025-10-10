@@ -29,12 +29,10 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
                 decoration: const InputDecoration(hintText: "Enter nickname"),
               ),
               actions: [
-                // cancel
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: const Text("Cancel"),
                 ),
-                // reset to original name from users collection
                 TextButton(
                   onPressed: () async {
                     try {
@@ -45,7 +43,6 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
                       final originalName =
                           userDoc.data()?['name'] ?? 'Unknown User';
 
-                      // update nickname in chats doc
                       await FirebaseFirestore.instance
                           .collection('chats')
                           .doc(chatId)
@@ -57,12 +54,11 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
 
                       Navigator.pop(context, originalName);
                     } catch (e) {
-                      Navigator.pop(context); // close if may unexpected error
+                      Navigator.pop(context);
                     }
                   },
                   child: const Text("Reset"),
                 ),
-                // save new nickname
                 TextButton(
                   onPressed: () => Navigator.pop(context, temp),
                   child: const Text("Save"),
@@ -73,7 +69,6 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
         );
 
         if (newName != null && newName.trim().isNotEmpty) {
-          // update Firestore nicknames (if not reset already handled above)
           await FirebaseFirestore.instance.collection('chats').doc(chatId).set({
             'nicknames': {
               loggedInUserId: {receiverId: newName},
@@ -82,6 +77,8 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
         }
       },
     },
+
+    // 3D Avatar Sign Language
     {
       'optionText': "3D Avatar Sign Language",
       'iconPath': AppConstants.receiver_avatar_icon,
@@ -99,6 +96,9 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
 
           return Switch(
             value: aslForMe,
+            activeColor: Colors.white,
+            inactiveThumbColor: AppConstants.darkViolet,
+            inactiveTrackColor: AppConstants.darkViolet.withOpacity(0.4),
             onChanged: (val) async {
               await FirebaseFirestore.instance
                   .collection('chats')
@@ -111,6 +111,8 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
         },
       ),
     },
+
+    // Translated Voice Speech
     {
       'optionText': "Translated Voice Speech",
       'iconPath': AppConstants.receiver_voice_speech_icon,
@@ -127,6 +129,9 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
 
           return Switch(
             value: ttsForMe,
+            activeColor: Colors.white,
+            inactiveThumbColor: AppConstants.darkViolet,
+            inactiveTrackColor: AppConstants.darkViolet.withOpacity(0.4),
             onChanged: (val) async {
               await FirebaseFirestore.instance
                   .collection('chats')
@@ -140,6 +145,7 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
       ),
     },
 
+    // Mute Notification
     {
       'optionText': 'Mute Notification',
       'iconPath': AppConstants.receiver_notification_icon,
@@ -161,13 +167,12 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
 
             return Icon(
               isMuted ? Icons.notifications_off : Icons.notifications,
-              color: isMuted ? Colors.white : Colors.white,
+              color: Colors.white,
               size: 36,
             );
           },
         );
       },
-
       'trailingWidget': StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('chats')
@@ -182,6 +187,9 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
 
           return Switch(
             value: isMuted,
+            activeColor: Colors.white,
+            inactiveThumbColor: AppConstants.darkViolet,
+            inactiveTrackColor: AppConstants.darkViolet.withOpacity(0.4),
             onChanged: (val) async {
               await FirebaseFirestore.instance
                   .collection('chats')
@@ -246,7 +254,6 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
       'optionText': 'Delete Conversation',
       'iconPath': AppConstants.receiver_delete_icon,
       'onTap': () async {
-        // Show confirmation dialog
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (BuildContext dialogContext) {
@@ -270,13 +277,12 @@ List<Map<String, dynamic>> getReceiverProfileOptions(
           },
         );
 
-        // If user confirmed, proceed with deletion
         if (confirmed == true) {
           await Provider.of<ChatProvider>(
             context,
             listen: false,
           ).deleteConversation(chatId);
-          Navigator.pop(context); // close profile
+          Navigator.pop(context);
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text("Conversation deleted")));
