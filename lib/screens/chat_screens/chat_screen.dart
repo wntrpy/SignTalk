@@ -170,14 +170,17 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  //block screen
   Widget _buildBlockedUI({
+    required BuildContext context,
     required String displayName,
     required bool isMeBlocking,
   }) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(displayName, style: TextStyle(color: AppConstants.white)),
+        title: Text(
+          displayName,
+          style: const TextStyle(color: AppConstants.white),
+        ),
         backgroundColor: AppConstants.darkViolet,
       ),
       body: Center(
@@ -196,12 +199,45 @@ class _ChatScreenState extends State<ChatScreen> {
             if (isMeBlocking)
               ElevatedButton(
                 onPressed: () async {
-                  await _firestore
-                      .collection('users')
-                      .doc(loggedInUser!.uid)
-                      .set({
-                        'blocked': {widget.receiverId: false},
-                      }, SetOptions(merge: true));
+                  final shouldUnblock = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text("Unblock User"),
+                      content: Text(
+                        "Are you sure you want to unblock $displayName?",
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(false),
+                          child: const Text("Cancel"),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppConstants.darkViolet,
+                          ),
+                          onPressed: () => Navigator.of(ctx).pop(true),
+                          child: const Text("Unblock"),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (shouldUnblock == true) {
+                    await _firestore
+                        .collection('users')
+                        .doc(loggedInUser!.uid)
+                        .set({
+                          'blocked': {widget.receiverId: false},
+                        }, SetOptions(merge: true));
+
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("$displayName has been unblocked."),
+                        ),
+                      );
+                    }
+                  }
                 },
                 child: const Text("Unblock"),
               ),
@@ -459,11 +495,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 if (isMeBlocking) {
                   return _buildBlockedUI(
+                    context: context,
                     displayName: displayName,
                     isMeBlocking: true,
                   );
                 } else if (isBlockedByReceiver) {
                   return _buildBlockedUI(
+                    context: context,
                     displayName: displayName,
                     isMeBlocking: false,
                   );
