@@ -26,9 +26,11 @@ class SearchUserCardWidget extends StatelessWidget {
       title: Text(name),
       subtitle: Text(email),
       onTap: () async {
-        final chatId =
-            await chatProvider.getChatRoom(userId) ??
-            await chatProvider.createChatRoom(userId);
+        // Check if chat room exists
+        final chatId = await chatProvider.getChatRoom(userId);
+
+        // Navigate to ChatScreen
+        // If chatId is null, ChatScreen will create it when first message is sent
         Navigator.push(
           context,
           MaterialPageRoute(

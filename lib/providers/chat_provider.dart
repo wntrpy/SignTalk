@@ -47,6 +47,7 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
+  /*
   Future<void> sendVoiceMessage(
     String chatId,
     String receiverId,
@@ -68,7 +69,7 @@ class ChatProvider with ChangeNotifier {
           'timestamp': FieldValue.serverTimestamp(),
           'status': 'sent',
         });
-  }
+  }*/
 
   //tanggal
   void startListening() async {
@@ -163,6 +164,7 @@ class ChatProvider with ChangeNotifier {
     return await ref.getDownloadURL();
   }
 
+  /*
   Future<void> sendMessage(
     String chatId,
     String message,
@@ -193,6 +195,88 @@ class ChatProvider with ChangeNotifier {
         'timestamp': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
     }
+  }*/
+
+  Future<String> sendMessage(
+    String? chatId, // Now accepts nullable chatId
+    String message,
+    String receiverId,
+  ) async {
+    final currentUser = _auth.currentUser;
+
+    if (currentUser != null) {
+      // If chatId is null, create a new chat room first
+      chatId ??= await createChatRoom(receiverId);
+
+      // Create message with initial status = sent
+      await _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .add({
+            'senderId': currentUser.uid,
+            'receiverId': receiverId,
+            'messageBody': message,
+            'timestamp': FieldValue.serverTimestamp(),
+            'status': 'sent',
+          });
+
+      // Update chat summary (for the list view)
+      await _firestore.collection('chats').doc(chatId).set({
+        'users': [currentUser.uid, receiverId],
+        'lastMessage': message,
+        'lastMessageSenderId': currentUser.uid,
+        'lastMessageStatus': 'sent',
+        'timestamp': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      return chatId; // Return the chatId (new or existing)
+    }
+
+    throw Exception('Current User is Null');
+  }
+
+  Future<String> sendVoiceMessage(
+    String? chatId, // Now accepts nullable chatId
+    String receiverId,
+    String messageText,
+    String audioUrl,
+    Duration duration,
+  ) async {
+    final currentUser = _auth.currentUser;
+
+    if (currentUser != null) {
+      // If chatId is null, create a new chat room first
+      chatId ??= await createChatRoom(receiverId);
+
+      // Send to Firestore chats collection
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .add({
+            'senderId': currentUser.uid,
+            'receiverId': receiverId,
+            'messageBody': messageText,
+            'audioUrl': audioUrl,
+            'duration': duration.inSeconds,
+            'timestamp': FieldValue.serverTimestamp(),
+            'status': 'sent',
+          });
+
+      // Update chat summary
+      await _firestore.collection('chats').doc(chatId).set({
+        'users': [currentUser.uid, receiverId],
+        'lastMessage': messageText,
+        'lastMessageSenderId': currentUser.uid,
+        'lastMessageStatus': 'sent',
+        'timestamp': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      return chatId;
+    }
+
+    throw Exception('Current User is Null');
   }
 
   Future<String?> getChatRoom(String receiverId) async {

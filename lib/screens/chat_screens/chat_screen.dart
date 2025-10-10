@@ -112,8 +112,10 @@ class _ChatScreenState extends State<ChatScreen> {
     final text = textController.text.trim();
     if (text.isEmpty) return;
 
+    // Create chat room if it doesn't exist
     if (chatId == null || chatId!.isEmpty) {
       chatId = await chatProvider.createChatRoom(widget.receiverId);
+      setState(() {}); // Update UI with new chatId
     }
     if (chatId == null) return;
 
@@ -404,8 +406,13 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
 
+    /*
     if (chatId == null) {
       return const Scaffold(body: Center(child: Text("No chat available")));
+    }*/
+
+    if (loggedInUser == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return StreamBuilder<DocumentSnapshot>(
@@ -566,10 +573,31 @@ class _ChatScreenState extends State<ChatScreen> {
                   body: Column(
                     children: [
                       Expanded(
-                        child: CustomMessageStream(
-                          chatId: chatId!,
-                          timestampToLocal: timestampToLocal,
-                        ),
+                        child: chatId == null
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.chat_bubble_outline,
+                                      size: 64,
+                                      color: Colors.grey[400],
+                                    ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      'Send a message to start chatting',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : CustomMessageStream(
+                                chatId: chatId!,
+                                timestampToLocal: timestampToLocal,
+                              ),
                       ),
                       _buildMessageInput(chatProvider, context),
                     ],
