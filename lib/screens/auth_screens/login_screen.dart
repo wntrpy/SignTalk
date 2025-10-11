@@ -462,7 +462,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 icon: _isLockedOut
                                     ? ColorFiltered(
                                         colorFilter: ColorFilter.mode(
-                                          Colors.grey,
+                                          Colors.transparent,
                                           BlendMode.saturation,
                                         ),
                                         child: Image.asset(

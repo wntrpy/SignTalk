@@ -4,7 +4,7 @@ class ModelApiService {
   final Dio _dio = Dio();
 
   String baseUrl =
-      'https://redhead-midnight-tremendous-expert.trycloudflare.com';
+      'https://animation-notebooks-wichita-download.trycloudflare.com';
 
   ModelApiService() {
     _dio.options.connectTimeout = Duration(minutes: 3);
