@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
@@ -28,6 +30,9 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController textController = TextEditingController();
   final AudioRecorder _audioRecorder = AudioRecorder();
 
+  Timer? _listeningTimer;
+  int _listeningSeconds = 0;
+
   String? recordedAudioPath; // path of current recording
   String? sttText; // result of speech-to-text
   bool isPlaying = false; // for replay in input
@@ -52,6 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     textController.dispose();
     _audioRecorder.dispose();
+    _listeningTimer?.cancel(); // Add this line
     super.dispose();
   }
 
@@ -88,6 +94,21 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       _isListening = true;
       _voiceText = '';
+      _listeningSeconds = 0;
+    });
+
+    // Start timer
+    _listeningTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _listeningSeconds = timer.tick;
+        });
+
+        // Auto-stop after 15 seconds
+        if (_listeningSeconds >= 15) {
+          _stopListening();
+        }
+      }
     });
 
     _speech.listen(
@@ -99,10 +120,12 @@ class _ChatScreenState extends State<ChatScreen> {
       },
       localeId: 'en_US',
       listenMode: stt.ListenMode.dictation,
+      listenFor: const Duration(seconds: 15),
     );
   }
 
   Future<void> _stopListening() async {
+    _listeningTimer?.cancel();
     await _speech.stop();
     setState(() => _isListening = false);
   }
@@ -264,10 +287,10 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             const Icon(Icons.mic, color: Colors.red, size: 28),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
-                "Listening...",
-                style: TextStyle(fontSize: 16, color: Colors.black54),
+                "Listening... ${_listeningSeconds}s",
+                style: const TextStyle(fontSize: 16, color: Colors.black54),
               ),
             ),
             IconButton(

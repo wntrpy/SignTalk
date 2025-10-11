@@ -90,7 +90,7 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget>
             _transcribedText = result.recognizedWords;
           });
         },
-        listenFor: const Duration(seconds: 30),
+        listenFor: const Duration(seconds: 15),
         pauseFor: const Duration(seconds: 3),
         partialResults: true,
         cancelOnError: false,
@@ -140,7 +140,7 @@ class _VoiceRecordingWidgetState extends State<VoiceRecordingWidget>
         });
 
         // Auto-stop after 5 seconds
-        if (_recordingDuration.inSeconds >= 5) {
+        if (_recordingDuration.inSeconds >= 15) {
           if (kDebugMode) print('⏱️ 5 seconds reached, auto-stopping...');
           _stopRecording();
         }
