@@ -179,7 +179,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
 
       final text = Uri.encodeComponent(widget.text);
       final url = Uri.parse(
-        'https://api.streamelements.com/kappa/v2/speech?voice=Brian&text=$text',
+        'https://api.streamelements.com/kappa/v2/speech?voice=Joanna&text=$text',
       );
 
       final response = await http.get(url).timeout(const Duration(seconds: 15));
