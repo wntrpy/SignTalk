@@ -153,7 +153,7 @@ login screen
 - if all conditions are true, and the credentials are right, proceed/navigate to home screen
 
 
-registration screen / sign up screen
+registration screen
 - users can create new account in order to use enter/use the mobile application
 - fields: name, age, user type (hearing, non-hearing), email, password, confirm password
 - after creating an account, it will automatically navigate the user to the login screen
@@ -176,7 +176,15 @@ home screen
 search screen
 - this screen lets the current logged in user search other users that are registered in the mobile application
 - the searched users here is in a form of card, which is clickable, when clicked, will be redirected to the chat screen, with the correct user data
+- when the user chats that receiver, it will add that receiver in the users home screen list
 
+Slidable user card
+ - this is the card that represent each receiver (user) in the home screen
+ - when clicked, it will redirect the user in the chat screen, with the right data
+ - this slidable user card is like encapsulated in a slidable widget in flutter, in which it contains 3 options
+  - mute notification just like in receiver profile screen
+  - block the receiver just like in receiver profile screen
+  - delete the conversation for the users end only, not both ends, just like in the receiver profile screen
 
 chat screen
 - this screen lets two user(current logged in user and the receiver) to communicate
@@ -187,7 +195,7 @@ chat screen
    - when the receiver's pfp is clicked, it wil redirect the current logged in user to the receiver profile screen
 
 
-Receiver profile screen (the one the user is talking to)
+Receiver profile screen/module (the one the user is talking to)
 - this screen shows some options/configs, and the name of the receiver
   - can change/reset nickname
   - can enable and disable:
@@ -195,7 +203,17 @@ Receiver profile screen (the one the user is talking to)
     - translated voice speech - hide the audio translation
   - mute notification
   - can block the user
-  - can delete conversation
+  - can delete conversation, not both ends just the on who deletes
+
+	Sub-feature for this screen includes:
+			Change nickname
+			disable/enable toggle 3d avatar sign language
+			Disable/enable translated voice speech
+			Mute notification
+			Block contact
+			Delete conversation
+
+
 
 User profile screen
 - this screen display the basic information of the current logged in user
@@ -204,9 +222,10 @@ User profile screen
    - age
    - user type
    - email
-- the current logged in user can change their pfp, name, and age
+- the current logged in user can change/modify their pfp, name, and age
 - this screen also contains the settings icon/button, that when clicked, the current logged in user will be redirected to the settings screen
 
+settings module, which includes sub features such as: send feedback, blocked list, asl chart
 Settings screen
 - this screen contains some options/configurations for the application?
 - contains feedback dialog/screen?
@@ -222,10 +241,3 @@ Settings screen
   - this screen just contains an image of ASL alphabet chart(A-Z), in which the current logged in user can learn some ASL Sign Language
 
 
-ChatGPT said:
-
-ChatScreen:
-The ChatScreen is the main messaging interface where users can send and receive messages in real time. It displays the receiver’s name, profile, and online status, allows text and voice-to-text input, and handles blocking between users.
-
-CustomMessageStream:
-The CustomMessageStream displays all chat messages for a specific conversation, updating live from Firestore. It also marks incoming messages as read and shows them in chat bubbles for both sender and receiver.
