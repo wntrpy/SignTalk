@@ -286,135 +286,137 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         }
       },
       child: Scaffold(
-        resizeToAvoidBottomInset: false,
+        // ✅ Let Scaffold adjust when keyboard shows
+        resizeToAvoidBottomInset: true,
         body: Stack(
-          fit: StackFit.expand,
           children: [
-            Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 40.0,
-                vertical: 50,
-              ),
-              child: Column(
-                children: [
-                  SafeArea(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          Center(
-                            child: CustomSigntalkLogo(width: 150, height: 150),
-                          ),
-                          CustomTextfieldAuth(
-                            labelText: "Name",
-                            controller: _nameController,
-                            errorText: _nameError,
-                            onChanged: (value) {
-                              setState(() => _nameError = null);
-                            },
-                          ),
-                          SizedBox(height: 20),
-                          CustomTextfieldAuth(
-                            labelText: "Age",
-                            controller: _ageController,
-                            errorText: _ageError,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            onChanged: (value) {
-                              setState(() => _ageError = null);
-                            },
-                          ),
-                          SizedBox(height: 20),
-                          CustomTextfieldDropdown(
-                            hint: "User Type",
-                            value: selectedUserType,
-                            items: userTypes,
-                            onChanged: (value) =>
-                                setState(() => selectedUserType = value),
-                          ),
-                          SizedBox(height: 20),
-                          CustomTextfieldAuth(
-                            labelText: "Email",
-                            controller: _emailController,
-                            errorText: _emailError,
-                            keyboardType: TextInputType.emailAddress,
-                            onChanged: (value) {
-                              setState(() => _emailError = null);
-                            },
-                          ),
-                          SizedBox(height: 20),
-                          CustomPasswordField(
-                            controller: _passwordController,
-                            labelText: 'Password',
-                            errorText: _passwordError,
-                            onChanged: (value) {
-                              setState(() => _passwordError = null);
-                            },
-                          ),
-                          SizedBox(height: 20),
-                          CustomPasswordField(
-                            controller: _confirmPasswordController,
-                            labelText: 'Confirm Password',
-                            errorText: _passwordError,
-                            onChanged: (value) {
-                              setState(() => _passwordError = null);
-                            },
-                          ),
-                          SizedBox(height: 30),
-                          Container(
-                            margin: EdgeInsets.only(left: 170),
-                            child: CustomButton(
-                              buttonText: _isLoading
-                                  ? "Registering..."
-                                  : "Register",
-                              colorCode: AppConstants.orange,
-                              buttonWidth: 200,
-                              buttonHeight: 50,
-                              onPressed: _isLoading
-                                  ? null
-                                  : () {
-                                      print('Button pressed'); // Debug
-                                      _handleSubmit().then(
-                                        (success) {
-                                          print(
-                                            'Registration result: $success',
-                                          ); // Debug
-                                          if (success == true) {
-                                            print(
-                                              'Success is TRUE, checking mounted',
-                                            ); // Debug
-                                            if (mounted) {
-                                              print(
-                                                'Navigating to login screen',
-                                              ); // Debug
-                                              context.push('/login_screen');
-                                            }
-                                          } else {
-                                            print(
-                                              'Not navigating - success: $success',
-                                            ); // Debug
-                                          }
-                                        },
-                                        onError: (error) {
-                                          print(
-                                            'Error caught: $error',
-                                          ); // Debug
-                                        },
-                                      );
-                                    },
-                              textSize: 24,
-                              borderRadiusValue: 10,
+            // ✅ Background stays static
+            Positioned.fill(
+              child: Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+            ),
+
+            // ✅ Use SafeArea + Padding + SingleChildScrollView
+            SafeArea(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    // ✅ Automatically scrolls when keyboard opens
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40.0,
+                      vertical: 50,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Center(
+                              child: CustomSigntalkLogo(
+                                width: 150,
+                                height: 150,
+                              ),
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 20),
+
+                            CustomTextfieldAuth(
+                              labelText: "Name",
+                              controller: _nameController,
+                              errorText: _nameError,
+                              onChanged: (_) =>
+                                  setState(() => _nameError = null),
+                            ),
+                            const SizedBox(height: 20),
+
+                            CustomTextfieldAuth(
+                              labelText: "Age",
+                              controller: _ageController,
+                              errorText: _ageError,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              onChanged: (_) =>
+                                  setState(() => _ageError = null),
+                            ),
+                            const SizedBox(height: 20),
+
+                            CustomTextfieldDropdown(
+                              hint: "User Type",
+                              value: selectedUserType,
+                              items: userTypes,
+                              onChanged: (value) =>
+                                  setState(() => selectedUserType = value),
+                            ),
+                            const SizedBox(height: 20),
+
+                            CustomTextfieldAuth(
+                              labelText: "Email",
+                              controller: _emailController,
+                              errorText: _emailError,
+                              keyboardType: TextInputType.emailAddress,
+                              onChanged: (_) =>
+                                  setState(() => _emailError = null),
+                            ),
+                            const SizedBox(height: 20),
+
+                            // ✅ Password fields
+                            CustomPasswordField(
+                              controller: _passwordController,
+                              labelText: 'Password',
+                              errorText: _passwordError,
+                              onChanged: (_) =>
+                                  setState(() => _passwordError = null),
+                            ),
+                            const SizedBox(height: 20),
+
+                            CustomPasswordField(
+                              controller: _confirmPasswordController,
+                              labelText: 'Confirm Password',
+                              errorText: _passwordError,
+                              onChanged: (_) =>
+                                  setState(() => _passwordError = null),
+                            ),
+
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton(
+                                onPressed: () => context.push('/login_screen'),
+                                child: Text(
+                                  "Already Registered?",
+                                  style: TextStyle(
+                                    color: AppConstants.white,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(height: 20),
+
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: CustomButton(
+                                buttonText: "Register",
+                                colorCode: AppConstants.orange,
+                                buttonWidth: 200,
+                                buttonHeight: 50,
+                                onPressed: _isLoading ? null : _handleSubmit,
+                                textSize: 24,
+                                borderRadiusValue: 10,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
             ),
+
             if (_isLoading)
               Container(
                 color: Colors.black.withOpacity(0.3),

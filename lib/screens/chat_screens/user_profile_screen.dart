@@ -62,7 +62,10 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        const CustomAppBar(appBarText: "Profile"),
+        Padding(
+          padding: const EdgeInsets.only(top: 25),
+          child: const CustomAppBar(appBarText: "Profile"),
+        ),
 
         // -------------------- Profile Picture -------------------- \\
         Stack(
@@ -141,7 +144,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
   Widget _buildProfileForm(UserModel user, bool isEditMode) {
     return Padding(
-      padding: const EdgeInsets.only(right: 20),
+      padding: const EdgeInsets.only(right: 30),
       child: Column(
         children: [
           // --- NAME FIELD WITH EDIT/SAVE BUTTON ---
@@ -349,7 +352,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.40,
+                    height: MediaQuery.of(context).size.height * 0.45,
                     child: ClipRRect(
                       borderRadius: const BorderRadius.only(
                         bottomLeft: Radius.circular(40),

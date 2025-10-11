@@ -17,6 +17,8 @@ class SettingsBlockedListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
+
         title: const Text(
           "Blocked Users",
           style: TextStyle(color: Colors.white),

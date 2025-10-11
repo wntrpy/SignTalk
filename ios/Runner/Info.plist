@@ -8,22 +8,6 @@
 	<string>Signtalk</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
-	<!--Copied from GoogleService-Info.plist key CLIENT_ID-->
-	<string>1618713415-2e1t1d2cedo3mnb8e6itgkt6n6slqv2f.apps.googleusercontent.com</string>
-	<!-- Google Signin Section -->
-	<key>CFBundleURLTypes</key>
-	<!-- Photo Library Usage -->
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your photo library to select a profile picture.</string>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			</array>
-			   <!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
-			<string>com.googleusercontent.apps.1618713415-2e1t1d2cedo3mnb8e6itgkt6n6slqv2f</string>
-		</dict>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -61,5 +45,22 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Photo Library Usage -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to your photo library to select a profile picture.</string>
+	<!-- Google Sign-In Configuration -->
+	<key>GIDClientID</key>
+	<string>1618713415-2e1t1d2cedo3mnb8e6itgkt6n6slqv2f.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1618713415-2e1t1d2cedo3mnb8e6itgkt6n6slqv2f</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

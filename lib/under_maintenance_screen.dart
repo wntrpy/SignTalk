@@ -69,8 +69,8 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen> {
                 children: [
                   Image.asset(
                     AppConstants.signtalk_logo,
-                    height: 120,
-                    width: 120,
+                    height: 200,
+                    width: 200,
                   ),
                   const SizedBox(height: 40),
 

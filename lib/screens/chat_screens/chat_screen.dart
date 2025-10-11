@@ -179,6 +179,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(color: Colors.white),
+
         title: Text(
           displayName,
           style: const TextStyle(color: AppConstants.white),
@@ -218,7 +220,10 @@ class _ChatScreenState extends State<ChatScreen> {
                             backgroundColor: AppConstants.darkViolet,
                           ),
                           onPressed: () => Navigator.of(ctx).pop(true),
-                          child: const Text("Unblock"),
+                          child: Text(
+                            "Unblock",
+                            style: TextStyle(color: AppConstants.white),
+                          ),
                         ),
                       ],
                     ),
@@ -325,7 +330,7 @@ class _ChatScreenState extends State<ChatScreen> {
       //Normal typing UI
       return Container(
         color: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 15),
+        padding: const EdgeInsets.only(top: 8, right: 15, left: 15, bottom: 24),
         child: Row(
           children: [
             Expanded(
@@ -516,6 +521,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 return Scaffold(
                   appBar: AppBar(
+                    iconTheme: const IconThemeData(color: Colors.white),
+
                     title: Row(
                       children: [
                         CustomProfileAvatar(

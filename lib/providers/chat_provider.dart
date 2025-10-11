@@ -312,17 +312,6 @@ class ChatProvider with ChangeNotifier {
     throw Exception('Current User is Null');
   }
 
-  //typing status
-  Future<void> updateTypingStatus(
-    String chatId,
-    String userId,
-    bool isTyping,
-  ) async {
-    await FirebaseFirestore.instance.collection('chats').doc(chatId).update({
-      'typing.$userId': isTyping,
-    });
-  }
-
   //user active state
   void setUserOnlineStatus(bool isOnline) async {
     final currentUser = FirebaseAuth.instance.currentUser;

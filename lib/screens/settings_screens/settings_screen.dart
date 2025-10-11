@@ -28,55 +28,61 @@ class SettingScreen extends ConsumerWidget {
             fit: StackFit.expand,
             children: [
               Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
-              Column(
-                children: [
-                  CustomAppBar(
-                    appBarText: "Settings",
-                    rightWidget: CustomCirclePfpButton(
-                      borderColor: AppConstants.white,
-                      userImage: user.photoUrl ?? AppConstants.default_user_pfp,
-                      width: 40,
-                      height: 40,
+              Padding(
+                padding: const EdgeInsets.only(top: 25),
+                child: Column(
+                  children: [
+                    CustomAppBar(
+                      appBarText: "Settings",
+                      rightWidget: CustomCirclePfpButton(
+                        borderColor: AppConstants.white,
+                        userImage:
+                            user.photoUrl ?? AppConstants.default_user_pfp,
+                        width: 40,
+                        height: 40,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 25,
-                      vertical: 30,
-                    ),
-                    child: Column(
-                      children: [
-                        ...settingsOptions.map(
-                          (option) => Column(
-                            children: [
-                              CustomSettingsOptionCard(
-                                optionText: option['text'],
-                                trailing: option['icon'],
-                                onTap: option['onTap'],
-                              ),
-                              spacer,
-                            ],
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 25,
+                        vertical: 30,
+                      ),
+                      child: Column(
+                        children: [
+                          ...settingsOptions.map(
+                            (option) => Column(
+                              children: [
+                                CustomSettingsOptionCard(
+                                  optionText: option['text'],
+                                  trailing: option['icon'],
+                                  onTap: option['onTap'],
+                                ),
+                                spacer,
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 30),
+                          const SizedBox(height: 30),
 
-                        CustomButton(
-                          buttonText: 'Log out',
-                          colorCode: AppConstants.orange,
-                          textColor: AppConstants.white,
-                          buttonWidth: 150,
-                          buttonHeight: 45,
-                          textSize: AppConstants.fontSizeMedium,
-                          borderRadiusValue: 10,
-                          onPressed: () async {
-                            await ref.read(authprovider.authProvider).signOut();
-                            context.go('/login_screen');
-                          },
-                        ),
-                      ],
+                          CustomButton(
+                            buttonText: 'Log out',
+                            colorCode: AppConstants.orange,
+                            textColor: AppConstants.white,
+                            buttonWidth: 150,
+                            buttonHeight: 45,
+                            textSize: AppConstants.fontSizeMedium,
+                            borderRadiusValue: 10,
+                            onPressed: () async {
+                              await ref
+                                  .read(authprovider.authProvider)
+                                  .signOut();
+                              context.go('/login_screen');
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

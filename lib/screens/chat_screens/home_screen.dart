@@ -129,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(top: 30),
+                            padding: const EdgeInsets.only(top: 50),
                             child: Row(
                               children: [
                                 CustomSigntalkLogo(width: 60, height: 60),
@@ -171,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 15),
 
                       //-----------------------------------------SEARCH BAR--------------------------------------------\\
                       GestureDetector(
