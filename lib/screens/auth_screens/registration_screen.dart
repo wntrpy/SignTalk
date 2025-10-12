@@ -240,6 +240,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             backgroundColor: Colors.green,
           ),
         );
+
+        context.go('/login_screen');
       }
 
       setState(() => _isLoading = false);
