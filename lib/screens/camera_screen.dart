@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:async';
+import 'package:flutter/cupertino.dart' show showCupertinoDialog, CupertinoAlertDialog, CupertinoDialogAction;
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,27 +14,23 @@ import 'package:signtalk/providers/chat_provider.dart';
 class RecordVideoScreen extends StatefulWidget {
   final String chatId;
   final String receiverId;
+  
 
-  const RecordVideoScreen({
-    super.key,
-    required this.chatId,
-    required this.receiverId,
-  });
+  const RecordVideoScreen({super.key, required this.chatId, required this.receiverId});
 
   @override
-  State<RecordVideoScreen> createState() =>
-      _RecordVideoScreenState(chatId, receiverId);
+  State<RecordVideoScreen> createState() => _RecordVideoScreenState(chatId, receiverId);
 }
 
 class _RecordVideoScreenState extends State<RecordVideoScreen> {
   CameraController? _controller;
   bool _isRecording = false;
   bool _isProcessing = false;
+  bool _isTimerPause = false;
   int _secondsRecorded = 0;
   String _processingStatus = 'Uploading';
   XFile? _videoFile;
   String _errorMessage = '';
-
   String chatId = '';
   String receiverId = '';
 
@@ -126,43 +124,95 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
     }
   }
 
+  late Future<void> _recordingFuture; 
+  int _recordingId = 0;
+  DateTime? _recordingStartTime;
+  int _pausedDuration = 0;
+  DateTime? _currentPauseStartTime; // Add this to track current pause
+  bool _isManuallyPaused = false;   
+
   Future<void> _startRecording() async {
     if (_controller == null || !_controller!.value.isInitialized) {
       print('Cannot start recording: controller not ready');
       return;
     }
 
+    if (_controller!.value.isRecordingVideo) {
+    print('Recording already in progress');
+    return;
+  }
+
     try {
       print('Starting recording...');
+      _isCancelled = false;
+      _videoFile = null;
+      _recordingId++;
+      _recordingStartTime = DateTime.now();
+      _pausedDuration = 0;
+      _isManuallyPaused = false;
+
       await _controller!.startVideoRecording();
+    
       setState(() {
         _isRecording = true;
         _secondsRecorded = 0;
+        _isTimerPause = false;
       });
 
       _updateTimer();
 
-      Future.delayed(Duration(seconds: 15), () {
-        if (_isRecording && mounted) {
-          _stopRecording();
-        }
-      });
+      final currentRecordingId = _recordingId;
+
+    // Check every 100ms if we've reached 15 seconds of actual recording time
+    _checkRecordingDuration(currentRecordingId);
+  
     } catch (e) {
       print('Recording error: $e');
       _showError('Failed to start recording: $e');
     }
   }
 
+  void _checkRecordingDuration(int recordingId) {
+  Future.delayed(Duration(milliseconds: 100), () {
+    if (!_isRecording || _isCancelled || recordingId != _recordingId || !mounted) {
+      return;
+    }
+
+    // Calculate actual recording time (excluding paused time)
+    final totalElapsed = DateTime.now().difference(_recordingStartTime!).inSeconds;
+
+     int currentPauseDuration = 0;
+    if (_isManuallyPaused && _currentPauseStartTime != null) {
+      currentPauseDuration = DateTime.now().difference(_currentPauseStartTime!).inSeconds;
+    }
+
+    final actualRecordingTime = totalElapsed - _pausedDuration - currentPauseDuration;
+
+     print('Total elapsed: $totalElapsed, Paused: $_pausedDuration, Current pause: $currentPauseDuration, Actual: $actualRecordingTime');
+
+    if (actualRecordingTime >= 15) {
+      print('15 seconds of recording reached');
+      _stopRecording();
+    } else {
+      _checkRecordingDuration(recordingId); // Keep checking
+    }
+  });
+}
+
   void _updateTimer() {
     if (!_isRecording) return;
 
     Future.delayed(Duration(seconds: 1), () {
-      if (_isRecording && mounted) {
+      if (!_isTimerPause && _isRecording && mounted) {
         setState(() => _secondsRecorded++);
+        _updateTimer();
+      }else if(_isTimerPause && _isRecording && mounted){
         _updateTimer();
       }
     });
   }
+
+  bool _isCancelled = false;
 
   Future<void> _stopRecording() async {
     if (!_controller!.value.isRecordingVideo) return;
@@ -172,7 +222,14 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
       _videoFile = await _controller!.stopVideoRecording();
       print('Video saved: ${_videoFile!.path}');
       setState(() => _isRecording = false);
+
+        if (!_isCancelled) {
+          print("Processing vid");
       await _processVideo();
+    }else {
+      print("vid is not processing cos canncelled");
+    }
+
     } catch (e) {
       print('Stop recording error: $e');
       _showError('Failed to stop recording: $e');
@@ -181,7 +238,7 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
 
   Future<void> _processVideo() async {
     if (_videoFile == null) return;
-
+       
     setState(() {
       _isProcessing = true;
       _processingStatus = 'Uploading video';
@@ -202,9 +259,9 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
       print('Checking API health...');
       setState(() => _processingStatus = 'Connecting.....');
       final isHealthy = await apiService.checkHealth();
-
+      
       if (!isHealthy) {
-        throw Exception('Cannot connect to API. Make sure Colab is running.');
+        throw Exception('Cannot connect to API.');
       }
 
       setState(() => _processingStatus = 'Recognizing signs');
@@ -235,10 +292,12 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
 
       // Success!
       if (mounted) {
+        
         final chatProvider = Provider.of<ChatProvider>(context, listen: false);
         var message = result['translation'];
 
         await chatProvider.sendMessage(chatId, message, receiverId);
+      
       }
     } catch (e) {
       print('Processing error: $e');
@@ -249,14 +308,141 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
       }
     }
   }
+    Future<void> _cancelRecording() async {
+    try {
+    print('Attempting to pause recording...');
+    print('Is recording before pause: ${_controller!.value.isRecordingVideo}');
+    print('Is recording paused before: ${_controller!.value.isRecordingPaused}');
 
-  Future<void> _cancelRecording() async {
-    if (_isRecording) {
-      _stopRecording();
+    _isManuallyPaused = true;
+    _currentPauseStartTime = DateTime.now();
+    
+    await _controller!.pauseVideoRecording();
+    
+    print('Is recording after pause: ${_controller!.value.isRecordingVideo}');
+    print('Is recording paused after: ${_controller!.value.isRecordingPaused}');
+  } catch (e) {
+    print('Error pausing recording: $e');
+    // If pause fails, we might need to handle this differently
+  }
+   
+     setState(() {
+    _isTimerPause = true;
+  });
+  
+    
+   final bool? result = await showCupertinoDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return CupertinoAlertDialog(
+        content: Text('Are you sure you want to cancel? The recording will be deleted.'),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: Text('No'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.of(context).pop(true); // Yes
+            },
+            child: Text('Yes'),
+          ),
+        ],
+      );
+    },
+  );
+
+     // Calculate how long we were paused for this session
+  if (_currentPauseStartTime != null) {
+    final pauseDuration = DateTime.now().difference(_currentPauseStartTime!).inSeconds;
+    _pausedDuration += pauseDuration;
+    print('Pause duration: $pauseDuration seconds');
+    print('Total paused duration: $_pausedDuration seconds');
+     _currentPauseStartTime = null;
+  }
+
+  if (result == true) {
+    // User confirmed cancellation
+    _isManuallyPaused = false;
+    _currentPauseStartTime = null;
+    await _performCancelRecording();
+  } else {
+    // User said no, resume recording
+    await _resumeRecording();
+  }
+}
+  Future<void> _resumeRecording() async {
+  try {
+    print('Attempting to resume recording...');
+    print('Is recording paused before resume: ${_controller!.value.isRecordingPaused}');
+    
+      // Try to resume even if it says it's not paused
+    if (_controller!.value.isRecordingVideo) {
+      try {
+        await _controller!.resumeVideoRecording();
+      } catch (e) {
+        print('Resume failed (might already be resumed): $e');
+      }
     }
+    
+    print('Is recording paused after resume: ${_controller!.value.isRecordingPaused}');
+
+    _isManuallyPaused = false;
+    _currentPauseStartTime = null;
+
     setState(() {
-      _isRecording = false;
+       _isTimerPause = false;
     });
+
+    print('Recording resumed');
+  } catch (e) {
+    print("Error resuming recording: $e");
+  }
+}
+
+    Future<void> _performCancelRecording()async {
+    _isCancelled = true;   
+    _recordingId++;
+    _isManuallyPaused = false;
+    _currentPauseStartTime = null;
+  
+     try {
+        // Check if recording is actually running
+    if (!_controller!.value.isRecordingVideo) {
+      print('No recording to cancel');
+      setState(() {
+        _isRecording = false;
+        _isTimerPause = false;
+        _secondsRecorded = 0;
+        _recordingStartTime = null;
+        _pausedDuration = 0;
+      });
+      return;
+    }
+
+       setState(() {
+      _isRecording = false;
+      _isTimerPause = false;
+      _secondsRecorded = 0;
+      _recordingStartTime = null;
+      _pausedDuration = 0;
+    });
+
+      await _controller!.stopVideoRecording();
+
+      await Future.delayed(Duration(milliseconds: 1000));
+   
+    if (_videoFile !=null) {
+      final file = File (_videoFile!.path);
+      await file.delete();
+    }
+    _videoFile = null;
+    } catch (e) {
+      print("Error cancelling recording: $e");
+    }
   }
 
   void _showError(String message) {
@@ -400,7 +586,7 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
 
           if (!_isProcessing)
             Positioned(
-              bottom: 40,
+              bottom: 65,
               left: 0,
               right: 0,
               child: Center(
@@ -423,32 +609,38 @@ class _RecordVideoScreenState extends State<RecordVideoScreen> {
                 ),
               ),
             ),
+         
 
-          //  if (!_isProcessing) ...[
-          //   SizedBox(width: 20),
-
-          //       child: Center(
-          //       child: Container(
-          //         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          //         decoration: BoxDecoration(
-          //           color: Colors.red,
-          //           borderRadius: BorderRadius.circular(20),
-          //         ),
-          //       child: Text(
-          //       'Cancel',
-          //           style: TextStyle(
-          //           color: Colors.white,
-          //           fontWeight: FontWeight.bold,
-          //           fontSize: 15,
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-
-          //   ),
-          // ],
+              if (_isRecording)
+                    Positioned(
+                      bottom: 78,
+                      left: 220,
+                      right: 0,
+                      child: Center(
+                        child: ElevatedButton(
+                          onPressed: _cancelRecording,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            elevation: 5,
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),        
         ],
       ),
     );
   }
 }
+

@@ -1,14 +1,54 @@
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dio/dio.dart';
 
 class ModelApiService {
   final Dio _dio = Dio();
 
-  String baseUrl =
-      'https://animation-notebooks-wichita-download.trycloudflare.com';
-
-  ModelApiService() {
+  static final ModelApiService _instance = ModelApiService._internal();
+  factory ModelApiService() => _instance;
+  
+  ModelApiService._internal(){
     _dio.options.connectTimeout = Duration(minutes: 3);
     _dio.options.receiveTimeout = Duration(minutes: 3);
+  }
+
+
+  String baseUrl = '';
+
+  StreamSubscription<DocumentSnapshot>? _urlSubscription;
+
+  // Call this once when app starts
+  Future<void> initialize() async {
+    // Get initial URL
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('BaseUrl')
+          .doc('serverApi')
+          .get();
+      
+      if (doc.exists) {
+        baseUrl = doc['URL'] ?? '';
+        print('API URL loaded: $baseUrl');
+      }
+    } catch (e) {
+      print('Error loading URL: $e');
+    }
+
+    // Listen for real-time updates
+    _urlSubscription = FirebaseFirestore.instance
+        .collection('BaseUrl')
+        .doc('serverApi')
+        .snapshots()
+        .listen((doc) {
+      if (doc.exists) {
+        String newUrl = doc['URL'] ?? '';
+        if (newUrl != baseUrl) {
+          baseUrl = newUrl;
+          print('API URL updated to: $baseUrl');
+        }
+      }
+    });
   }
 
   void updateBaseUrl(String newUrl) {

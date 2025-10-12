@@ -100,13 +100,30 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
       });
     });
   }
+  
+  String normalizeText(String text) {
+  return text
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]'), '')
+      .trim();
+}
 
   Future<String> _checkGIF() async {
     print("MESSAGES : ${widget.text}");
 
+      // Split the message into words
+    List<String> words = widget.text.split(' ');
+    
+    if (words.isEmpty) return '';
+
+    String normalizedFull = normalizeText(widget.text);
+    print("TRYING FULL MESSAGE: $normalizedFull");
+
+    print("NORMALIZED WORD: $normalizedFull");
+
     DocumentReference docRef = FirebaseFirestore.instance
         .collection('triggers')
-        .doc(widget.text);
+        .doc(normalizedFull);
 
     DocumentSnapshot docSnapshot = await docRef.get();
 

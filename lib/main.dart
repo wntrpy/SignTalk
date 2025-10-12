@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider;
+import 'package:signtalk/UniSign/model_api.dart';
 import 'package:signtalk/core/navigation.dart';
 import 'package:signtalk/core/notification_service.dart';
 import 'package:signtalk/providers/app_lifecylce.dart';
@@ -16,7 +17,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: "key.env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  await ModelApiService().initialize();
   // register background handler BEFORE runApp
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
