@@ -152,6 +152,8 @@ login screen
 - if user failed to get the credentials right after 3 attempts, the user won't be able to attempt to try again after 5 mins, after 5 mins, the user can try again
 - if all conditions are true, and the credentials are right, proceed/navigate to home screen
 
+Verification screen
+- 
 
 registration screen
 - users can create new account in order to use enter/use the mobile application
