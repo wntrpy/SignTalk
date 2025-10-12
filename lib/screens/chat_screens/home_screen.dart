@@ -86,6 +86,12 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
 
+      bool isMuted = false;
+      if (chatData['mute'] != null) {
+        final muteMap = Map<String, dynamic>.from(chatData['mute']);
+        isMuted = muteMap[loggedInUser?.uid] ?? false;
+      }
+
       return {
         'chatId': chatId,
         'lastMessage': chatData['lastMessage'] ?? '',
@@ -96,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
             : DateTime.now(),
         'userData': userData,
         'nickname': nickname,
+        'isMuted': isMuted,
       };
     } catch (e) {
       debugPrint('Error fetching chat data: $e');
@@ -517,6 +524,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       chatData['lastMessageStatus'],
                                     ),
                                     currentUserId: loggedInUser!.uid,
+                                    isMuted: chatData['isMuted'] ?? false,
                                     onTap: () {
                                       Navigator.push(
                                         context,

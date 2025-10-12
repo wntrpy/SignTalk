@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:signtalk/models/message_status.dart';
 import 'package:signtalk/widgets/custom_profile_avatar.dart';
 
-// 🔹 Same offset logic as your CustomMessageBubble
 const Duration kAppTzOffset = Duration(hours: 8);
 
 DateTime _toAppLocal(dynamic ts) {
@@ -43,6 +42,7 @@ class CustomUserCardWidget extends StatelessWidget {
   final DateTime lastMessageTime;
   final MessageStatus lastMessageStatus;
   final String currentUserId;
+  final bool isMuted;
   final VoidCallback? onTap;
 
   const CustomUserCardWidget({
@@ -50,12 +50,13 @@ class CustomUserCardWidget extends StatelessWidget {
     required this.userId,
     required this.userName,
     this.nickname,
-    this.photoUrl, // ADD THIS
+    this.photoUrl,
     required this.lastMessage,
     required this.lastMessageSenderId,
     required this.lastMessageTime,
     required this.lastMessageStatus,
     required this.currentUserId,
+    this.isMuted = false,
     this.onTap,
   });
 
@@ -99,9 +100,19 @@ class CustomUserCardWidget extends StatelessWidget {
           ),
         ],
       ),
-      trailing: Text(
-        formattedTime,
-        style: const TextStyle(color: Colors.black54, fontSize: 12),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 🔔 Show mute icon if chat is muted
+          if (isMuted) ...[
+            const Icon(Icons.notifications_off, size: 16, color: Colors.grey),
+            const SizedBox(width: 6),
+          ],
+          Text(
+            formattedTime,
+            style: const TextStyle(color: Colors.black54, fontSize: 12),
+          ),
+        ],
       ),
     );
   }
