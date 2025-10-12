@@ -219,13 +219,17 @@ Widget _buildUserProfileHeader(
 
         const SizedBox(width: 20),
         Flexible(
-          child: Text(
-            display,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-              fontSize: AppConstants.fontSizeExtraLarge,
+          child: SizedBox(
+            width: 200, // Adjust this value as needed
+            child: Text(
+              display,
+              softWrap: true,
+              overflow: TextOverflow.visible,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+                fontSize: AppConstants.fontSizeExtraLarge,
+              ),
             ),
           ),
         ),

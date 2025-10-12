@@ -103,7 +103,6 @@ class CustomUserCardWidget extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 🔔 Show mute icon if chat is muted
           if (isMuted) ...[
             const Icon(Icons.notifications_off, size: 16, color: Colors.grey),
             const SizedBox(width: 6),

@@ -569,8 +569,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              displayName,
-                              style: const TextStyle(color: Colors.white),
+                              displayName.length > 15
+                                  ? '${displayName.substring(0, 15)}...'
+                                  : displayName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                             Row(
                               children: [
