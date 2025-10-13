@@ -249,7 +249,5 @@ Settings screen
 
 
 
-
-link to google account to have easy access 
-go to settings          
+   
 

@@ -177,6 +177,44 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<int> _getNextFormattedUid() async {
+    try {
+      // Query Firestore to get the user with the highest formatted_uid
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where(
+            'formatted_uid',
+            isNotEqualTo: 'ADMIN_018',
+          ) // Exclude admin UIDs (if stored as string)
+          .orderBy('formatted_uid', descending: true)
+          .limit(1)
+          .get();
+
+      int nextUid = 1000; // Starting UID
+
+      if (querySnapshot.docs.isNotEmpty) {
+        var latestUid = querySnapshot.docs.first.get('formatted_uid');
+
+        // If formatted_uid is stored as int
+        if (latestUid is int) {
+          nextUid = latestUid + 1;
+        }
+        // If formatted_uid is stored as String (like "1000")
+        else if (latestUid is String) {
+          int? parsed = int.tryParse(latestUid);
+          if (parsed != null) {
+            nextUid = parsed + 1;
+          }
+        }
+      }
+
+      return nextUid;
+    } catch (e) {
+      print('Error getting next formatted UID: $e');
+      return 1000; // Fallback to starting UID
+    }
+  }
+
   Future<void> register(
     String email,
     String password,
@@ -215,61 +253,30 @@ class AuthProvider with ChangeNotifier {
 
       // Get latest formatted_uid
       print('Fetching latest formatted_uid...');
-      final snapshot = await _firestore
+
+      // Query only numeric formatted_uid values (ignore admin UIDs)
+      final numericSnapshot = await _firestore
           .collection('users')
+          .where('formatted_uid', isGreaterThanOrEqualTo: 1000)
+          .where('formatted_uid', isLessThan: 1000000) // Reasonable upper limit
           .orderBy('formatted_uid', descending: true)
           .limit(1)
           .get();
 
-      print('Query returned ${snapshot.docs.length} documents');
-
       int newFormattedUid = 1000; // Default starting value
-      if (snapshot.docs.isNotEmpty) {
-        final latestDoc = snapshot.docs.first.data();
-        print('Latest document data: $latestDoc');
 
-        final latestFormattedUidField = latestDoc['formatted_uid'];
-        print(
-          'Latest formatted_uid field value: $latestFormattedUidField (type: ${latestFormattedUidField.runtimeType})',
-        );
+      if (numericSnapshot.docs.isNotEmpty) {
+        final latestDoc = numericSnapshot.docs.first.data();
+        final latestFormattedUid = latestDoc['formatted_uid'];
 
-        if (latestFormattedUidField is int) {
-          newFormattedUid = latestFormattedUidField + 1;
-          print('Calculated new formatted_uid (from int): $newFormattedUid');
-        } else if (latestFormattedUidField is String) {
-          // Extract numeric part from string like "ADMIN_004" or just parse the number
-          String numericPart = latestFormattedUidField.replaceAll(
-            RegExp(r'[^0-9]'),
-            '',
-          );
-          if (numericPart.isNotEmpty) {
-            newFormattedUid = int.parse(numericPart);
-          }
+        print('Latest numeric formatted_uid: $latestFormattedUid');
 
-          // If it's an admin formatted UID, keep the format
-          if (latestFormattedUidField.startsWith('ADMIN_')) {
-            // Skip admin formatted UIDs and find the next numeric one
-            final numericSnapshot = await _firestore
-                .collection('users')
-                .where('formatted_uid', isGreaterThanOrEqualTo: 1000)
-                .orderBy('formatted_uid', descending: true)
-                .limit(1)
-                .get();
-
-            if (numericSnapshot.docs.isNotEmpty) {
-              final numericDoc = numericSnapshot.docs.first.data();
-              final numericUid = numericDoc['formatted_uid'];
-              if (numericUid is int) {
-                newFormattedUid = numericUid + 1;
-              }
-            }
-          } else {
-            // For numeric formatted_uid strings
-            newFormattedUid =
-                (int.tryParse(latestFormattedUidField) ?? 999) + 1;
-          }
-          print('Calculated new formatted_uid (from string): $newFormattedUid');
+        if (latestFormattedUid is int) {
+          newFormattedUid = latestFormattedUid + 1;
+          print('Calculated new formatted_uid: $newFormattedUid');
         }
+      } else {
+        print('No numeric formatted_uid found, starting at 1000');
       }
 
       print('Final formatted_uid to be assigned: $newFormattedUid');
@@ -600,48 +607,30 @@ class AuthProvider with ChangeNotifier {
 
       // Get latest formatted_uid
       print('Fetching latest formatted_uid...');
-      final snapshot = await _firestore
+
+      // Query only numeric formatted_uid values (ignore admin UIDs)
+      final numericSnapshot = await _firestore
           .collection('users')
+          .where('formatted_uid', isGreaterThanOrEqualTo: 1000)
+          .where('formatted_uid', isLessThan: 1000000) // Reasonable upper limit
           .orderBy('formatted_uid', descending: true)
           .limit(1)
           .get();
 
-      int newFormattedUid = 1000;
-      if (snapshot.docs.isNotEmpty) {
-        final latestDoc = snapshot.docs.first.data();
-        final latestFormattedUidField = latestDoc['formatted_uid'];
+      int newFormattedUid = 1000; // Default starting value
 
-        if (latestFormattedUidField is int) {
-          newFormattedUid = latestFormattedUidField + 1;
-        } else if (latestFormattedUidField is String) {
-          String numericPart = latestFormattedUidField.replaceAll(
-            RegExp(r'[^0-9]'),
-            '',
-          );
-          if (numericPart.isNotEmpty) {
-            newFormattedUid = int.parse(numericPart);
-          }
+      if (numericSnapshot.docs.isNotEmpty) {
+        final latestDoc = numericSnapshot.docs.first.data();
+        final latestFormattedUid = latestDoc['formatted_uid'];
 
-          if (latestFormattedUidField.startsWith('ADMIN_')) {
-            final numericSnapshot = await _firestore
-                .collection('users')
-                .where('formatted_uid', isGreaterThanOrEqualTo: 1000)
-                .orderBy('formatted_uid', descending: true)
-                .limit(1)
-                .get();
+        print('Latest numeric formatted_uid: $latestFormattedUid');
 
-            if (numericSnapshot.docs.isNotEmpty) {
-              final numericDoc = numericSnapshot.docs.first.data();
-              final numericUid = numericDoc['formatted_uid'];
-              if (numericUid is int) {
-                newFormattedUid = numericUid + 1;
-              }
-            }
-          } else {
-            newFormattedUid =
-                (int.tryParse(latestFormattedUidField) ?? 999) + 1;
-          }
+        if (latestFormattedUid is int) {
+          newFormattedUid = latestFormattedUid + 1;
+          print('Calculated new formatted_uid: $newFormattedUid');
         }
+      } else {
+        print('No numeric formatted_uid found, starting at 1000');
       }
 
       print('Final formatted_uid to be assigned: $newFormattedUid');
