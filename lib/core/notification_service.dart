@@ -101,9 +101,12 @@ class NotificationService {
   void _handleRemoteMessageNavigation(RemoteMessage message) {
     final data = message.data;
     final chatId = data['chatId'];
-    final receiverId = data['receiverId'];
-    if (chatId != null && receiverId != null) {
-      router.push('/chat', extra: {'chatId': chatId, 'receiverId': receiverId});
+    final otherUserId = data['otherUserId']; // Changed
+    if (chatId != null && otherUserId != null) {
+      router.push(
+        '/chat',
+        extra: {'chatId': chatId, 'receiverId': otherUserId},
+      );
     }
   }
 

@@ -17,11 +17,11 @@ exports.sendChatNotification = onDocumentCreated(
     if (!snap) return null;
 
     const data = snap.data() || {};
-    const receiverId = data.receiverId;
-    const senderId = data.senderId;
+    const messageReceiverId = data.receiverId; // Person receiving the message (Winter)
+    const messageSenderId = data.senderId; // Person who sent the message (Chisa)
     const messageText = data.messageBody || "";
 
-    if (!receiverId || !senderId) return null;
+    if (!messageReceiverId || !messageSenderId) return null;
 
     // check mute status
     const chatDoc = await admin
@@ -30,16 +30,16 @@ exports.sendChatNotification = onDocumentCreated(
       .doc(event.params.chatId)
       .get();
     const chatData = chatDoc.data();
-    if (chatData?.mute && chatData.mute[receiverId]) return null;
+    if (chatData?.mute && chatData.mute[messageReceiverId]) return null;
 
-    // get receiver’s FCM token
-    const userDoc = await db.collection("users").doc(receiverId).get();
+    // get receiver's FCM token (Winter's token)
+    const userDoc = await db.collection("users").doc(messageReceiverId).get();
     if (!userDoc.exists) return null;
     const token = userDoc.data()?.fcmToken;
     if (!token) return null;
 
-    // get sender’s name
-    const senderDoc = await db.collection("users").doc(senderId).get();
+    // get sender's name (Chisa's name)
+    const senderDoc = await db.collection("users").doc(messageSenderId).get();
     const senderName =
       senderDoc.exists && senderDoc.data().name
         ? senderDoc.data().name
@@ -50,10 +50,12 @@ exports.sendChatNotification = onDocumentCreated(
       body: messageText,
     };
 
+    // FIXED: When Winter clicks the notification, she should see Chisa's chat
+    // So receiverId in the payload should be Chisa's ID (the sender)
     const payloadData = {
       chatId: event.params.chatId,
-      senderId,
-      receiverId,
+      senderId: messageSenderId, // Chisa's ID
+      receiverId: messageSenderId, // Also Chisa's ID - this is who Winter will chat with
       click_action: "FLUTTER_NOTIFICATION_CLICK",
     };
 
@@ -71,7 +73,7 @@ exports.sendChatNotification = onDocumentCreated(
           data: payloadData,
         });
       }
-      console.log("✅ Notification sent to:", receiverId);
+      console.log("✅ Notification sent to:", messageReceiverId);
     } catch (err) {
       console.error("❌ Error sending notification:", err);
     }
