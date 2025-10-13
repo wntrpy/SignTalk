@@ -425,7 +425,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
 
-                              CustomButton(
+                            CustomButton(
                                 buttonText: 'Log in with Google',
                                 colorCode: _isLockedOut
                                     ? Colors.grey.shade400
@@ -440,21 +440,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                               context,
                                               listen: false,
                                             );
-                                        final result = await authProvider
-                                            .signInWithGoogle();
-                                        if (result == "success") {
-                                          context.push('/home_screen');
-                                        } else if (result == "error") {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "Google sign-in failed. Please try again.",
-                                              ),
-                                            ),
-                                          );
-                                        }
+                                        try {
+                                              await authProvider.signInWithGoogle();
+                                              // If no exception, it was successful
+                                              if (context.mounted) {
+                                                context.push('/home_screen');
+                                              }
+                                            } catch (e) {
+                                              // If exception, show error
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      e.toString().replaceAll('Exception: ', ''),
+                                                    ),
+                                                    backgroundColor: Colors.red,
+                                                    duration: Duration(seconds: 3),
+                                                  ),
+                                                );
+                                              }
+                                            }
                                       },
                                 textColor: _isLockedOut
                                     ? Colors.grey.shade600

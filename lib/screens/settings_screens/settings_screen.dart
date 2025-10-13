@@ -63,6 +63,32 @@ class SettingScreen extends ConsumerWidget {
                           ),
                           const SizedBox(height: 30),
 
+                            //Link google account
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            try {
+                                final authProvider = ref.read(authprovider.authProvider);
+                                await authProvider.linkGoogleAccount();
+                              
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Google account linked! You can now sign in with Google.'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(e.toString().replaceAll('Exception: ', '')),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          },
+                          icon: Icon(Icons.link),
+                          label: Text('Link Google Account'),
+                        ),
+
                           CustomButton(
                             buttonText: 'Log out',
                             colorCode: AppConstants.orange,

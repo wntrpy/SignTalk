@@ -481,8 +481,100 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // Helper function to get next formatted_uid
-  Future<int> _getNextFormattedUid() async {
+ Future<void> signInWithGoogle() async {
+  print('=== GOOGLE SIGN-IN START ===');
+
+  try {
+    // Trigger Google Sign-In flow
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    
+    if (googleUser == null) {
+      print('Google Sign-In cancelled by user');
+      return;
+    }
+
+    print('Google user selected: ${googleUser.email}');
+
+    // Check if user with this email already exists in Firestore
+    final existingUserQuery = await _firestore
+        .collection('users')
+        .where('email_lowercase', isEqualTo: googleUser.email.toLowerCase())
+        .limit(1)
+        .get();
+
+    if (existingUserQuery.docs.isNotEmpty) {
+      // User exists in Firestore
+      print('Found existing user with email: ${googleUser.email}');
+      
+      final existingUserDoc = existingUserQuery.docs.first;
+      final existingUserData = existingUserDoc.data();
+      
+      print('Existing user data: name=${existingUserData['name']}, formatted_uid=${existingUserData['formatted_uid']}');
+
+      // Check if Google is linked by looking at a flag in Firestore
+      final bool isGoogleLinked = existingUserData['googleLinked'] ?? false;
+      
+      print('Google linked status: $isGoogleLinked');
+
+      if (!isGoogleLinked) {
+        // Google is NOT linked - block sign-in
+        print('Google is NOT linked. Blocking sign-in.');
+        
+        // Sign out from Google immediately
+        await GoogleSignIn().signOut();
+        
+        throw Exception(
+          'NOT_LINKED: This email is already registered with a password. '
+          'To use Google Sign-In, you must link your Google account first:\n\n'
+          '1. Sign in with your email and password\n'
+          '2. Go to Settings\n'
+          '3. Click "Link Google Account"\n\n'
+          'This ensures your account data is preserved.'
+        );
+      }
+
+      // Google IS linked - proceed with sign-in
+      print('Google is linked. Proceeding with sign-in...');
+    }
+
+    // Safe to sign in with Google now
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    UserCredential userCredential = await _auth.signInWithCredential(credential);
+    print('Signed in with Google. Firebase UID: ${userCredential.user?.uid}');
+
+    // Check if user exists in Firestore (update or create)
+    final userDocQuery = await _firestore
+        .collection('users')
+        .where('email_lowercase', isEqualTo: googleUser.email.toLowerCase())
+        .limit(1)
+        .get();
+
+    if (userDocQuery.docs.isNotEmpty) {
+      // Existing user - update online status
+      final userDoc = userDocQuery.docs.first;
+      
+      await _firestore.collection('users').doc(userDoc.id).update({
+        'isOnline': true,
+      });
+
+      print('Logged in with existing account data');
+      print('User data: name=${userDoc.data()['name']}, formatted_uid=${userDoc.data()['formatted_uid']}');
+      print('=== GOOGLE SIGN-IN SUCCESS (EXISTING USER) ===');
+      notifyListeners();
+      return;
+    }
+
+    // No existing user - create new account
+    print('No existing user found. Creating new account...');
+
+    // Get latest formatted_uid
+    print('Fetching latest formatted_uid...');
     final snapshot = await _firestore
         .collection('users')
         .orderBy('formatted_uid', descending: true)
@@ -497,6 +589,14 @@ class AuthProvider with ChangeNotifier {
       if (latestFormattedUidField is int) {
         newFormattedUid = latestFormattedUidField + 1;
       } else if (latestFormattedUidField is String) {
+        String numericPart = latestFormattedUidField.replaceAll(
+          RegExp(r'[^0-9]'),
+          '',
+        );
+        if (numericPart.isNotEmpty) {
+          newFormattedUid = int.parse(numericPart);
+        }
+
         if (latestFormattedUidField.startsWith('ADMIN_')) {
           final numericSnapshot = await _firestore
               .collection('users')
@@ -506,8 +606,8 @@ class AuthProvider with ChangeNotifier {
               .get();
 
           if (numericSnapshot.docs.isNotEmpty) {
-            final numericUid = numericSnapshot.docs.first
-                .data()['formatted_uid'];
+            final numericDoc = numericSnapshot.docs.first.data();
+            final numericUid = numericDoc['formatted_uid'];
             if (numericUid is int) {
               newFormattedUid = numericUid + 1;
             }
@@ -517,151 +617,136 @@ class AuthProvider with ChangeNotifier {
         }
       }
     }
-    return newFormattedUid;
-  }
 
-  //Sign in using Google - ENHANCED VERSION
-  Future<String> signInWithGoogle() async {
-    try {
-      print('=== GOOGLE SIGN-IN START ===');
+    print('Final formatted_uid to be assigned: $newFormattedUid');
 
-      final googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) {
-        print('User cancelled Google sign-in');
-        return "cancelled";
-      }
+    // Create new user document
+    await _firestore.collection('users').doc(userCredential.user?.uid).set({
+      'uid': userCredential.user?.uid,
+      'formatted_uid': newFormattedUid,
+      'name': googleUser.displayName ?? 'User',
+      'name_lowercase': (googleUser.displayName ?? 'User').toLowerCase(),
+      'age': '',
+      'userType': '',
+      'isOnline': true,
+      'email': googleUser.email,
+      'email_lowercase': googleUser.email.toLowerCase(),
+      'firebase_uid': userCredential.user?.uid,
+      'createdAt': FieldValue.serverTimestamp(),
+      'photoUrl': googleUser.photoUrl ?? '',
+      'googleLinked': true, // Mark as Google-linked from the start
+    });
 
-      final googleAuth = await googleUser.authentication;
-      final credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-        accessToken: googleAuth.accessToken,
-      );
+    print('New Google user saved to Firestore with formatted_uid: $newFormattedUid');
+    print('=== GOOGLE SIGN-IN SUCCESS (NEW USER) ===');
+    notifyListeners();
 
-      final userCredential = await _auth.signInWithCredential(credential);
-      final user = userCredential.user;
-
-      if (user == null) {
-        print('Failed to get user from credential');
-        return "error";
-      }
-
-      final email = user.email?.toLowerCase() ?? '';
-      print('Google user email: $email');
-
-      // Check if user exists in Firestore by email (not just by auth UID)
-      final emailQuery = await _firestore
-          .collection('users')
-          .where('email_lowercase', isEqualTo: email)
-          .limit(1)
-          .get();
-
-      if (emailQuery.docs.isNotEmpty) {
-        // EXISTING USER - Check if we need to link accounts
-        print('Found existing user with this email');
-        final existingDoc = emailQuery.docs.first;
-        final existingData = existingDoc.data();
-        final existingUid = existingDoc.id;
-        final existingFirebaseUid = existingData['firebase_uid'] as String?;
-        final existingPhotoUrl = existingData['photoUrl'] as String? ?? '';
-
-        // Determine which photo to use:
-        // 1. If user has a custom photo (not empty and not a Google photo), keep it
-        // 2. If user has no photo or has a Google photo, update with new Google photo
-        String photoToUse = existingPhotoUrl;
-
-        // Only update photo if current photo is empty OR if it's a Google photo being refreshed
-        if (existingPhotoUrl.isEmpty ||
-            existingPhotoUrl.contains('googleusercontent.com') ||
-            existingPhotoUrl.contains('ggpht.com')) {
-          photoToUse = user.photoURL ?? existingPhotoUrl;
-          print('Updating photo URL from Google');
-        } else {
-          print('Keeping existing custom photo URL');
-        }
-
-        // If the firebase_uid is different, we need to update it
-        if (existingFirebaseUid != user.uid) {
-          print('Linking Google account to existing email/password account');
-
-          // Update the existing document with new firebase_uid
-          await _firestore.collection('users').doc(existingUid).update({
-            'firebase_uid': user.uid,
-            'photoUrl': photoToUse,
-            'lastLoginMethod': 'google',
-            'lastLoginAt': FieldValue.serverTimestamp(),
-          });
-
-          // If there's a separate document with the Google UID, delete it to avoid duplicates
-          if (existingUid != user.uid) {
-            final googleUidDoc = await _firestore
-                .collection('users')
-                .doc(user.uid)
-                .get();
-            if (googleUidDoc.exists) {
-              await _firestore.collection('users').doc(user.uid).delete();
-              print('Deleted duplicate Google UID document');
-            }
-          }
-        } else {
-          // Just update last login info and photo if appropriate
-          await _firestore.collection('users').doc(existingUid).update({
-            'lastLoginMethod': 'google',
-            'lastLoginAt': FieldValue.serverTimestamp(),
-            'photoUrl': photoToUse,
-          });
-        }
-
-        print('Existing user signed in successfully');
-      } else {
-        // NEW USER - Create new account
-        print('Creating new user account from Google sign-in');
-
-        final newFormattedUid = await _getNextFormattedUid();
-
-        // Note: Google Sign-In API does not provide birthdate/age information
-        // Age defaults to 0 and must be set by user later
-        // Google only provides: name, email, profile picture, and locale
-
-        await _firestore.collection('users').doc(user.uid).set({
-          'uid': user.uid,
-          'formatted_uid': newFormattedUid,
-          'name': user.displayName ?? 'Google User',
-          'name_lowercase': (user.displayName ?? 'Google User').toLowerCase(),
-          'email': user.email ?? '',
-          'email_lowercase': email,
-          'userType':
-              '', // Will be empty for Google sign-in, user can update later in profile
-          'age': 0, // Google doesn't provide age - user must update in profile
-          'photoUrl': user.photoURL ?? '',
-          'firebase_uid': user.uid,
-          'isOnline': false,
-          'createdAt': FieldValue.serverTimestamp(),
-          'lastLoginMethod': 'google',
-          'lastLoginAt': FieldValue.serverTimestamp(),
-        });
-
-        print('New user created with formatted_uid: $newFormattedUid');
-        print(
-          'Note: Age and userType set to defaults - user should update in profile',
-        );
-      }
-
-      // Mark user as online
-      final presence = PresenceService();
-      await presence.setUserOnline(true);
-
-      // Reset any login attempts for this email
-      await _resetLoginAttempts(email);
-
-      notifyListeners();
-      print('=== GOOGLE SIGN-IN SUCCESS ===');
-      return "success";
-    } catch (e) {
-      print("Google Sign-In Error: $e");
-      print('=== GOOGLE SIGN-IN FAILED ===');
-      return "error";
+  } on FirebaseAuthException catch (e) {
+    print('FirebaseAuthException during Google Sign-In: ${e.code}');
+    
+    if (e.code == 'account-exists-with-different-credential') {
+      throw Exception('NOT_LINKED: An account with this email already exists');
+    } else if (e.code == 'invalid-credential') {
+      throw Exception('Invalid Google credentials');
+    } else if (e.code == 'user-disabled') {
+      throw Exception('This account has been disabled');
+    } else {
+      throw Exception(e.message ?? 'Google Sign-In failed');
     }
+  } catch (e) {
+    print('General exception during Google Sign-In: $e');
+    print('=== GOOGLE SIGN-IN FAILED ===');
+    
+    if (e.toString().contains('Exception:')) {
+      rethrow;
+    }
+    throw Exception('Google Sign-In failed: ${e.toString()}');
   }
+}
+
+// Link Google to existing email/password account
+Future<void> linkGoogleAccount() async {
+  print('=== LINKING GOOGLE ACCOUNT START ===');
+
+  try {
+    User? currentUser = _auth.currentUser;
+    
+    if (currentUser == null) {
+      throw Exception('You must be signed in to link a Google account');
+    }
+
+    print('Current user UID: ${currentUser.uid}');
+
+    // Check if Google is already linked in Firestore
+    final userDoc = await _firestore.collection('users').doc(currentUser.uid).get();
+    
+    if (userDoc.exists) {
+      final userData = userDoc.data();
+      final bool isGoogleLinked = userData?['googleLinked'] ?? false;
+      
+      if (isGoogleLinked) {
+        throw Exception('Google account is already linked');
+      }
+    }
+
+    // Trigger Google Sign-In
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    
+    if (googleUser == null) {
+      print('Google Sign-In cancelled');
+      return;
+    }
+
+    // Verify the email matches
+    if (googleUser.email.toLowerCase() != currentUser.email?.toLowerCase()) {
+      await GoogleSignIn().signOut();
+      throw Exception('Please use the same email (${currentUser.email}) for linking');
+    }
+
+    // Get auth credentials
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    // Link the credential to current user
+    await currentUser.linkWithCredential(credential);
+
+    // Update Firestore to mark Google as linked
+    await _firestore.collection('users').doc(currentUser.uid).update({
+      'googleLinked': true,
+    });
+
+    print('Google account linked successfully!');
+    print('User can now sign in with both email/password and Google');
+    print('=== LINKING GOOGLE ACCOUNT SUCCESS ===');
+    
+    notifyListeners();
+
+  } on FirebaseAuthException catch (e) {
+    print('FirebaseAuthException during linking: ${e.code}');
+    
+    if (e.code == 'provider-already-linked') {
+      throw Exception('Google account is already linked');
+    } else if (e.code == 'credential-already-in-use') {
+      throw Exception('This Google account is already used by another account');
+    } else if (e.code == 'email-already-in-use') {
+      throw Exception('This email is already in use');
+    } else {
+      throw Exception(e.message ?? 'Failed to link Google account');
+    }
+  } catch (e) {
+    print('General exception during linking: $e');
+    print('=== LINKING GOOGLE ACCOUNT FAILED ===');
+    
+    if (e.toString().contains('Exception:')) {
+      rethrow;
+    }
+    throw Exception('Failed to link Google account: ${e.toString()}');
+  }
+}
 
   Future<void> signOut() async {
     final user = FirebaseAuth.instance.currentUser;
