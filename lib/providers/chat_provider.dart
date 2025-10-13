@@ -198,15 +198,18 @@ class ChatProvider with ChangeNotifier {
   }*/
 
   Future<String> sendMessage(
-    String? chatId, // Now accepts nullable chatId
+    String? chatId,
     String message,
     String receiverId,
   ) async {
     final currentUser = _auth.currentUser;
 
     if (currentUser != null) {
-      // If chatId is null, create a new chat room first
-      chatId ??= await createChatRoom(receiverId);
+      // If chatId is null, get existing or create new
+      if (chatId == null) {
+        chatId = await getChatRoom(receiverId);
+        chatId ??= await createChatRoom(receiverId);
+      }
 
       // Create message with initial status = sent
       await _firestore
@@ -221,23 +224,26 @@ class ChatProvider with ChangeNotifier {
             'status': 'sent',
           });
 
-      // Update chat summary (for the list view)
       await _firestore.collection('chats').doc(chatId).set({
         'users': [currentUser.uid, receiverId],
         'lastMessage': message,
         'lastMessageSenderId': currentUser.uid,
         'lastMessageStatus': 'sent',
         'timestamp': FieldValue.serverTimestamp(),
+        'deletedFor': {
+          currentUser.uid: FieldValue.delete(),
+          receiverId: FieldValue.delete(),
+        },
       }, SetOptions(merge: true));
 
-      return chatId; // Return the chatId (new or existing)
+      return chatId;
     }
 
     throw Exception('Current User is Null');
   }
 
   Future<String> sendVoiceMessage(
-    String? chatId, // Now accepts nullable chatId
+    String? chatId,
     String receiverId,
     String messageText,
     String audioUrl,
@@ -246,8 +252,10 @@ class ChatProvider with ChangeNotifier {
     final currentUser = _auth.currentUser;
 
     if (currentUser != null) {
-      // If chatId is null, create a new chat room first
-      chatId ??= await createChatRoom(receiverId);
+      if (chatId == null) {
+        chatId = await getChatRoom(receiverId);
+        chatId ??= await createChatRoom(receiverId);
+      }
 
       // Send to Firestore chats collection
       await FirebaseFirestore.instance
@@ -264,13 +272,16 @@ class ChatProvider with ChangeNotifier {
             'status': 'sent',
           });
 
-      // Update chat summary
       await _firestore.collection('chats').doc(chatId).set({
         'users': [currentUser.uid, receiverId],
         'lastMessage': messageText,
         'lastMessageSenderId': currentUser.uid,
         'lastMessageStatus': 'sent',
         'timestamp': FieldValue.serverTimestamp(),
+        'deletedFor': {
+          currentUser.uid: FieldValue.delete(),
+          receiverId: FieldValue.delete(),
+        },
       }, SetOptions(merge: true));
 
       return chatId;

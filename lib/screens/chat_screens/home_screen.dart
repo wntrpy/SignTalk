@@ -465,7 +465,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 "Delete Conversation",
                                               ),
                                               content: const Text(
-                                                "This will permanently delete your copy of the conversation.",
+                                                "Are you sure you want to delete this conversation? This action cannot be undone.",
                                               ),
                                               actions: [
                                                 TextButton(
@@ -473,9 +473,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                                       Navigator.pop(ctx, false),
                                                   child: const Text("Cancel"),
                                                 ),
-                                                ElevatedButton(
+                                                TextButton(
                                                   onPressed: () =>
                                                       Navigator.pop(ctx, true),
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor: Colors.red,
+                                                  ),
                                                   child: const Text("Delete"),
                                                 ),
                                               ],
