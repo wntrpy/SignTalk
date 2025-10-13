@@ -45,12 +45,45 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<!-- Photo Library Usage -->
+
+	<!-- Photo Library Usage (READ/WRITE External Storage equivalent) -->
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your photo library to select a profile picture.</string>
+	<string>This app needs access to your photo library to select and upload images.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app needs permission to save photos or videos to your library.</string>
+
+	<!-- Microphone Usage (RECORD_AUDIO equivalent) -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires microphone access to record audio.</string>
+
+	<!-- Camera Usage (CAMERA equivalent) -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to capture images or videos.</string>
+
+	<!-- Notifications (POST_NOTIFICATIONS equivalent) -->
+	<key>NSUserNotificationUsageDescription</key>
+	<string>This app would like to send you notifications.</string>
+
+	<!-- Internet Access (INTERNET equivalent) -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+
+	<!-- File Sharing (READ/WRITE External Storage helper) -->
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+
+	<!-- Photo Library (previous entry kept from your file) -->
+	<!-- This was already present, safe to keep -->
 	<!-- Google Sign-In Configuration -->
 	<key>GIDClientID</key>
 	<string>1618713415-2e1t1d2cedo3mnb8e6itgkt6n6slqv2f.apps.googleusercontent.com</string>
+
+	<!--  Google Sign-In URL Schemes -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -62,5 +95,6 @@
 			</array>
 		</dict>
 	</array>
+
 </dict>
 </plist>
