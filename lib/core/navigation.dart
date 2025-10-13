@@ -48,18 +48,14 @@ final GoRouter router = GoRouter(
     goRouteWithSlide('/profile_screen', UserProfileScreen()),
 
     GoRoute(
-      path:'/camera_screen',
-      builder: (context,state){
+      path: '/camera_screen',
+      builder: (context, state) {
         final args = state.extra as Map<String, dynamic>? ?? {};
         final chatId = args['chatId'] as String? ?? '';
         final receiverId = args['receiverId'] as String? ?? '';
 
-        return RecordVideoScreen(
-          chatId: chatId,
-          receiverId: receiverId,
-        );
-
-      }
+        return RecordVideoScreen(chatId: chatId, receiverId: receiverId);
+      },
     ),
 
     GoRoute(
@@ -67,12 +63,23 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final args = state.extra as Map<String, dynamic>? ?? {};
 
+        print('🔍 NAVIGATION.DART - Received args:');
+        print('   args: $args');
+        print('   chatId from args: "${args['chatId']}"');
+        print('   chatId type: ${args['chatId'].runtimeType}');
+
         final receiverData =
             args['receiverData'] as Map<String, dynamic>? ?? {};
         final chatId = args['chatId'] as String? ?? '';
         final receiverId = args['receiverId'] as String? ?? '';
         final nickname = (args['nickname'] ?? receiverData['name'] ?? '')
             .toString();
+
+        print('🔍 NAVIGATION.DART - After processing:');
+        print('   chatId: "$chatId"');
+        print('   chatId.isEmpty: ${chatId.isEmpty}');
+        print('   receiverId: "$receiverId"');
+        print('   nickname: "$nickname"');
 
         return ReceiverProfileScreen(
           receiverData: receiverData,

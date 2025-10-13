@@ -25,75 +25,88 @@ class ReceiverProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final loggedInUserId = FirebaseAuth.instance.currentUser!.uid;
 
-    if (chatId.trim().isEmpty) {
-      final display = (nickname.isNotEmpty)
-          ? nickname
-          : (receiverData['name'] as String?) ?? 'Unknown User';
-
-      final finalReceiverProfileOptions = getReceiverProfileOptions(
-        context,
-        chatId: chatId,
-        loggedInUserId: loggedInUserId,
-        receiverId: receiverId,
-      );
-
-      return PopScope(
-        canPop: false,
-        onPopInvoked: (didPop) {
-          if (!didPop) Navigator.of(context).pop();
-        },
-        child: Scaffold(
-          resizeToAvoidBottomInset: false, // keeps background fixed
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              Positioned.fill(
-                child: Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
-              ),
-              // back button
-              Padding(
-                padding: const EdgeInsets.only(top: 24, left: 16),
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: CustomIconButton(
-                    icon: Icons.arrow_back,
-                    color: Colors.white,
-                    size: 30.0,
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.only(top: 100, right: 20, left: 20),
-                child: SingleChildScrollView(
-                  // fix overflow
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _buildUserProfileHeader(receiverData, display),
-                      ...finalReceiverProfileOptions.map(
-                        (option) => Column(
-                          children: [
-                            CustomReceiverProfileOption(
-                              optionText: option['optionText'],
-                              iconPath: option['iconPath'] ?? '',
-                              fallbackIcon: option['fallbackIcon'],
-                              trailingWidget: option['trailingWidget'],
-                              onTap: option['onTap'],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
+    // Check if chat exists FIRST - prevent StreamBuilder creation
+    if (chatId.isEmpty || chatId.trim().isEmpty) {
+      return _buildProfileWithoutChat(context, loggedInUserId);
     }
 
+    // Only reach here if chatId is valid
+    return _buildProfileWithStreamBuilder(context, loggedInUserId);
+  }
+
+  // PROFILE SCREEN WHEN NO CHAT EXISTS YET
+  Widget _buildProfileWithoutChat(BuildContext context, String loggedInUserId) {
+    final display = (nickname.isNotEmpty)
+        ? nickname
+        : (receiverData['name'] as String?) ?? 'Unknown User';
+
+    final finalReceiverProfileOptions = getReceiverProfileOptions(
+      context,
+      chatId: chatId,
+      loggedInUserId: loggedInUserId,
+      receiverId: receiverId,
+    );
+
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (!didPop) Navigator.of(context).pop();
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: Image.asset(AppConstants.signtalk_bg, fit: BoxFit.cover),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 24, left: 16),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: CustomIconButton(
+                  icon: Icons.arrow_back,
+                  color: Colors.white,
+                  size: 30.0,
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.only(top: 100, right: 20, left: 20),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _buildUserProfileHeader(receiverData, display),
+                    ...finalReceiverProfileOptions.map(
+                      (option) => Column(
+                        children: [
+                          CustomReceiverProfileOption(
+                            optionText: option['optionText'],
+                            iconPath: option['iconPath'] ?? '',
+                            fallbackIcon: option['fallbackIcon'],
+                            trailingWidget: option['trailingWidget'],
+                            onTap: option['onTap'],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // PROFILE SCREEN WITH STREAMBUILDER (WHEN CHAT EXISTS)
+  Widget _buildProfileWithStreamBuilder(
+    BuildContext context,
+    String loggedInUserId,
+  ) {
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
           .collection('chats')
@@ -136,7 +149,7 @@ class ReceiverProfileScreen extends StatelessWidget {
             if (!didPop) Navigator.of(context).pop();
           },
           child: Scaffold(
-            resizeToAvoidBottomInset: false, // keeps bg image fixed
+            resizeToAvoidBottomInset: false,
             body: Stack(
               fit: StackFit.expand,
               children: [
@@ -146,7 +159,6 @@ class ReceiverProfileScreen extends StatelessWidget {
                     fit: BoxFit.cover,
                   ),
                 ),
-                // back button
                 Padding(
                   padding: const EdgeInsets.only(top: 24, left: 16),
                   child: Align(
@@ -162,7 +174,6 @@ class ReceiverProfileScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.only(top: 100, right: 20, left: 20),
                   child: SingleChildScrollView(
-                    // fix overflow
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -216,11 +227,10 @@ Widget _buildUserProfileHeader(
             photoUrl: receiverData['photoUrl'],
           ),
         ),
-
         const SizedBox(width: 20),
         Flexible(
           child: SizedBox(
-            width: 200, // Adjust this value as needed
+            width: 200,
             child: Text(
               display,
               softWrap: true,

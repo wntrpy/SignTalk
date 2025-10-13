@@ -467,29 +467,29 @@ class _ChatScreenState extends State<ChatScreen> {
           statusText = 'Offline';
         }
 
-        return StreamBuilder<DocumentSnapshot>(
-          stream: _firestore.collection('chats').doc(chatId).snapshots(),
+        return StreamBuilder<DocumentSnapshot?>(
+          stream: chatId != null && chatId!.isNotEmpty
+              ? _firestore.collection('chats').doc(chatId).snapshots()
+              : Stream.value(null),
           builder: (context, chatSnapshot) {
-            if (!chatSnapshot.hasData) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            final chatData =
-                chatSnapshot.data!.data() as Map<String, dynamic>? ?? {};
             String displayName = realName;
+            Map<String, dynamic> chatData = {};
 
-            if (chatData['nicknames'] != null && loggedInUser != null) {
-              final nickMap = Map<String, dynamic>.from(
-                chatData['nicknames'] ?? {},
-              );
-              if (nickMap.containsKey(loggedInUser!.uid)) {
-                final userNicknames = Map<String, dynamic>.from(
-                  nickMap[loggedInUser!.uid],
+            if (chatSnapshot.hasData && chatSnapshot.data != null) {
+              chatData =
+                  chatSnapshot.data!.data() as Map<String, dynamic>? ?? {};
+
+              if (chatData['nicknames'] != null && loggedInUser != null) {
+                final nickMap = Map<String, dynamic>.from(
+                  chatData['nicknames'] ?? {},
                 );
-                if (userNicknames.containsKey(widget.receiverId)) {
-                  displayName = userNicknames[widget.receiverId];
+                if (nickMap.containsKey(loggedInUser!.uid)) {
+                  final userNicknames = Map<String, dynamic>.from(
+                    nickMap[loggedInUser!.uid],
+                  );
+                  if (userNicknames.containsKey(widget.receiverId)) {
+                    displayName = userNicknames[widget.receiverId];
+                  }
                 }
               }
             }
@@ -552,18 +552,27 @@ class _ChatScreenState extends State<ChatScreen> {
                           name: displayName,
                           photoUrl: receiverData['photoUrl'],
                           onTap: () {
+                            print('🔍 DEBUG - Navigating to receiver profile:');
+                            print('   chatId: "$chatId"');
+                            print('   chatId is null: ${chatId == null}');
+                            print('   chatId is empty: ${chatId?.isEmpty}');
+                            print('   receiverId: "${widget.receiverId}"');
+                            print('   displayName: "$displayName"');
+                            print('   receiverData: $receiverData');
+
                             context.push(
                               '/receiver_profile_screen',
                               extra: {
                                 'receiverData': receiverData,
-                                'chatId': chatId,
+                                'chatId': (chatId == null || chatId == 'null')
+                                    ? ''
+                                    : chatId,
                                 'receiverId': widget.receiverId,
                                 'nickname': displayName,
                               },
                             );
                           },
                         ),
-
                         const SizedBox(width: 10),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
