@@ -36,8 +36,8 @@ class SettingScreen extends ConsumerWidget {
                       appBarText: "Settings",
                       rightWidget: CustomCirclePfpButton(
                         borderColor: AppConstants.white,
-                        userImage:
-                            user.photoUrl ?? AppConstants.default_user_pfp,
+                        userImage: user.photoUrl,
+                        userName: user.name,
                         width: 40,
                         height: 40,
                       ),
@@ -61,33 +61,56 @@ class SettingScreen extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 30),
+                          const SizedBox(height: 5),
 
-                            //Link google account
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            try {
-                                final authProvider = ref.read(authprovider.authProvider);
+                          //Link google account
+                          ElevatedButton.icon(
+                            onPressed: () async {
+                              try {
+                                final authProvider = ref.read(
+                                  authprovider.authProvider,
+                                );
                                 await authProvider.linkGoogleAccount();
-                              
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Google account linked! You can now sign in with Google.'),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(e.toString().replaceAll('Exception: ', '')),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }
-                          },
-                          icon: Icon(Icons.link),
-                          label: Text('Link Google Account'),
-                        ),
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Google account linked! You can now sign in with Google.',
+                                    ),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      e.toString().replaceAll(
+                                        'Exception: ',
+                                        '',
+                                      ),
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            },
+                            icon: Icon(Icons.link, color: AppConstants.white),
+                            label: Text(
+                              'Link Google Account',
+                              style: TextStyle(color: AppConstants.white),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppConstants.darkViolet,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 70,
+                                vertical: 13,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20),
 
                           CustomButton(
                             buttonText: 'Log out',

@@ -73,12 +73,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       hasError = true;
     }
 
-    if (selectedUserType == null || selectedUserType!.isEmpty) {
+    /*  if (selectedUserType == null || selectedUserType!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please select a user type")),
       );
       hasError = true;
-    }
+    }*/
 
     return !hasError;
   }

@@ -1,3 +1,5 @@
+
+
 aral:
 - firebase
 - refresh indicator tulad ng sa facebook
@@ -243,4 +245,11 @@ Settings screen
   - when the ASL alphabet chart option from settings is clicked, it will redirect the current logged in user to the ASL alphabert chart screen
   - this screen just contains an image of ASL alphabet chart(A-Z), in which the current logged in user can learn some ASL Sign Language
 
+
+
+
+
+
+link to google account to have easy access 
+go to settings          
 

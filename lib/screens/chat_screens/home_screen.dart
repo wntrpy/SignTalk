@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:signtalk/app_constants.dart';
 import 'package:signtalk/models/message_status.dart';
+import 'package:signtalk/providers/auth_provider.dart' as authentication;
 import 'package:signtalk/providers/chat_provider.dart';
 import 'package:signtalk/screens/chat_screens/chat_screen.dart';
 import 'package:signtalk/screens/chat_screens/user_search_screen.dart';
@@ -29,6 +30,128 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     getCurrentUser();
+    _checkAndShowGoogleLinkPrompt();
+  }
+
+  // ✅ ADD THIS METHOD
+  Future<void> _checkAndShowGoogleLinkPrompt() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return;
+
+      // Wait a bit for the screen to fully render
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (!userDoc.exists) return;
+
+      final userData = userDoc.data();
+      if (userData == null) return;
+
+      // Check if user registered via email and hasn't seen the prompt yet
+      final registeredViaEmail = userData['registeredViaEmail'] ?? false;
+      final promptShown = userData['googleLinkPromptShown'] ?? false;
+      final googleLinked = userData['googleLinked'] ?? false;
+
+      // Only show if: registered via email, prompt not shown, and Google not linked
+      if (registeredViaEmail && !promptShown && !googleLinked) {
+        if (mounted) {
+          _showGoogleLinkDialog();
+        }
+      }
+    } catch (e) {
+      debugPrint('Error checking Google link prompt: $e');
+    }
+  }
+
+  // ✅ ADD THIS METHOD
+  void _showGoogleLinkDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Cannot dismiss by tapping outside
+      builder: (context) => PopScope(
+        canPop: false, // Cannot dismiss with back button
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.link, color: AppConstants.orange, size: 28),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Link Google Account',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Link your Google account for easier access and secure sign-in!\n\n'
+            'You can do this anytime in Settings.',
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                // Mark as shown
+                final authProvider = Provider.of<authentication.AuthProvider>(
+                  context,
+                  listen: false,
+                );
+                await authProvider.markGoogleLinkPromptShown();
+
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text(
+                'Not Now',
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // Mark as shown
+                final authProvider = Provider.of<authentication.AuthProvider>(
+                  context,
+                  listen: false,
+                );
+                await authProvider.markGoogleLinkPromptShown();
+
+                if (mounted) {
+                  Navigator.of(context).pop();
+                  context.push('/settings_screen');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppConstants.orange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text(
+                'Go to Settings',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void getCurrentUser() {

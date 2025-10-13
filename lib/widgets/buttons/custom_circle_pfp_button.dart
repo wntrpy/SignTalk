@@ -8,6 +8,7 @@ bool isNetworkUrl(String? path) {
 class CustomCirclePfpButton extends StatelessWidget {
   final Color? borderColor; // color for border
   final String? userImage; // path to user image
+  final String? userName; // user's name for initial fallback
   final void Function()? onPressed;
 
   final double width;
@@ -17,6 +18,7 @@ class CustomCirclePfpButton extends StatelessWidget {
     super.key,
     this.borderColor,
     required this.userImage,
+    this.userName,
     this.onPressed,
     this.width = 50.0,
     this.height = 50.0,
@@ -24,11 +26,39 @@ class CustomCirclePfpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ImageProvider imageProvider;
+    // Check if we need to show initial instead of image
+    bool showInitial = userImage == null || userImage!.isEmpty;
 
-    if (userImage == null || userImage!.isEmpty) {
-      imageProvider = AssetImage(AppConstants.default_user_pfp);
-    } else if (isNetworkUrl(userImage)) {
+    if (showInitial) {
+      return IconButton(
+        onPressed: onPressed,
+        splashRadius: width / 2 + 5,
+        icon: Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: borderColor ?? AppConstants.darkViolet,
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Center(
+            child: Text(
+              userName != null && userName!.isNotEmpty
+                  ? userName![0].toUpperCase()
+                  : "?",
+              style: TextStyle(
+                color: AppConstants.darkViolet,
+                fontSize: width * 0.4,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Show image if available
+    ImageProvider imageProvider;
+    if (isNetworkUrl(userImage)) {
       imageProvider = NetworkImage(userImage!);
     } else {
       imageProvider = AssetImage(userImage!);

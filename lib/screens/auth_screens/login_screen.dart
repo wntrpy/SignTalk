@@ -55,11 +55,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _loadSavedState() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Load saved email
+    /* Load saved email
     final savedEmail = prefs.getString(KEY_EMAIL);
     if (savedEmail != null) {
       emailcontroller.text = savedEmail;
-    }
+    }*/
 
     // Load lockout state
     final isLocked = prefs.getBool(KEY_IS_LOCKED) ?? false;
@@ -93,11 +93,11 @@ class _LoginScreenState extends State<LoginScreen> {
     await prefs.setInt(KEY_LOCKOUT_END, lockoutEnd.millisecondsSinceEpoch);
   }
 
-  // Add method to clear lockout state
   Future<void> _clearSavedLockoutState() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(KEY_IS_LOCKED);
     await prefs.remove(KEY_LOCKOUT_END);
+    await prefs.remove(KEY_EMAIL); // Add this line
   }
 
   // Load lockout data when screen initializes
@@ -157,6 +157,12 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       });
     });
+  }
+
+  // Add this method after _clearSavedLockoutState()
+  Future<void> _clearSavedEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(KEY_EMAIL);
   }
 
   Future<void> _handlelogin() async {
@@ -425,7 +431,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
 
-                            CustomButton(
+                              CustomButton(
                                 buttonText: 'Log in with Google',
                                 colorCode: _isLockedOut
                                     ? Colors.grey.shade400
@@ -441,25 +447,38 @@ class _LoginScreenState extends State<LoginScreen> {
                                               listen: false,
                                             );
                                         try {
-                                              await authProvider.signInWithGoogle();
-                                              // If no exception, it was successful
-                                              if (context.mounted) {
-                                                context.push('/home_screen');
-                                              }
-                                            } catch (e) {
-                                              // If exception, show error
-                                              if (context.mounted) {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      e.toString().replaceAll('Exception: ', ''),
-                                                    ),
-                                                    backgroundColor: Colors.red,
-                                                    duration: Duration(seconds: 3),
-                                                  ),
-                                                );
-                                              }
-                                            }
+                                          await authProvider.signInWithGoogle();
+                                          // If no exception, it was successful - navigate to home
+                                          if (context.mounted) {
+                                            context.push('/home_screen');
+                                          }
+                                        } catch (e) {
+                                          // Check if user cancelled
+                                          final errorMessage = e
+                                              .toString()
+                                              .replaceAll('Exception: ', '');
+
+                                          if (errorMessage == 'CANCELLED') {
+                                            // User cancelled - do nothing, stay on login screen
+                                            print(
+                                              'User cancelled Google Sign-In',
+                                            );
+                                            return;
+                                          }
+
+                                          // Show error for actual failures
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(errorMessage),
+                                                backgroundColor: Colors.red,
+                                                duration: Duration(seconds: 3),
+                                              ),
+                                            );
+                                          }
+                                        }
                                       },
                                 textColor: _isLockedOut
                                     ? Colors.grey.shade600
