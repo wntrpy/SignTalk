@@ -67,13 +67,20 @@ class CustomMessageStream extends StatelessWidget {
           .doc(chatId)
           .snapshots(),
       builder: (context, chatSnapshot) {
-        // Get TTS setting from chat document
+        // Get TTS setting AND 3DASL setting from chat document
         bool showAudio = false;
+        bool show3DASL = false; // ADD THIS LINE
+
         if (chatSnapshot.hasData && chatSnapshot.data != null) {
           final chatData =
               chatSnapshot.data!.data() as Map<String, dynamic>? ?? {};
           final ttsMap = chatData['ttsEnabled'] as Map<String, dynamic>? ?? {};
           showAudio = ttsMap[currentUser] ?? false;
+
+          // ADD THESE 2 LINES:
+          final aslMap =
+              chatData['3DASLEnabled'] as Map<String, dynamic>? ?? {};
+          show3DASL = aslMap[currentUser] ?? false;
         }
 
         return StreamBuilder<QuerySnapshot>(
@@ -90,7 +97,6 @@ class CustomMessageStream extends StatelessWidget {
 
             final docs = snapshot.data!.docs;
 
-            // after building the list, mark incoming as READ
             WidgetsBinding.instance.addPostFrameCallback((_) {
               _markIncomingAsRead(chatId, docs);
             });
@@ -100,12 +106,11 @@ class CustomMessageStream extends StatelessWidget {
             for (final message in docs) {
               final data = message.data() as Map<String, dynamic>;
 
-              // ✅ CHECK IF MESSAGE IS DELETED FOR CURRENT USER
               final deletedFor = Map<String, dynamic>.from(
                 data['deletedFor'] ?? {},
               );
               if (deletedFor[currentUser] == true) {
-                continue; // Skip this message - don't show it
+                continue;
               }
 
               final text = data['messageBody'] as String? ?? '';
@@ -123,7 +128,8 @@ class CustomMessageStream extends StatelessWidget {
                   timestampToLocal: timestampToLocal,
                   status: status,
                   messageId: message.id,
-                  showAudio: showAudio, // Use the setting from chat document
+                  showAudio: showAudio,
+                  show3DASL: show3DASL,
                 ),
               );
             }

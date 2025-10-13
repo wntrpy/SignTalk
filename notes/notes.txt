@@ -153,7 +153,8 @@ login screen
 - if all conditions are true, and the credentials are right, proceed/navigate to home screen
 
 Verification screen
-- 
+- this screen is used for the user to enter the code that was sent to their email in order to confirm/verify the login 
+- after loggin in, and the credentials are correct, the user will be redirected here, and the code will be sent to the email the user used in the login to verify 
 
 registration screen
 - users can create new account in order to use enter/use the mobile application

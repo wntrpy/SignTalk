@@ -53,6 +53,7 @@ class CustomMessageBubble extends StatefulWidget {
   final String messageId;
   final String? audioUrl;
   final bool showAudio;
+  final bool show3DASL;
 
   const CustomMessageBubble({
     super.key,
@@ -65,6 +66,7 @@ class CustomMessageBubble extends StatefulWidget {
     required this.messageId,
     this.audioUrl,
     required this.showAudio,
+    required this.show3DASL,
   });
 
   @override
@@ -100,20 +102,17 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
       });
     });
   }
-  
+
   String normalizeText(String text) {
-  return text
-      .toLowerCase()
-      .replaceAll(RegExp(r'[^a-z0-9]'), '')
-      .trim();
-}
+    return text.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '').trim();
+  }
 
   Future<String> _checkGIF() async {
     print("MESSAGES : ${widget.text}");
 
-      // Split the message into words
+    // Split the message into words
     List<String> words = widget.text.split(' ');
-    
+
     if (words.isEmpty) return '';
 
     String normalizedFull = normalizeText(widget.text);
@@ -442,9 +441,9 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (gifUrl != '')
+                        if (_expanded && widget.show3DASL && gifUrl != '')
                           Container(
-                            margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+                            margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
                             child: Image.network(
                               gifUrl,
                               width: 300,
@@ -456,6 +455,7 @@ class _CustomMessageBubbleState extends State<CustomMessageBubble>
                           widget.text,
                           style: TextStyle(color: textColor, fontSize: 15),
                         ),
+
                         if (_expanded && widget.showAudio) ...[
                           const SizedBox(height: 12),
                           Row(
